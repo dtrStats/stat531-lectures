@@ -306,6 +306,7 @@ Is one unknown equal to another unknown? Unknown!
 x <- c(4, 8, NA)
 mean(x)
 mean(x, na.rm = TRUE)
+x == NA # this is wrong
 is.na(x)
 ```
 
@@ -635,11 +636,7 @@ Correct answer: Paramount Pictures (37 movies). Bugs to listen for: ascending so
 Target: start at 0:70, finish by 0:75.
 :::
 
-## Bug Bounty results
-
-Which team has the most points?
-
-. . .
+## Buggy results
 
 Bugs from today:
 

@@ -1482,7 +1482,11 @@ display:block!important;
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; [1] 6</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a></a><span class="fu">is.na</span>(x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a></a>x <span class="sc">==</span> <span class="cn">NA</span> <span class="co"># this is wrong</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] NA NA NA</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a></a><span class="fu">is.na</span>(x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; [1] FALSE FALSE  TRUE</code></pre>
 </div>
@@ -1509,7 +1513,7 @@ display:block!important;
 <section id="a-column-is-a-vector" class="slide level2">
 <h2>A column is a vector</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a></a>movies<span class="sc">$</span>runtime <span class="sc">|&gt;</span> <span class="fu">head</span>(<span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a></a>movies<span class="sc">$</span>runtime <span class="sc">|&gt;</span> <span class="fu">head</span>(<span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt;  [1]  80 101  84 139  90  78 142  93  88 119</code></pre>
 </div>
@@ -1519,7 +1523,7 @@ display:block!important;
 <section id="mystery" class="slide level2">
 <h2>Mystery</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a></a><span class="fu">mean</span>(movies<span class="sc">$</span>runtime)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a></a><span class="fu">mean</span>(movies<span class="sc">$</span>runtime)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; [1] NA</code></pre>
 </div>
@@ -1533,11 +1537,11 @@ display:block!important;
 <section id="solving-the-mystery" class="slide level2">
 <h2>Solving the mystery</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a></a><span class="fu">sum</span>(<span class="fu">is.na</span>(movies<span class="sc">$</span>runtime))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a></a><span class="fu">sum</span>(<span class="fu">is.na</span>(movies<span class="sc">$</span>runtime))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; [1] 1</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a></a><span class="fu">mean</span>(movies<span class="sc">$</span>runtime, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a></a><span class="fu">mean</span>(movies<span class="sc">$</span>runtime, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; [1] 105.8215</code></pre>
 </div>
@@ -1564,7 +1568,7 @@ display:block!important;
 <section id="challenge-2-swap-roles-find-something-weird" class="slide level2">
 <h2>Challenge 2 (swap roles): find something weird</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a></a><span class="fu">glimpse</span>(movies)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a></a><span class="fu">glimpse</span>(movies)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>You have 90 seconds. Find <strong>one thing</strong> in this table that looks odd, surprising, or worth asking about.</p>
 <aside class="notes">
@@ -1609,13 +1613,13 @@ display:block!important;
 <section id="same-thing-two-ways" class="slide level2">
 <h2>Same thing, two ways</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a></a><span class="fu">head</span>(<span class="fu">arrange</span>(<span class="fu">filter</span>(movies, genre <span class="sc">==</span> <span class="st">&quot;Drama&quot;</span>), imdb_rating), <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a></a><span class="fu">head</span>(<span class="fu">arrange</span>(<span class="fu">filter</span>(movies, genre <span class="sc">==</span> <span class="st">&quot;Drama&quot;</span>), imdb_rating), <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a></a>movies <span class="sc">|&gt;</span></span>
-<span id="cb55-2"><a></a>  <span class="fu">filter</span>(genre <span class="sc">==</span> <span class="st">&quot;Drama&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb55-3"><a></a>  <span class="fu">arrange</span>(imdb_rating) <span class="sc">|&gt;</span></span>
-<span id="cb55-4"><a></a>  <span class="fu">head</span>(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb57-2"><a></a>  <span class="fu">filter</span>(genre <span class="sc">==</span> <span class="st">&quot;Drama&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb57-3"><a></a>  <span class="fu">arrange</span>(imdb_rating) <span class="sc">|&gt;</span></span>
+<span id="cb57-4"><a></a>  <span class="fu">head</span>(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>You’ll also see <code>%&gt;%</code>, the older tidyverse pipe. It behaves the same for what we do.</p>
 <aside class="notes">
@@ -1635,8 +1639,8 @@ display:block!important;
 <section id="select-choose-columns" class="slide level2">
 <h2><code>select()</code>: choose columns</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a></a>movies <span class="sc">|&gt;</span></span>
-<span id="cb56-2"><a></a>  <span class="fu">select</span>(title, genre, runtime, imdb_rating)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb58-2"><a></a>  <span class="fu">select</span>(title, genre, runtime, imdb_rating)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; # A tibble: 651 × 4
 #&gt;   title                genre  runtime imdb_rating
@@ -1653,9 +1657,9 @@ display:block!important;
 <section id="filter-keep-rows" class="slide level2">
 <h2><code>filter()</code>: keep rows</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a></a>movies <span class="sc">|&gt;</span></span>
-<span id="cb58-2"><a></a>  <span class="fu">select</span>(title, genre, imdb_rating) <span class="sc">|&gt;</span></span>
-<span id="cb58-3"><a></a>  <span class="fu">filter</span>(genre <span class="sc">==</span> <span class="st">&quot;Drama&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb60-2"><a></a>  <span class="fu">select</span>(title, genre, imdb_rating) <span class="sc">|&gt;</span></span>
+<span id="cb60-3"><a></a>  <span class="fu">filter</span>(genre <span class="sc">==</span> <span class="st">&quot;Drama&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; # A tibble: 305 × 3
 #&gt;   title                genre imdb_rating
@@ -1678,7 +1682,7 @@ display:block!important;
 <li><code>,</code> or <code>&amp;</code> means <strong>and</strong>; <code>|</code> means <strong>or</strong></li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(genre <span class="sc">==</span> <span class="st">&quot;Drama&quot;</span>, imdb_rating <span class="sc">&gt;</span> <span class="dv">8</span>) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(genre <span class="sc">==</span> <span class="st">&quot;Drama&quot;</span>, imdb_rating <span class="sc">&gt;</span> <span class="dv">8</span>) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; [1] 8</code></pre>
 </div>
@@ -1709,8 +1713,8 @@ display:block!important;
 <p>“Keep the Drama and Comedy movies.”</p>
 </blockquote>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a></a>movies <span class="sc">|&gt;</span></span>
-<span id="cb62-2"><a></a>  <span class="fu">filter</span>(genre <span class="sc">==</span> <span class="fu">c</span>(<span class="st">&quot;Drama&quot;</span>, <span class="st">&quot;Comedy&quot;</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb64-2"><a></a>  <span class="fu">filter</span>(genre <span class="sc">==</span> <span class="fu">c</span>(<span class="st">&quot;Drama&quot;</span>, <span class="st">&quot;Comedy&quot;</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="vote">
 <p>Restate it. Guilty or innocent?</p>
@@ -1719,11 +1723,11 @@ display:block!important;
 <section id="case-1-the-evidence" class="slide level2">
 <h2>Case #1: the evidence</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(genre <span class="sc">==</span> <span class="fu">c</span>(<span class="st">&quot;Drama&quot;</span>, <span class="st">&quot;Comedy&quot;</span>)) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(genre <span class="sc">==</span> <span class="fu">c</span>(<span class="st">&quot;Drama&quot;</span>, <span class="st">&quot;Comedy&quot;</span>)) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; [1] 191</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(genre <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;Drama&quot;</span>, <span class="st">&quot;Comedy&quot;</span>)) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(genre <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;Drama&quot;</span>, <span class="st">&quot;Comedy&quot;</span>)) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; [1] 392</code></pre>
 </div>
@@ -1753,8 +1757,8 @@ display:block!important;
 <p>“Keep movies that have a DVD release year.”</p>
 </blockquote>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a></a>movies <span class="sc">|&gt;</span></span>
-<span id="cb67-2"><a></a>  <span class="fu">filter</span>(dvd_rel_year <span class="sc">!=</span> <span class="cn">NA</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb69-2"><a></a>  <span class="fu">filter</span>(dvd_rel_year <span class="sc">!=</span> <span class="cn">NA</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="vote">
 <p>Guilty or innocent?</p>
@@ -1763,11 +1767,11 @@ display:block!important;
 <section id="case-2-the-evidence" class="slide level2">
 <h2>Case #2: the evidence</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(dvd_rel_year <span class="sc">!=</span> <span class="cn">NA</span>) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(dvd_rel_year <span class="sc">!=</span> <span class="cn">NA</span>) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; [1] 0</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(dvd_rel_year)) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb72"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(dvd_rel_year)) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; [1] 643</code></pre>
 </div>
@@ -1797,9 +1801,9 @@ display:block!important;
 <p>“How many documentaries are in the data?”</p>
 </blockquote>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb72"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a></a>movies <span class="sc">|&gt;</span></span>
-<span id="cb72-2"><a></a>  <span class="fu">filter</span>(genre <span class="sc">==</span> <span class="st">&quot;Documentary&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb72-3"><a></a>  <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb74"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb74-2"><a></a>  <span class="fu">filter</span>(genre <span class="sc">==</span> <span class="st">&quot;Documentary&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb74-3"><a></a>  <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="vote">
 <p>Guilty or innocent? Look closely at the column names first.</p>
@@ -1821,11 +1825,11 @@ display:block!important;
 <section id="case-3-the-evidence" class="slide level2">
 <h2>Case #3: the evidence</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(genre <span class="sc">==</span> <span class="st">&quot;Documentary&quot;</span>) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(genre <span class="sc">==</span> <span class="st">&quot;Documentary&quot;</span>) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; [1] 52</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(title_type <span class="sc">==</span> <span class="st">&quot;Documentary&quot;</span>) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(title_type <span class="sc">==</span> <span class="st">&quot;Documentary&quot;</span>) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; [1] 55</code></pre>
 </div>
@@ -1853,9 +1857,9 @@ display:block!important;
 <h2><code>arrange()</code>: sort rows</h2>
 <p>Now fix Case #0.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a></a>movies <span class="sc">|&gt;</span></span>
-<span id="cb77-2"><a></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(imdb_rating)) <span class="sc">|&gt;</span></span>
-<span id="cb77-3"><a></a>  <span class="fu">select</span>(title, imdb_rating)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb79"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb79-2"><a></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(imdb_rating)) <span class="sc">|&gt;</span></span>
+<span id="cb79-3"><a></a>  <span class="fu">select</span>(title, imdb_rating)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; # A tibble: 651 × 2
 #&gt;   title                  imdb_rating
@@ -1872,9 +1876,9 @@ display:block!important;
 <section id="mutate-make-new-columns" class="slide level2">
 <h2><code>mutate()</code>: make new columns</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb79"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a></a>movies <span class="sc">|&gt;</span></span>
-<span id="cb79-2"><a></a>  <span class="fu">mutate</span>(<span class="at">runtime_hrs =</span> runtime <span class="sc">/</span> <span class="dv">60</span>) <span class="sc">|&gt;</span></span>
-<span id="cb79-3"><a></a>  <span class="fu">select</span>(title, runtime, runtime_hrs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb81"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb81-2"><a></a>  <span class="fu">mutate</span>(<span class="at">runtime_hrs =</span> runtime <span class="sc">/</span> <span class="dv">60</span>) <span class="sc">|&gt;</span></span>
+<span id="cb81-3"><a></a>  <span class="fu">select</span>(title, runtime, runtime_hrs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; # A tibble: 651 × 3
 #&gt;   title                runtime runtime_hrs
@@ -2000,10 +2004,8 @@ overflow: hidden!important;
 display:block!important;
 }</style></aside>
 </section>
-<section id="bug-bounty-results" class="slide level2">
-<h2>Bug Bounty results</h2>
-<p>Which team has the most points?</p>
-<div class="fragment">
+<section id="buggy-results" class="slide level2">
+<h2>Buggy results</h2>
 <p>Bugs from today:</p>
 <ul>
 <li><code>arrange()</code> sorts <strong>ascending</strong> by default</li>
@@ -2013,7 +2015,6 @@ display:block!important;
 <li>Ambiguous questions get confident answers</li>
 </ul>
 <p><strong>Audit Loop:</strong> Read it, Run it, Restate it, Refine or Reject it.</p>
-</div>
 </section>
 <section id="exit-ticket" class="slide level2">
 <h2>Exit ticket</h2>
@@ -2055,22 +2056,22 @@ display:block!important;
 <section id="moved-square-brackets-pick-things" class="slide level2">
 <h2>Moved: square brackets pick things</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb82"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb82-1"><a></a>scores[<span class="dv">1</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb84"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb84-1"><a></a>scores[<span class="dv">1</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; [1] 72</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb84"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb84-1"><a></a>scores[<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb86"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb86-1"><a></a>scores[<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; [1] 72 91</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb86"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb86-1"><a></a>scores[scores <span class="sc">&gt;</span> <span class="dv">70</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb88"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb88-1"><a></a>scores[scores <span class="sc">&gt;</span> <span class="dv">70</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; [1] 72 88 91</code></pre>
 </div>
 </div>
 <p>Finding the movie with the missing runtime:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb88"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb88-1"><a></a>movies<span class="sc">$</span>title[<span class="fu">is.na</span>(movies<span class="sc">$</span>runtime)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb90"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb90-1"><a></a>movies<span class="sc">$</span>title[<span class="fu">is.na</span>(movies<span class="sc">$</span>runtime)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; [1] &quot;The End of America&quot;</code></pre>
 </div>
@@ -2087,9 +2088,9 @@ display:block!important;
 <section id="moved-challenge-3-answer" class="slide level2">
 <h2>Moved: Challenge 3 answer</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb90"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb90-1"><a></a>movies <span class="sc">|&gt;</span></span>
-<span id="cb90-2"><a></a>  <span class="fu">filter</span>(mpaa_rating <span class="sc">==</span> <span class="st">&quot;R&quot;</span>, runtime <span class="sc">&gt;</span> <span class="dv">150</span>) <span class="sc">|&gt;</span></span>
-<span id="cb90-3"><a></a>  <span class="fu">select</span>(title, runtime, imdb_rating)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb92"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb92-1"><a></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb92-2"><a></a>  <span class="fu">filter</span>(mpaa_rating <span class="sc">==</span> <span class="st">&quot;R&quot;</span>, runtime <span class="sc">&gt;</span> <span class="dv">150</span>) <span class="sc">|&gt;</span></span>
+<span id="cb92-3"><a></a>  <span class="fu">select</span>(title, runtime, imdb_rating)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; # A tibble: 6 × 3
 #&gt;   title                  runtime imdb_rating
@@ -2106,11 +2107,11 @@ display:block!important;
 <section id="moved-case-2b-where-did-it-go" class="slide level2">
 <h2>Moved: Case #2b, where did it go?</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb92"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb92-1"><a></a><span class="fu">nrow</span>(movies)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb94"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb94-1"><a></a><span class="fu">nrow</span>(movies)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; [1] 651</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb94"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb94-1"><a></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(runtime <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb96"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb96-1"><a></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(runtime <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; [1] 650</code></pre>
 </div>
@@ -2138,11 +2139,11 @@ display:block!important;
 <h2>Backup: AI answer for Round 2</h2>
 <p>Use this if no AI is available. Audit it!</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb96"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb96-1"><a></a>movies <span class="sc">|&gt;</span></span>
-<span id="cb96-2"><a></a>  <span class="fu">group_by</span>(studio) <span class="sc">|&gt;</span></span>
-<span id="cb96-3"><a></a>  <span class="fu">summarize</span>(<span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">|&gt;</span></span>
-<span id="cb96-4"><a></a>  <span class="fu">arrange</span>(n) <span class="sc">|&gt;</span></span>
-<span id="cb96-5"><a></a>  <span class="fu">head</span>(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb98"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb98-1"><a></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb98-2"><a></a>  <span class="fu">group_by</span>(studio) <span class="sc">|&gt;</span></span>
+<span id="cb98-3"><a></a>  <span class="fu">summarize</span>(<span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb98-4"><a></a>  <span class="fu">arrange</span>(n) <span class="sc">|&gt;</span></span>
+<span id="cb98-5"><a></a>  <span class="fu">head</span>(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <aside class="notes">
 <p>Same bug as Case #0 in a new costume: <code>arrange(n)</code> is ascending, so this returns a studio with a single movie. Fix: <code>arrange(desc(n))</code>. Pattern: AI repeats failure modes, so learn the common ones.</p>
@@ -2161,11 +2162,11 @@ display:block!important;
 <section id="backup-running-it" class="slide level2">
 <h2>Backup: running it</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb97"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb97-1"><a></a>movies <span class="sc">|&gt;</span></span>
-<span id="cb97-2"><a></a>  <span class="fu">group_by</span>(studio) <span class="sc">|&gt;</span></span>
-<span id="cb97-3"><a></a>  <span class="fu">summarize</span>(<span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">|&gt;</span></span>
-<span id="cb97-4"><a></a>  <span class="fu">arrange</span>(n) <span class="sc">|&gt;</span></span>
-<span id="cb97-5"><a></a>  <span class="fu">head</span>(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb99"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb99-1"><a></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb99-2"><a></a>  <span class="fu">group_by</span>(studio) <span class="sc">|&gt;</span></span>
+<span id="cb99-3"><a></a>  <span class="fu">summarize</span>(<span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb99-4"><a></a>  <span class="fu">arrange</span>(n) <span class="sc">|&gt;</span></span>
+<span id="cb99-5"><a></a>  <span class="fu">head</span>(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; # A tibble: 1 × 2
 #&gt;   studio             n
@@ -2177,11 +2178,11 @@ display:block!important;
 <section id="backup-the-fix" class="slide level2">
 <h2>Backup: the fix</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb99"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb99-1"><a></a>movies <span class="sc">|&gt;</span></span>
-<span id="cb99-2"><a></a>  <span class="fu">group_by</span>(studio) <span class="sc">|&gt;</span></span>
-<span id="cb99-3"><a></a>  <span class="fu">summarize</span>(<span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">|&gt;</span></span>
-<span id="cb99-4"><a></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(n)) <span class="sc">|&gt;</span></span>
-<span id="cb99-5"><a></a>  <span class="fu">head</span>(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb101"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb101-1"><a></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb101-2"><a></a>  <span class="fu">group_by</span>(studio) <span class="sc">|&gt;</span></span>
+<span id="cb101-3"><a></a>  <span class="fu">summarize</span>(<span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb101-4"><a></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(n)) <span class="sc">|&gt;</span></span>
+<span id="cb101-5"><a></a>  <span class="fu">head</span>(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; # A tibble: 1 × 2
 #&gt;   studio                 n

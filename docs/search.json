@@ -312,7 +312,7 @@
     "href": "W04L07_slides.html#handling-na",
     "title": "You Navigate, AI Drives",
     "section": "Handling NA",
-    "text": "Handling NA\n\nx &lt;- c(4, 8, NA)\nmean(x)\n\n#&gt; [1] NA\n\nmean(x, na.rm = TRUE)\n\n#&gt; [1] 6\n\nis.na(x)\n\n#&gt; [1] FALSE FALSE  TRUE\n\n\n\n\nna.rm = TRUE is a decision, not a fix. You chose to ignore the unknowns.\n\n\nPlant the seed: dropping missing values changes who is in your analysis. This returns in the WellSync cleaning sessions."
+    "text": "Handling NA\n\nx &lt;- c(4, 8, NA)\nmean(x)\n\n#&gt; [1] NA\n\nmean(x, na.rm = TRUE)\n\n#&gt; [1] 6\n\nx == NA # this is wrong\n\n#&gt; [1] NA NA NA\n\nis.na(x)\n\n#&gt; [1] FALSE FALSE  TRUE\n\n\n\n\nna.rm = TRUE is a decision, not a fix. You chose to ignore the unknowns.\n\n\nPlant the seed: dropping missing values changes who is in your analysis. This returns in the WellSync cleaning sessions."
   },
   {
     "objectID": "W04L07_slides.html#a-column-is-a-vector",
@@ -551,5 +551,12 @@
     "title": "You Navigate, AI Drives",
     "section": "Backup: the fix",
     "text": "Backup: the fix\n\nmovies |&gt;\n  group_by(studio) |&gt;\n  summarize(n = n()) |&gt;\n  arrange(desc(n)) |&gt;\n  head(1)\n\n#&gt; # A tibble: 1 × 2\n#&gt;   studio                 n\n#&gt;   &lt;chr&gt;              &lt;int&gt;\n#&gt; 1 Paramount Pictures    37"
+  },
+  {
+    "objectID": "W04L07_slides.html#buggy-results",
+    "href": "W04L07_slides.html#buggy-results",
+    "title": "You Navigate, AI Drives",
+    "section": "Buggy results",
+    "text": "Buggy results\nBugs from today:\n\narrange() sorts ascending by default\nNA spreads through math\n== is not %in%\n!= NA never works\nAmbiguous questions get confident answers\n\nAudit Loop: Read it, Run it, Restate it, Refine or Reject it."
   }
 ]
