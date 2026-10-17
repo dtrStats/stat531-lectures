@@ -2,7 +2,7 @@
 # Removes the built output of any session page still marked `draft: true`,
 # so unfinished slides and handouts never end up in docs/.
 out_dir <- Sys.getenv("QUARTO_PROJECT_OUTPUT_DIR", "docs")
-qmds <- list.files(pattern = "^[0-9]{2}_.*\\.qmd$")
+qmds <- list.files(pattern = "_(slides|handout)\\.qmd$")
 
 for (f in qmds) {
   header <- readLines(f, n = 20, warn = FALSE)

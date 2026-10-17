@@ -79,9 +79,9 @@ ul.task-list li input[type="checkbox"] {
     }
 
     const options = {
-      valueNames: ['listing-date','listing-title','listing-description','listing-categories',{ data: ['index'] },{ data: ['categories'] }],
+      valueNames: ['listing-date','listing-title','listing-description','listing-categories',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-title-sort'] }],
       
-      searchColumns: [],
+      searchColumns: ["listing-date","listing-title","listing-author"],
     };
 
     window['quarto-listings'] = window['quarto-listings'] || {};
@@ -204,18 +204,64 @@ window.Quarto = {
 </section>
 <section id="sessions" class="level2">
 <h2 class="anchored" data-anchor-id="sessions">Sessions</h2>
-<p>New sessions appear in the table below as they are published. Slides are for class and handouts are the detailed reference. The lab instructions for Sessions 4 and 7 live in the <a href="https://github.com/YOUR-USERNAME/YOUR-PROJECT-REPO">course project repo</a>.</p>
+<p>New sessions appear in the table below as they are published. Slides are for class and handouts are the detailed reference. The lab instructions for Sessions 4 and 7 live in the <a href="https://github.com/dtrStats/YOUR-PROJECT-REPO">course project repo</a>.</p>
 <div id="listing-listing" class="quarto-listing quarto-listing-container-table">
-<table class="quarto-listing-table table caption-top" data-quarto-postprocess="true">
+<table class="quarto-listing-table table">
 <thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th">Date</th>
-<th data-quarto-table-cell-role="th">Title</th>
-<th data-quarto-table-cell-role="th">Description</th>
-<th data-quarto-table-cell-role="th">Categories</th>
+<tr>
+
+<th>
+Date
+</th>
+
+<th>
+Title
+</th>
+
+<th>
+Description
+</th>
+
+<th>
+Categories
+</th>
+
 </tr>
 </thead>
 <tbody class="list">
+
+<tr data-index="0" data-categories="SGFuZG91dA==" data-listing-date-sort="1792393200000" data-listing-file-modified-sort="1792256053113" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="20" data-listing-word-count-sort="3889" data-listing-title-sort="Session 1 Handout: R Basics and Data Manipulation" data-listing-filename-sort="W04L07_handout.qmd">
+<td>
+<span class="listing-date">Oct 19, 2026</span>
+</td>
+<td>
+<a href="./W04L07_handout.html" class="title listing-title">Session 1 Handout: R Basics and Data Manipulation</a>
+</td>
+<td>
+<span class="listing-description">Full reference for R basics and the core dplyr verbs, with Audit it boxes and practice</span>
+</td>
+<td>
+<span class="listing-categories">Handout</span>
+</td>
+
+</tr>
+
+<tr data-index="1" data-categories="U2xpZGVz" data-listing-date-sort="1792393200000" data-listing-file-modified-sort="1792261057952" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="12" data-listing-word-count-sort="2346" data-listing-title-sort="You Navigate, AI Drives" data-listing-filename-sort="W04L07_slides.qmd">
+<td>
+<span class="listing-date">Oct 19, 2026</span>
+</td>
+<td>
+<a href="./W04L07_slides.html" class="title listing-title">You Navigate, AI Drives</a>
+</td>
+<td>
+<span class="listing-description">Driver-navigator mindset, the Audit Loop, R essentials, and the first dplyr verbs</span>
+</td>
+<td>
+<span class="listing-categories">Slides</span>
+</td>
+
+</tr>
+
 </tbody>
 </table>
 <div class="listing-no-matching d-none">No matching items</div>

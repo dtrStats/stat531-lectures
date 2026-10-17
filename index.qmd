@@ -5,7 +5,8 @@ format: html
 toc: false
 listing:
   contents:
-    - "0*.qmd"
+    - "*_slides.qmd"
+    - "*_handout.qmd"
   type: table
   fields: [date, title, description, categories]
   sort: ["date", "categories"]
@@ -25,7 +26,7 @@ Course materials for learning R, data wrangling, visualization, and data cleanin
 
 ## Sessions
 
-New sessions appear in the table below as they are published. Slides are for class and handouts are the detailed reference. The lab instructions for Sessions 4 and 7 live in the [course project repo](https://github.com/YOUR-USERNAME/YOUR-PROJECT-REPO).
+New sessions appear in the table below as they are published. Slides are for class and handouts are the detailed reference. The lab instructions for Sessions 4 and 7 live in the [course project repo](https://github.com/dtrStats/YOUR-PROJECT-REPO).
 
 ::: {#listing}
 :::
