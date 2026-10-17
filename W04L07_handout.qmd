@@ -32,7 +32,7 @@ Every section follows the same pattern: a short explanation, code you can run, a
 4. **Refine** it or **Reject** it.
 :::
 
-**Setup for the examples.** Every example uses `movies.csv` (651 movies, 32 columns). [Download it here](data/movies.csv) and put it in a `data` folder inside your Positron project. The setup code for this handout is:
+**Setup for the examples.** Choose a directory to work from inside of Positron and create a `data` folder. Every example uses `movies.csv` (651 movies, 32 columns). [Download it here](data/movies.csv) and put it the `data` folder you created. The setup code for this handout is:
 
 ```{r}
 #| eval: false

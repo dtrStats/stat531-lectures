@@ -9,10 +9,19 @@ format: revealjs
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, comment = "#>", message = FALSE, warning = FALSE)
+knitr::opts_chunk$set(
+        echo = TRUE,
+        comment = "#>",
+        message = FALSE,
+        warning = FALSE
+)
 library(tidyverse)
-options(tibble.print_max = 5, tibble.print_min = 5, width = 72,
-        pillar.max_footer_lines = 2)
+options(
+        tibble.print_max = 5,
+        tibble.print_min = 5,
+        width = 72,
+        pillar.max_footer_lines = 2
+)
 movies <- read_csv("data/movies.csv", show_col_types = FALSE)
 ```
 
