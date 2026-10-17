@@ -1,0 +1,18 @@
+---
+title: "Session 6 Slides: Data Cleaning 2: Types, Anomalies, and Missingness"
+description: "Dates, sentinels, outliers, missing-data mechanisms, and validation rules"
+date: 2026-11-18
+categories: [Slides]
+format: revealjs
+draft: true
+---
+
+## Planned outline
+
+- lubridate and mixed timestamp formats
+- Sentinels with na_if(); outliers by domain rules plus plots
+- Missingness: MCAR / MAR / MNAR; document vs. impute; a first look at mice
+- Validation rules with pointblank; unit tests with testthat
+- Judging imputation by distributional recovery, not row-level match
+
+*Draft: remove `draft: true` from the top of this file to publish it.*

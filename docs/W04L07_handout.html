@@ -1,0 +1,2426 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.34">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="DTR">
+<meta name="dcterms.date" content="2026-10-19">
+<meta name="description" content="Full reference for R basics and the core dplyr verbs, with Audit it boxes and practice">
+
+<title>Session 1 Handout: R Basics and Data Manipulation – STAT 531: R in the AI Era</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-c8ad9e5dbd60b7b70b38521ab19b7da4.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-d7294beede67a4f0c1d75a160eaed9e1.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+<style>
+
+      .quarto-title-block .quarto-title-banner h1,
+      .quarto-title-block .quarto-title-banner h2,
+      .quarto-title-block .quarto-title-banner h3,
+      .quarto-title-block .quarto-title-banner h4,
+      .quarto-title-block .quarto-title-banner h5,
+      .quarto-title-block .quarto-title-banner h6
+      {
+        color: #ffffff;
+      }
+
+      .quarto-title-block .quarto-title-banner {
+        color: #ffffff;
+background: #213921;
+      }
+</style>
+
+
+</head>
+
+<body class="floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">STAT 531: R in the AI Era</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default toc-left page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Session 1 Handout: R Basics and Data Manipulation</h1>
+            <p class="subtitle lead">Reference companion to the Session 1 slides</p>
+                  <div>
+        <div class="description">
+          Full reference for R basics and the core dplyr verbs, with Audit it boxes and practice
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">Handout</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>DTR </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">October 19, 2026</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Contents</h2>
+   
+  <ul class="collapse">
+  <li><a href="#how-to-use-this-handout" id="toc-how-to-use-this-handout" class="nav-link active" data-scroll-target="#how-to-use-this-handout"><span class="header-section-number">1</span> How to use this handout</a></li>
+  <li><a href="#r-as-a-calculator-and-naming-things" id="toc-r-as-a-calculator-and-naming-things" class="nav-link" data-scroll-target="#r-as-a-calculator-and-naming-things"><span class="header-section-number">2</span> R as a calculator, and naming things</a></li>
+  <li><a href="#functions-and-arguments" id="toc-functions-and-arguments" class="nav-link" data-scroll-target="#functions-and-arguments"><span class="header-section-number">3</span> Functions and arguments</a></li>
+  <li><a href="#vectors-and-types" id="toc-vectors-and-types" class="nav-link" data-scroll-target="#vectors-and-types"><span class="header-section-number">4</span> Vectors and types</a>
+  <ul class="collapse">
+  <li><a href="#the-types-you-will-meet" id="toc-the-types-you-will-meet" class="nav-link" data-scroll-target="#the-types-you-will-meet"><span class="header-section-number">4.1</span> The types you will meet</a></li>
+  <li><a href="#coercion-when-types-are-mixed" id="toc-coercion-when-types-are-mixed" class="nav-link" data-scroll-target="#coercion-when-types-are-mixed"><span class="header-section-number">4.2</span> Coercion: when types are mixed</a></li>
+  <li><a href="#recycling" id="toc-recycling" class="nav-link" data-scroll-target="#recycling"><span class="header-section-number">4.3</span> Recycling</a></li>
+  <li><a href="#logical-vectors-yesno-questions" id="toc-logical-vectors-yesno-questions" class="nav-link" data-scroll-target="#logical-vectors-yesno-questions"><span class="header-section-number">4.4</span> Logical vectors: yes/no questions</a></li>
+  </ul></li>
+  <li><a href="#subsetting-vectors" id="toc-subsetting-vectors" class="nav-link" data-scroll-target="#subsetting-vectors"><span class="header-section-number">5</span> Subsetting vectors</a></li>
+  <li><a href="#missing-values" id="toc-missing-values" class="nav-link" data-scroll-target="#missing-values"><span class="header-section-number">6</span> Missing values</a>
+  <ul class="collapse">
+  <li><a href="#finding-and-counting-nas" id="toc-finding-and-counting-nas" class="nav-link" data-scroll-target="#finding-and-counting-nas"><span class="header-section-number">6.1</span> Finding and counting NAs</a></li>
+  <li><a href="#summaries-with-missing-values" id="toc-summaries-with-missing-values" class="nav-link" data-scroll-target="#summaries-with-missing-values"><span class="header-section-number">6.2</span> Summaries with missing values</a></li>
+  </ul></li>
+  <li><a href="#lists-and-data-frames" id="toc-lists-and-data-frames" class="nav-link" data-scroll-target="#lists-and-data-frames"><span class="header-section-number">7</span> Lists and data frames</a>
+  <ul class="collapse">
+  <li><a href="#looking-at-a-data-frame" id="toc-looking-at-a-data-frame" class="nav-link" data-scroll-target="#looking-at-a-data-frame"><span class="header-section-number">7.1</span> Looking at a data frame</a></li>
+  </ul></li>
+  <li><a href="#importing-data" id="toc-importing-data" class="nav-link" data-scroll-target="#importing-data"><span class="header-section-number">8</span> Importing data</a></li>
+  <li><a href="#the-pipe" id="toc-the-pipe" class="nav-link" data-scroll-target="#the-pipe"><span class="header-section-number">9</span> The pipe</a></li>
+  <li><a href="#data-manipulation-with-dplyr" id="toc-data-manipulation-with-dplyr" class="nav-link" data-scroll-target="#data-manipulation-with-dplyr"><span class="header-section-number">10</span> Data manipulation with dplyr</a>
+  <ul class="collapse">
+  <li><a href="#select-choose-columns" id="toc-select-choose-columns" class="nav-link" data-scroll-target="#select-choose-columns"><span class="header-section-number">10.1</span> <code>select()</code>: choose columns</a></li>
+  <li><a href="#filter-keep-rows" id="toc-filter-keep-rows" class="nav-link" data-scroll-target="#filter-keep-rows"><span class="header-section-number">10.2</span> <code>filter()</code>: keep rows</a></li>
+  <li><a href="#arrange-sort-rows" id="toc-arrange-sort-rows" class="nav-link" data-scroll-target="#arrange-sort-rows"><span class="header-section-number">10.3</span> <code>arrange()</code>: sort rows</a></li>
+  <li><a href="#mutate-create-or-change-columns" id="toc-mutate-create-or-change-columns" class="nav-link" data-scroll-target="#mutate-create-or-change-columns"><span class="header-section-number">10.4</span> <code>mutate()</code>: create or change columns</a></li>
+  <li><a href="#other-useful-verbs" id="toc-other-useful-verbs" class="nav-link" data-scroll-target="#other-useful-verbs"><span class="header-section-number">10.5</span> Other useful verbs</a></li>
+  </ul></li>
+  <li><a href="#reading-control-flow-loops-and-functions" id="toc-reading-control-flow-loops-and-functions" class="nav-link" data-scroll-target="#reading-control-flow-loops-and-functions"><span class="header-section-number">11</span> Reading control flow, loops, and functions</a>
+  <ul class="collapse">
+  <li><a href="#if-and-else" id="toc-if-and-else" class="nav-link" data-scroll-target="#if-and-else"><span class="header-section-number">11.1</span> <code>if</code> and <code>else</code></a></li>
+  <li><a href="#for-loops" id="toc-for-loops" class="nav-link" data-scroll-target="#for-loops"><span class="header-section-number">11.2</span> <code>for</code> loops</a></li>
+  <li><a href="#functions" id="toc-functions" class="nav-link" data-scroll-target="#functions"><span class="header-section-number">11.3</span> Functions</a></li>
+  </ul></li>
+  <li><a href="#practice-problems" id="toc-practice-problems" class="nav-link" data-scroll-target="#practice-problems"><span class="header-section-number">12</span> Practice problems</a></li>
+  <li><a href="#appendix" id="toc-appendix" class="nav-link" data-scroll-target="#appendix">Appendix</a>
+  <ul class="collapse">
+  <li><a href="#a.-matrices-and-arrays" id="toc-a.-matrices-and-arrays" class="nav-link" data-scroll-target="#a.-matrices-and-arrays">A. Matrices and arrays</a></li>
+  <li><a href="#b.-scope-and-lazy-evaluation" id="toc-b.-scope-and-lazy-evaluation" class="nav-link" data-scroll-target="#b.-scope-and-lazy-evaluation">B. Scope and lazy evaluation</a></li>
+  <li><a href="#c.-vectorization" id="toc-c.-vectorization" class="nav-link" data-scroll-target="#c.-vectorization">C. Vectorization</a></li>
+  <li><a href="#d.-the-apply-family-and-purrr" id="toc-d.-the-apply-family-and-purrr" class="nav-link" data-scroll-target="#d.-the-apply-family-and-purrr">D. The apply family and purrr</a></li>
+  <li><a href="#e.-old-syntax-to-new-syntax" id="toc-e.-old-syntax-to-new-syntax" class="nav-link" data-scroll-target="#e.-old-syntax-to-new-syntax">E. Old syntax to new syntax</a></li>
+  <li><a href="#f.-quick-reference" id="toc-f.-quick-reference" class="nav-link" data-scroll-target="#f.-quick-reference">F. Quick reference</a></li>
+  <li><a href="#where-to-go-next" id="toc-where-to-go-next" class="nav-link" data-scroll-target="#where-to-go-next">Where to go next</a></li>
+  </ul></li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+<section id="how-to-use-this-handout" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> How to use this handout</h1>
+<p>The slides move fast and are built for discussion. This handout is the slow, complete version: read it before class if you like, and return to it when you are auditing code.</p>
+<p>Every section follows the same pattern: a short explanation, code you can run, and <strong>Audit it</strong> boxes that show a mistake an AI assistant (or a human) could easily make.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="The Audit Loop">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+The Audit Loop
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>Read</strong> the code.</li>
+<li><strong>Run</strong> it.</li>
+<li><strong>Restate</strong> it in plain English. If you cannot say what a line does, you cannot vouch for it.</li>
+<li><strong>Refine</strong> it or <strong>Reject</strong> it.</li>
+</ol>
+</div>
+</div>
+<p><strong>Setup for the examples.</strong> Every example uses <code>movies.csv</code> (651 movies, 32 columns). <a href="data/movies.csv">Download it here</a> and put it in a <code>data</code> folder inside your Positron project. The setup code for this handout is:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>movies <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/movies.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>What changed since the older course notes.</strong> Some syntax has been modernized. The short version: use the native pipe <code>|&gt;</code>, use <code>slice_max()</code> and <code>slice_sample()</code> instead of <code>sample_n()</code>, and use <code>if_else()</code> and <code>case_when()</code> for conditions. Appendix E has a full old-to-new table.</p>
+</section>
+<section id="r-as-a-calculator-and-naming-things" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> R as a calculator, and naming things</h1>
+<p>R follows normal arithmetic precedence. Use parentheses whenever you are unsure.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span> <span class="sc">+</span> <span class="dv">3</span> <span class="sc">*</span> <span class="dv">4</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 14</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>(<span class="dv">2</span> <span class="sc">+</span> <span class="dv">3</span>) <span class="sc">*</span> <span class="dv">4</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 20</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span><span class="sc">^</span><span class="dv">10</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 1024</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="dv">10</span> <span class="sc">%/%</span> <span class="dv">3</span> <span class="co"># integer division</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 3</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="dv">10</span> <span class="sc">%%</span> <span class="dv">3</span> <span class="co"># remainder</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 1</code></pre>
+</div>
+</div>
+<p>Store a result with <code>&lt;-</code>, read it aloud as “gets”. Names are case-sensitive, can contain letters, numbers, <code>_</code> and <code>.</code>, and cannot start with a number.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>runtime_min <span class="ot">&lt;-</span> <span class="dv">95</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>runtime_min <span class="sc">/</span> <span class="dv">60</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 1.583333</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>runtime_min <span class="ot">&lt;-</span> runtime_min <span class="sc">+</span> <span class="dv">5</span> <span class="co"># overwrites the old value</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>runtime_min</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 100</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Convention">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Convention
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>=</code> also assigns, but R users use <code>&lt;-</code> for assignment and reserve <code>=</code> for naming function arguments. If you see <code>=</code> inside a <code>filter()</code>, that is almost always a bug (see Section 10).</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled" title="Audit it: decimals are approximate">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Audit it: decimals are approximate
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Computers store most decimals approximately, so exact comparison can fail.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fl">0.1</span> <span class="sc">+</span> <span class="fl">0.2</span> <span class="sc">==</span> <span class="fl">0.3</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] FALSE</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>dplyr<span class="sc">::</span><span class="fu">near</span>(<span class="fl">0.1</span> <span class="sc">+</span> <span class="fl">0.2</span>, <span class="fl">0.3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] TRUE</code></pre>
+</div>
+</div>
+<p>When AI-written code tests two decimals for equality with <code>==</code>, ask whether <code>near()</code> is what it meant.</p>
+</div>
+</div>
+</section>
+<section id="functions-and-arguments" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Functions and arguments</h1>
+<p>A function has a <strong>name</strong> and <strong>arguments</strong> in parentheses. Arguments can be given by position or by name; names are safer and easier to read.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fl">3.14159</span>, <span class="dv">2</span>) <span class="co"># by position</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 3.14</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fl">3.14159</span>, <span class="at">digits =</span> <span class="dv">2</span>) <span class="co"># by name</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 3.14</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="at">digits =</span> <span class="dv">2</span>, <span class="at">x =</span> <span class="fl">3.14159</span>) <span class="co"># names can be in any order</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 3.14</code></pre>
+</div>
+</div>
+<p>Many arguments have <strong>defaults</strong>. <code>?round</code> opens the help page; the <em>Usage</em> section shows every argument and its default.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fl">3.14159</span>) <span class="co"># digits defaults to 0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 3</code></pre>
+</div>
+</div>
+</section>
+<section id="vectors-and-types" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Vectors and types</h1>
+<p>The basic unit in R is the <strong>vector</strong>: an ordered collection of values of <strong>one type</strong>. Even a single number is a vector of length 1. Combine values with <code>c()</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>scores <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">72</span>, <span class="dv">88</span>, <span class="dv">91</span>, <span class="dv">65</span>)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(scores)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 4</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>scores <span class="sc">*</span> <span class="dv">2</span> <span class="co"># arithmetic works on every element</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 144 176 182 130</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">:</span><span class="dv">5</span> <span class="co"># a range</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 1 2 3 4 5</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">by =</span> <span class="fl">0.25</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 0.00 0.25 0.50 0.75 1.00</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rep</span>(<span class="st">"Drama"</span>, <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "Drama" "Drama" "Drama"</code></pre>
+</div>
+</div>
+<section id="the-types-you-will-meet" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="the-types-you-will-meet"><span class="header-section-number">4.1</span> The types you will meet</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Example</th>
+<th style="text-align: left;"><code>class()</code></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">numeric (double)</td>
+<td style="text-align: left;"><code>3.5</code>, <code>72</code></td>
+<td style="text-align: left;"><code>"numeric"</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">integer</td>
+<td style="text-align: left;"><code>5L</code></td>
+<td style="text-align: left;"><code>"integer"</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">character</td>
+<td style="text-align: left;"><code>"Drama"</code></td>
+<td style="text-align: left;"><code>"character"</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">logical</td>
+<td style="text-align: left;"><code>TRUE</code>, <code>FALSE</code></td>
+<td style="text-align: left;"><code>"logical"</code></td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(<span class="dv">72</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "numeric"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(<span class="dv">5</span>L)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "integer"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(<span class="st">"Drama"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "character"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(<span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "logical"</code></pre>
+</div>
+</div>
+</section>
+<section id="coercion-when-types-are-mixed" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="coercion-when-types-are-mixed"><span class="header-section-number">4.2</span> Coercion: when types are mixed</h2>
+<p>A vector holds one type, so R converts everything to the “most flexible” type present. The order is:</p>
+<p><code>logical</code> &lt; <code>integer</code> &lt; <code>numeric</code> &lt; <code>character</code></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="dv">2</span>L) <span class="co"># logical -&gt; integer</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 1 2</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="dv">2</span>L, <span class="fl">3.1</span>) <span class="co"># -&gt; numeric</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 1.0 2.0 3.1</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="dv">2</span>L, <span class="fl">3.1</span>, <span class="st">"a"</span>) <span class="co"># -&gt; character</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "TRUE" "2"    "3.1"  "a"</code></pre>
+</div>
+</div>
+<p>You can also convert on purpose with <code>as.numeric()</code>, <code>as.character()</code>, <code>as.logical()</code>, <code>as.integer()</code>.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Key idea">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Key idea
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A vector holds exactly <strong>one type</strong>, and R converts silently to make that true. After reading or converting data, always check the types.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled" title="Audit it: converting messy text to numbers">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Audit it: converting messy text to numbers
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>as.numeric()</code> quietly turns anything it cannot read into <code>NA</code>. Real data is full of text such as <code>"159.8 lbs"</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="fu">as.numeric</span>(<span class="fu">c</span>(<span class="st">"72"</span>, <span class="st">"159.8 lbs"</span>, <span class="st">"kg"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>#&gt; Warning: NAs introduced by coercion</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 72 NA NA</code></pre>
+</div>
+</div>
+<p>R prints a warning, but only once and easily ignored in a long script. After any conversion, count the new <code>NA</code>s: <code>sum(is.na(x))</code>. You will do this with real wearable data in the cleaning sessions.</p>
+</div>
+</div>
+</section>
+<section id="recycling" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="recycling"><span class="header-section-number">4.3</span> Recycling</h2>
+<p>When vectors of different lengths are combined, the shorter one is <strong>recycled</strong>. This is fine for a single number and dangerous otherwise.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>) <span class="sc">+</span> <span class="dv">10</span> <span class="co"># 10 is recycled: intended</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 11 12 13 14</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>) <span class="sc">+</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">20</span>) <span class="co"># recycled in a pattern: legal, rarely intended</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 11 22 13 24</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">:</span><span class="dv">3</span> <span class="sc">+</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span> <span class="co"># lengths don't divide evenly: R warns</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>#&gt; Warning in 1:3 + 1:2: longer object length is not a multiple of shorter object length</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 2 4 4</code></pre>
+</div>
+</div>
+</section>
+<section id="logical-vectors-yesno-questions" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="logical-vectors-yesno-questions"><span class="header-section-number">4.4</span> Logical vectors: yes/no questions</h2>
+<p>Comparisons produce logical vectors. Combine them with <code>&amp;</code> (and), <code>|</code> (or), and <code>!</code> (not).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>scores <span class="sc">&gt;</span> <span class="dv">70</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1]  TRUE  TRUE  TRUE FALSE</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>scores <span class="sc">&gt;</span> <span class="dv">70</span> <span class="sc">&amp;</span> scores <span class="sc">&lt;</span> <span class="dv">90</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1]  TRUE  TRUE FALSE FALSE</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="sc">!</span>(scores <span class="sc">&gt;</span> <span class="dv">70</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] FALSE FALSE FALSE  TRUE</code></pre>
+</div>
+</div>
+<p>Because <code>TRUE</code> counts as 1 and <code>FALSE</code> as 0, you can count and take proportions:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(scores <span class="sc">&gt;</span> <span class="dv">70</span>) <span class="co"># how many</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 3</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(scores <span class="sc">&gt;</span> <span class="dv">70</span>) <span class="co"># what fraction</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 0.75</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb72"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a><span class="fu">any</span>(scores <span class="sc">&gt;</span> <span class="dv">90</span>) <span class="co"># is at least one TRUE?</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] TRUE</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb74"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a><span class="fu">all</span>(scores <span class="sc">&gt;</span> <span class="dv">60</span>) <span class="co"># are all TRUE?</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] TRUE</code></pre>
+</div>
+</div>
+<p><code>%in%</code> asks whether each value appears anywhere in a set. Compare it with <code>==</code>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb76"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a>genres <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Drama"</span>, <span class="st">"Comedy"</span>, <span class="st">"Horror"</span>)</span>
+<span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a>genres <span class="sc">==</span> <span class="st">"Comedy"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] FALSE  TRUE FALSE</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb78"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a>genres <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Drama"</span>, <span class="st">"Horror"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1]  TRUE FALSE  TRUE</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Key idea">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Key idea
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Comparisons make logical vectors, and logical vectors can be <strong>counted</strong> (<code>sum</code>), turned into <strong>proportions</strong> (<code>mean</code>), and used to <strong>select</strong> (<code>x[condition]</code>). Most of <code>filter()</code> is this idea applied to a column.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="subsetting-vectors" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Subsetting vectors</h1>
+<p>Square brackets <code>[ ]</code> select elements. R counts from <strong>1</strong>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb80"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a>scores[<span class="dv">1</span>] <span class="co"># first</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 72</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb82"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a>scores[<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>)] <span class="co"># first and third</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 72 91</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb84"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a>scores[<span class="sc">-</span><span class="dv">1</span>] <span class="co"># everything except the first</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 88 91 65</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb86"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a>scores[scores <span class="sc">&gt;</span> <span class="dv">70</span>] <span class="co"># keep where the condition is TRUE</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 72 88 91</code></pre>
+</div>
+</div>
+<p><code>which()</code> converts a logical vector into positions:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb88"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a><span class="fu">which</span>(scores <span class="sc">&gt;</span> <span class="dv">70</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 1 2 3</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled" title="Audit it: out of range returns NA, not an error">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Audit it: out of range returns NA, not an error
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb90"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a>scores[<span class="dv">10</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] NA</code></pre>
+</div>
+</div>
+<p>No error and no warning. If AI-written code indexes by position, check that the positions can exist.</p>
+</div>
+</div>
+</section>
+<section id="missing-values" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Missing values</h1>
+<p><code>NA</code> means “not available”: a value exists in the world but we do not know it. Almost any calculation involving an unknown gives an unknown.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb92"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb92-1"><a href="#cb92-1" aria-hidden="true" tabindex="-1"></a><span class="cn">NA</span> <span class="sc">+</span> <span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] NA</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb94"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb94-1"><a href="#cb94-1" aria-hidden="true" tabindex="-1"></a><span class="cn">NA</span> <span class="sc">&gt;</span> <span class="dv">5</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] NA</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb96"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a><span class="cn">NA</span> <span class="sc">==</span> <span class="cn">NA</span> <span class="co"># is one unknown equal to another unknown? Unknown.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] NA</code></pre>
+</div>
+</div>
+<p>There are a few exceptions where the answer does not depend on the unknown:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb98"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a><span class="cn">NA</span> <span class="sc">&amp;</span> <span class="cn">FALSE</span> <span class="co"># FALSE no matter what NA is</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] FALSE</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb100"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb100-1"><a href="#cb100-1" aria-hidden="true" tabindex="-1"></a><span class="cn">NA</span> <span class="sc">|</span> <span class="cn">TRUE</span> <span class="co"># TRUE no matter what NA is</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] TRUE</code></pre>
+</div>
+</div>
+<section id="finding-and-counting-nas" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="finding-and-counting-nas"><span class="header-section-number">6.1</span> Finding and counting NAs</h2>
+<p><code>NA == NA</code> is <code>NA</code>, so you cannot test for missing values with <code>==</code>. Use <code>is.na()</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb102"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb102-1"><a href="#cb102-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">8</span>, <span class="cn">NA</span>, <span class="dv">2</span>)</span>
+<span id="cb102-2"><a href="#cb102-2" aria-hidden="true" tabindex="-1"></a><span class="fu">is.na</span>(x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] FALSE FALSE  TRUE FALSE</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb104"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb104-1"><a href="#cb104-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(x)) <span class="co"># how many are missing</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 1</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb106"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb106-1"><a href="#cb106-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(<span class="fu">is.na</span>(x)) <span class="co"># what fraction</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 0.25</code></pre>
+</div>
+</div>
+</section>
+<section id="summaries-with-missing-values" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="summaries-with-missing-values"><span class="header-section-number">6.2</span> Summaries with missing values</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb108"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb108-1"><a href="#cb108-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(x) <span class="co"># the unknown spreads</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] NA</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb110"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb110-1"><a href="#cb110-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(x, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="co"># remove NAs first</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 4.666667</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="na.rm = TRUE is a decision, not a fix">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+na.rm = TRUE is a decision, not a fix
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Using <code>na.rm = TRUE</code> means “compute this on the cases where I happen to know the value”. That is only reasonable if the missing cases are not systematically different from the observed ones. In real data they often are. For example, if a smartwatch drops readings more often for certain users, ignoring missing readings quietly changes <em>whose</em> data you are analyzing. Always ask: <strong>who is missing, and why?</strong></p>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled" title="Audit it: NA inside a logical subset">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Audit it: NA inside a logical subset
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb112"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb112-1"><a href="#cb112-1" aria-hidden="true" tabindex="-1"></a>x[x <span class="sc">&gt;</span> <span class="dv">5</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1]  8 NA</code></pre>
+</div>
+</div>
+<p>The result contains an <code>NA</code> row for the unknown. Applying the same idea to a data frame with <code>filter()</code> behaves differently (it drops those rows), which is also a quiet change. See Section 10.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="lists-and-data-frames" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Lists and data frames</h1>
+<p>A <strong>list</strong> is like a vector but each element can be a different type or length.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb114"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb114-1"><a href="#cb114-1" aria-hidden="true" tabindex="-1"></a>car <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">make =</span> <span class="st">"Ford"</span>, <span class="at">year =</span> <span class="dv">1999</span>, <span class="at">used =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb114-2"><a href="#cb114-2" aria-hidden="true" tabindex="-1"></a>car<span class="sc">$</span>make <span class="co"># by name</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "Ford"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb116"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb116-1"><a href="#cb116-1" aria-hidden="true" tabindex="-1"></a>car[[<span class="st">"year"</span>]] <span class="co"># double brackets pull out the element itself</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 1999</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb118"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb118-1"><a href="#cb118-1" aria-hidden="true" tabindex="-1"></a>car[<span class="st">"year"</span>] <span class="co"># single brackets return a smaller list</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; $year
+#&gt; [1] 1999</code></pre>
+</div>
+</div>
+<p>A <strong>data frame</strong> is a list of equal-length vectors, one per column. In the tidyverse we use <strong>tibbles</strong>, which are data frames that print more helpfully.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb120"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb120-1"><a href="#cb120-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb120-2"><a href="#cb120-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>),</span>
+<span id="cb120-3"><a href="#cb120-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">runtime =</span> <span class="fu">c</span>(<span class="dv">95</span>, <span class="dv">120</span>, <span class="cn">NA</span>),</span>
+<span id="cb120-4"><a href="#cb120-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">rated_r =</span> <span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">FALSE</span>, <span class="cn">TRUE</span>)</span>
+<span id="cb120-5"><a href="#cb120-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb120-6"><a href="#cb120-6" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 3 × 3
+#&gt;   title runtime rated_r
+#&gt;   &lt;chr&gt;   &lt;dbl&gt; &lt;lgl&gt;  
+#&gt; 1 A          95 TRUE   
+#&gt; 2 B         120 FALSE  
+#&gt; 3 C          NA TRUE</code></pre>
+</div>
+</div>
+<p>Every column is a vector, so everything from Sections 4 to 6 applies to columns.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb122"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb122-1"><a href="#cb122-1" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>runtime <span class="co"># pull one column out as a vector</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1]  95 120  NA</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb124"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb124-1"><a href="#cb124-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(df<span class="sc">$</span>runtime, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 107.5</code></pre>
+</div>
+</div>
+<section id="looking-at-a-data-frame" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="looking-at-a-data-frame"><span class="header-section-number">7.1</span> Looking at a data frame</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb126"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb126-1"><a href="#cb126-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(movies) <span class="co"># rows, columns</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 651  32</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb128"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb128-1"><a href="#cb128-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(movies)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 651</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb130"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb130-1"><a href="#cb130-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(movies)[<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "title"       "title_type"  "genre"       "runtime"     "mpaa_rating" "studio"</code></pre>
+</div>
+</div>
+<p><code>glimpse()</code> shows every column, its type, and the first values. Make it your first move on any new table.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb132"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb132-1"><a href="#cb132-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">select</span>(title<span class="sc">:</span>mpaa_rating) <span class="sc">|&gt;</span> <span class="fu">glimpse</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; Rows: 651
+#&gt; Columns: 5
+#&gt; $ title       &lt;chr&gt; "Filly Brown", "The Dish", "Waiting for Guffman", "The Age of Innoce…
+#&gt; $ title_type  &lt;chr&gt; "Feature Film", "Feature Film", "Feature Film", "Feature Film", "Fea…
+#&gt; $ genre       &lt;chr&gt; "Drama", "Drama", "Comedy", "Drama", "Horror", "Documentary", "Drama…
+#&gt; $ runtime     &lt;dbl&gt; 80, 101, 84, 139, 90, 78, 142, 93, 88, 119, 127, 108, 110, 100, 111,…
+#&gt; $ mpaa_rating &lt;chr&gt; "R", "PG-13", "R", "PG", "R", "Unrated", "PG-13", "R", "Unrated", "U…</code></pre>
+</div>
+</div>
+<p><code>summary()</code> gives quick numeric summaries, including how many <code>NA</code>s each column has:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb134"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb134-1"><a href="#cb134-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(movies<span class="sc">$</span>runtime)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.     NAs 
+#&gt;    39.0    92.0   103.0   105.8   115.8   267.0       1</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Key idea">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Key idea
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A data frame is a list of equal-length vectors, so <strong>each column is a vector</strong> and every vector rule above applies to it.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="importing-data" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> Importing data</h1>
+<p><code>readr::read_csv()</code> reads a comma-separated file. It guesses each column’s type from the first rows and tells you what it chose.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb136"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb136-1"><a href="#cb136-1" aria-hidden="true" tabindex="-1"></a>movies <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/movies.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Useful arguments:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Argument</th>
+<th style="text-align: left;">What it does</th>
+<th style="text-align: left;">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>na =</code></td>
+<td style="text-align: left;">which text means missing</td>
+<td style="text-align: left;"><code>na = c("", "NA", "-999")</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>skip =</code></td>
+<td style="text-align: left;">skip metadata lines at the top</td>
+<td style="text-align: left;"><code>skip = 2</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>comment =</code></td>
+<td style="text-align: left;">ignore lines starting with a character</td>
+<td style="text-align: left;"><code>comment = "#"</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>col_types =</code></td>
+<td style="text-align: left;">set types yourself</td>
+<td style="text-align: left;"><code>cols(zip = col_character())</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>n_max =</code></td>
+<td style="text-align: left;">read only the first rows</td>
+<td style="text-align: left;"><code>n_max = 1000</code></td>
+</tr>
+</tbody>
+</table>
+<p>Related readers: <code>read_tsv()</code> (tabs), <code>read_delim()</code> (any delimiter), <code>readxl::read_excel()</code> (Excel files), and <code>arrow::read_parquet()</code> (Parquet, which we use for large data in Session 2).</p>
+<p><strong>Where is my file?</strong> Paths like <code>"data/movies.csv"</code> are relative to your <strong>working directory</strong>. Check it with <code>getwd()</code>. In Positron, opening a folder as your workspace sets the working directory to that folder.</p>
+<div class="callout callout-style-default callout-warning callout-titled" title="Audit it: the guessed type can destroy information">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Audit it: the guessed type can destroy information
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>ZIP codes look like numbers, and R will happily treat them as numbers, dropping the leading zero.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb137"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb137-1"><a href="#cb137-1" aria-hidden="true" tabindex="-1"></a><span class="fu">read_csv</span>(<span class="fu">I</span>(<span class="st">"zip,n</span><span class="sc">\n</span><span class="st">01234,5"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 1 × 2
+#&gt;   zip       n
+#&gt;   &lt;chr&gt; &lt;dbl&gt;
+#&gt; 1 01234     5</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb139"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb139-1"><a href="#cb139-1" aria-hidden="true" tabindex="-1"></a><span class="fu">read_csv</span>(<span class="fu">I</span>(<span class="st">"zip,n</span><span class="sc">\n</span><span class="st">01234,5"</span>), <span class="at">col_types =</span> <span class="fu">cols</span>(<span class="at">zip =</span> <span class="fu">col_character</span>()))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 1 × 2
+#&gt;   zip       n
+#&gt;   &lt;chr&gt; &lt;dbl&gt;
+#&gt; 1 01234     5</code></pre>
+</div>
+</div>
+<p>Always check the column types after reading a file, and set <code>col_types</code> for identifiers, codes, and anything with leading zeros.</p>
+</div>
+</div>
+</section>
+<section id="the-pipe" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> The pipe</h1>
+<p>The pipe <code>|&gt;</code> takes what is on its left and passes it as the <strong>first argument</strong> of the function on its right. Read it as <strong>“then”</strong>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb141"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb141-1"><a href="#cb141-1" aria-hidden="true" tabindex="-1"></a><span class="co"># nested: read from the inside out</span></span>
+<span id="cb141-2"><a href="#cb141-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">arrange</span>(<span class="fu">filter</span>(movies, genre <span class="sc">==</span> <span class="st">"Drama"</span>), imdb_rating), <span class="dv">3</span>)</span>
+<span id="cb141-3"><a href="#cb141-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb141-4"><a href="#cb141-4" aria-hidden="true" tabindex="-1"></a><span class="co"># piped: read top to bottom</span></span>
+<span id="cb141-5"><a href="#cb141-5" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb141-6"><a href="#cb141-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(genre <span class="sc">==</span> <span class="st">"Drama"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb141-7"><a href="#cb141-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(imdb_rating) <span class="sc">|&gt;</span></span>
+<span id="cb141-8"><a href="#cb141-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Style:</strong> one verb per line, pipe at the end of the line, indent two spaces. Short lines are easier to restate.</p>
+<p><strong>Debugging a pipeline:</strong> run it one step at a time. Highlight everything up to a pipe (not including it) and run it to see the intermediate result.</p>
+<p><strong>Other pipes you will see.</strong> <code>%&gt;%</code> is the older tidyverse pipe and behaves the same for almost everything in this course. AI tools and older tutorials use both. They differ in how you place the data when it is <em>not</em> the first argument:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb142"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb142-1"><a href="#cb142-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">lm</span>(imdb_rating <span class="sc">~</span> critics_score, <span class="at">data =</span> _) <span class="co"># native pipe: placeholder is _</span></span>
+<span id="cb142-2"><a href="#cb142-2" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">%&gt;%</span> <span class="fu">lm</span>(imdb_rating <span class="sc">~</span> critics_score, <span class="at">data =</span> .) <span class="co"># magrittr pipe: placeholder is .</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Key idea">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Key idea
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Read <code>|&gt;</code> as “then”. When a pipeline misbehaves, run it one step at a time and look at each intermediate result.</p>
+</div>
+</div>
+</section>
+<section id="data-manipulation-with-dplyr" class="level1" data-number="10">
+<h1 data-number="10"><span class="header-section-number">10</span> Data manipulation with dplyr</h1>
+<p><code>dplyr</code> verbs follow four rules:</p>
+<ol type="1">
+<li>The first argument is a data frame.</li>
+<li>The other arguments say what to do with it.</li>
+<li>The result is a data frame.</li>
+<li><strong>Nothing is modified in place.</strong></li>
+</ol>
+<p>The four core verbs, at a glance:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Verb</th>
+<th style="text-align: left;">Works on</th>
+<th style="text-align: left;">What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>select()</code></td>
+<td style="text-align: left;">columns</td>
+<td style="text-align: left;">choose, drop, or reorder columns</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>filter()</code></td>
+<td style="text-align: left;">rows</td>
+<td style="text-align: left;">keep rows where a condition is <code>TRUE</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>arrange()</code></td>
+<td style="text-align: left;">rows</td>
+<td style="text-align: left;">change the order of rows</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>mutate()</code></td>
+<td style="text-align: left;">columns</td>
+<td style="text-align: left;">create or change columns</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-warning callout-titled" title="Audit it: a pipeline that is never saved">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Audit it: a pipeline that is never saved
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb143"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb143-1"><a href="#cb143-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(genre <span class="sc">==</span> <span class="st">"Drama"</span>) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 305</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb145"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb145-1"><a href="#cb145-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(movies) <span class="co"># movies itself is unchanged</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 651</code></pre>
+</div>
+</div>
+<p>If you want to keep a result, assign it: <code>dramas &lt;- movies |&gt; filter(genre == "Drama")</code>. Conversely, AI code that starts <code>movies &lt;- movies |&gt; filter(...)</code> permanently overwrites your data. Check which one you are reading.</p>
+</div>
+</div>
+<section id="select-choose-columns" class="level2" data-number="10.1">
+<h2 data-number="10.1" class="anchored" data-anchor-id="select-choose-columns"><span class="header-section-number">10.1</span> <code>select()</code>: choose columns</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb147"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb147-1"><a href="#cb147-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">select</span>(title, genre, imdb_rating)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 651 × 3
+#&gt;   title                genre       imdb_rating
+#&gt;   &lt;chr&gt;                &lt;chr&gt;             &lt;dbl&gt;
+#&gt; 1 Filly Brown          Drama               5.5
+#&gt; 2 The Dish             Drama               7.3
+#&gt; 3 Waiting for Guffman  Comedy              7.6
+#&gt; 4 The Age of Innocence Drama               7.2
+#&gt; 5 Malevolence          Horror              5.1
+#&gt; 6 Old Partner          Documentary         7.8
+#&gt; # ℹ 645 more rows</code></pre>
+</div>
+</div>
+<p>Selection helpers save typing:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb149"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb149-1"><a href="#cb149-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">select</span>(title, <span class="fu">ends_with</span>(<span class="st">"score"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 651 × 3
+#&gt;   title                critics_score audience_score
+#&gt;   &lt;chr&gt;                        &lt;dbl&gt;          &lt;dbl&gt;
+#&gt; 1 Filly Brown                     45             73
+#&gt; 2 The Dish                        96             81
+#&gt; 3 Waiting for Guffman             91             91
+#&gt; 4 The Age of Innocence            80             76
+#&gt; 5 Malevolence                     33             27
+#&gt; 6 Old Partner                     91             86
+#&gt; # ℹ 645 more rows</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb151"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb151-1"><a href="#cb151-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">select</span>(title, <span class="fu">starts_with</span>(<span class="st">"thtr"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 651 × 4
+#&gt;   title                thtr_rel_year thtr_rel_month thtr_rel_day
+#&gt;   &lt;chr&gt;                        &lt;dbl&gt;          &lt;dbl&gt;        &lt;dbl&gt;
+#&gt; 1 Filly Brown                   2013              4           19
+#&gt; 2 The Dish                      2001              3           14
+#&gt; 3 Waiting for Guffman           1996              8           21
+#&gt; 4 The Age of Innocence          1993             10            1
+#&gt; 5 Malevolence                   2004              9           10
+#&gt; 6 Old Partner                   2009              1           15
+#&gt; # ℹ 645 more rows</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb153"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb153-1"><a href="#cb153-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="fu">where</span>(is.numeric)) <span class="sc">|&gt;</span> <span class="fu">ncol</span>() <span class="co"># how many numeric columns</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 11</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb155"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb155-1"><a href="#cb155-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">-</span><span class="fu">starts_with</span>(<span class="st">"dvd"</span>), <span class="sc">-</span><span class="fu">ends_with</span>(<span class="st">"url"</span>)) <span class="sc">|&gt;</span> <span class="fu">ncol</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 27</code></pre>
+</div>
+</div>
+<p>Other helpers: <code>contains()</code>, <code>matches()</code> (regular expression), <code>everything()</code>, <code>last_col()</code>. Rename with <code>rename(new = old)</code>, and use <code>pull()</code> to extract one column as a vector:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb157"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb157-1"><a href="#cb157-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">rename</span>(<span class="at">rating =</span> imdb_rating) <span class="sc">|&gt;</span> <span class="fu">select</span>(title, rating)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 651 × 2
+#&gt;   title                rating
+#&gt;   &lt;chr&gt;                 &lt;dbl&gt;
+#&gt; 1 Filly Brown             5.5
+#&gt; 2 The Dish                7.3
+#&gt; 3 Waiting for Guffman     7.6
+#&gt; 4 The Age of Innocence    7.2
+#&gt; 5 Malevolence             5.1
+#&gt; 6 Old Partner             7.8
+#&gt; # ℹ 645 more rows</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb159"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb159-1"><a href="#cb159-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">pull</span>(title) <span class="sc">|&gt;</span> <span class="fu">head</span>(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "Filly Brown"         "The Dish"            "Waiting for Guffman"</code></pre>
+</div>
+</div>
+</section>
+<section id="filter-keep-rows" class="level2" data-number="10.2">
+<h2 data-number="10.2" class="anchored" data-anchor-id="filter-keep-rows"><span class="header-section-number">10.2</span> <code>filter()</code>: keep rows</h2>
+<p><code>filter()</code> keeps rows where the condition is <code>TRUE</code>. Several conditions separated by commas mean <strong>and</strong>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb161"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb161-1"><a href="#cb161-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb161-2"><a href="#cb161-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(genre <span class="sc">==</span> <span class="st">"Drama"</span>, imdb_rating <span class="sc">&gt;</span> <span class="dv">8</span>) <span class="sc">|&gt;</span></span>
+<span id="cb161-3"><a href="#cb161-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(title, imdb_rating)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 8 × 2
+#&gt;   title                  imdb_rating
+#&gt;   &lt;chr&gt;                        &lt;dbl&gt;
+#&gt; 1 Warrior                        8.2
+#&gt; 2 V for Vendetta                 8.2
+#&gt; 3 The Help                       8.1
+#&gt; 4 Good Will Hunting              8.3
+#&gt; 5 The Prestige                   8.5
+#&gt; 6 No Country for Old Men         8.1
+#&gt; # ℹ 2 more rows</code></pre>
+</div>
+</div>
+<p>More tools: <code>|</code> (or), <code>%in%</code> (membership), <code>between()</code> (inclusive range), and <code>is.na()</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb163"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb163-1"><a href="#cb163-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(genre <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Drama"</span>, <span class="st">"Comedy"</span>)) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 392</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb165"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb165-1"><a href="#cb165-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="fu">between</span>(imdb_rating, <span class="dv">7</span>, <span class="dv">8</span>)) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 226</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb167"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb167-1"><a href="#cb167-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="fu">is.na</span>(runtime)) <span class="sc">|&gt;</span> <span class="fu">select</span>(title, runtime)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 1 × 2
+#&gt;   title              runtime
+#&gt;   &lt;chr&gt;                &lt;dbl&gt;
+#&gt; 1 The End of America      NA</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled" title="Audit it: == against a vector">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Audit it: == against a vector
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>==</code> compares position by position and <strong>recycles</strong> the shorter vector. It does not mean “equal to either”.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb169"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb169-1"><a href="#cb169-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(genre <span class="sc">==</span> <span class="fu">c</span>(<span class="st">"Drama"</span>, <span class="st">"Comedy"</span>)) <span class="sc">|&gt;</span> <span class="fu">nrow</span>() <span class="co"># wrong</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 191</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb171"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb171-1"><a href="#cb171-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(genre <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Drama"</span>, <span class="st">"Comedy"</span>)) <span class="sc">|&gt;</span> <span class="fu">nrow</span>() <span class="co"># right</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 392</code></pre>
+</div>
+</div>
+<p>R prints a warning about lengths in your console. Warnings are clues.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled" title="Audit it: comparing with NA">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Audit it: comparing with NA
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Anything compared with <code>NA</code> is <code>NA</code>, and <code>filter()</code> drops rows where the condition is not <code>TRUE</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb173"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb173-1"><a href="#cb173-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(dvd_rel_year <span class="sc">!=</span> <span class="cn">NA</span>) <span class="sc">|&gt;</span> <span class="fu">nrow</span>() <span class="co"># wrong: zero rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 0</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb175"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb175-1"><a href="#cb175-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(dvd_rel_year)) <span class="sc">|&gt;</span> <span class="fu">nrow</span>() <span class="co"># right</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 643</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled" title="Audit it: filter() silently drops NA rows">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Audit it: filter() silently drops NA rows
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb177"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb177-1"><a href="#cb177-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(movies)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 651</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb179"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb179-1"><a href="#cb179-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(runtime <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">|&gt;</span> <span class="fu">nrow</span>() <span class="co"># every runtime is positive, but one row vanished</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 650</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb181"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb181-1"><a href="#cb181-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(runtime <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">|</span> <span class="fu">is.na</span>(runtime)) <span class="sc">|&gt;</span> <span class="fu">nrow</span>() <span class="co"># keep unknowns on purpose</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 651</code></pre>
+</div>
+</div>
+<p>Any time a row count changes unexpectedly, ask where the rows went. Row-count checks before and after each step are a core habit.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled" title="Audit it: and/or precedence">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Audit it: and/or precedence
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>&amp;</code> is evaluated before <code>|</code>, like multiplication before addition. Use parentheses.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb183"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb183-1"><a href="#cb183-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb183-2"><a href="#cb183-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(genre <span class="sc">==</span> <span class="st">"Drama"</span> <span class="sc">|</span> genre <span class="sc">==</span> <span class="st">"Comedy"</span> <span class="sc">&amp;</span> imdb_rating <span class="sc">&gt;</span> <span class="dv">8</span>) <span class="sc">|&gt;</span></span>
+<span id="cb183-3"><a href="#cb183-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 306</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb185"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb185-1"><a href="#cb185-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb185-2"><a href="#cb185-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>((genre <span class="sc">==</span> <span class="st">"Drama"</span> <span class="sc">|</span> genre <span class="sc">==</span> <span class="st">"Comedy"</span>) <span class="sc">&amp;</span> imdb_rating <span class="sc">&gt;</span> <span class="dv">8</span>) <span class="sc">|&gt;</span></span>
+<span id="cb185-3"><a href="#cb185-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 9</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled" title="Audit it: typos and case give zero rows, not errors">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Audit it: typos and case give zero rows, not errors
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Text comparison is exact and case-sensitive.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb187"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb187-1"><a href="#cb187-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(genre <span class="sc">==</span> <span class="st">"drama"</span>) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 0</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb189"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb189-1"><a href="#cb189-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(genre <span class="sc">==</span> <span class="st">"Drama"</span>) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 305</code></pre>
+</div>
+</div>
+<p>A result with zero rows is a clue that a category name is wrong. Check the real values first with <code>distinct(genre)</code>.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled" title="Audit it: = instead of ==">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Audit it: = instead of ==
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb191"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb191-1"><a href="#cb191-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="at">genre =</span> <span class="st">"Drama"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-error">
+<pre><code>#&gt; Error in `filter()`:
+#&gt; ! We detected a named input.
+#&gt; ℹ This usually means that you've used `=` instead of `==`.
+#&gt; ℹ Did you mean `genre == "Drama"`?</code></pre>
+</div>
+</div>
+<p>This one is friendly: dplyr stops and explains. Not every mistake is.</p>
+</div>
+</div>
+</section>
+<section id="arrange-sort-rows" class="level2" data-number="10.3">
+<h2 data-number="10.3" class="anchored" data-anchor-id="arrange-sort-rows"><span class="header-section-number">10.3</span> <code>arrange()</code>: sort rows</h2>
+<p>Sorting is <strong>ascending</strong> by default. Use <code>desc()</code> for descending, and add more columns to break ties.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb193"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb193-1"><a href="#cb193-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb193-2"><a href="#cb193-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(imdb_rating), title) <span class="sc">|&gt;</span></span>
+<span id="cb193-3"><a href="#cb193-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(title, imdb_rating)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 651 × 2
+#&gt;   title                  imdb_rating
+#&gt;   &lt;chr&gt;                        &lt;dbl&gt;
+#&gt; 1 The Godfather, Part II         9  
+#&gt; 2 Django Unchained               8.5
+#&gt; 3 Memento                        8.5
+#&gt; 4 Promises                       8.5
+#&gt; 5 The Prestige                   8.5
+#&gt; 6 Aliens                         8.4
+#&gt; # ℹ 645 more rows</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled" title="Audit it: the most common AI mistake">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Audit it: the most common AI mistake
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>“Show the 5 highest-rated movies” written as <code>arrange(imdb_rating) |&gt; head(5)</code> returns the five <strong>lowest</strong>. No error, no warning, a believable table.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb195"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb195-1"><a href="#cb195-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">arrange</span>(imdb_rating) <span class="sc">|&gt;</span> <span class="fu">select</span>(title, imdb_rating) <span class="sc">|&gt;</span> <span class="fu">head</span>(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 5 × 2
+#&gt;   title             imdb_rating
+#&gt;   &lt;chr&gt;                   &lt;dbl&gt;
+#&gt; 1 Disaster Movie            1.9
+#&gt; 2 Epic Movie                2.3
+#&gt; 3 Battlefield Earth         2.4
+#&gt; 4 Viva Knievel!             2.7
+#&gt; 5 Doogal                    2.8</code></pre>
+</div>
+</div>
+<p>For top-N questions, <code>slice_max()</code> states the intent directly:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb197"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb197-1"><a href="#cb197-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb197-2"><a href="#cb197-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_max</span>(imdb_rating, <span class="at">n =</span> <span class="dv">5</span>, <span class="at">with_ties =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb197-3"><a href="#cb197-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(title, imdb_rating)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 5 × 2
+#&gt;   title                  imdb_rating
+#&gt;   &lt;chr&gt;                        &lt;dbl&gt;
+#&gt; 1 The Godfather, Part II         9  
+#&gt; 2 Promises                       8.5
+#&gt; 3 Django Unchained               8.5
+#&gt; 4 Memento                        8.5
+#&gt; 5 The Prestige                   8.5</code></pre>
+</div>
+</div>
+<p><code>with_ties = FALSE</code> returns exactly 5 rows. The default keeps all tied rows, which can return more than you asked for.</p>
+</div>
+</div>
+</section>
+<section id="mutate-create-or-change-columns" class="level2" data-number="10.4">
+<h2 data-number="10.4" class="anchored" data-anchor-id="mutate-create-or-change-columns"><span class="header-section-number">10.4</span> <code>mutate()</code>: create or change columns</h2>
+<p><code>mutate()</code> adds new columns (at the end) or overwrites existing ones.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb199"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb199-1"><a href="#cb199-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb199-2"><a href="#cb199-2" aria-hidden="true" tabindex="-1"></a>       <span class="fu">mutate</span>(<span class="at">runtime_hrs =</span> runtime <span class="sc">/</span> <span class="dv">60</span>, <span class="at">decade =</span> thtr_rel_year <span class="sc">%/%</span> <span class="dv">10</span> <span class="sc">*</span> <span class="dv">10</span>) <span class="sc">|&gt;</span></span>
+<span id="cb199-3"><a href="#cb199-3" aria-hidden="true" tabindex="-1"></a>       <span class="fu">select</span>(title, runtime_hrs, decade)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 651 × 3
+#&gt;   title                runtime_hrs decade
+#&gt;   &lt;chr&gt;                      &lt;dbl&gt;  &lt;dbl&gt;
+#&gt; 1 Filly Brown                 1.33   2010
+#&gt; 2 The Dish                    1.68   2000
+#&gt; 3 Waiting for Guffman         1.4    1990
+#&gt; 4 The Age of Innocence        2.32   1990
+#&gt; 5 Malevolence                 1.5    2000
+#&gt; 6 Old Partner                 1.3    2000
+#&gt; # ℹ 645 more rows</code></pre>
+</div>
+</div>
+<p>Use <code>if_else()</code> for two outcomes and <code>case_when()</code> for several. They check that the outcomes are the same type, which catches mistakes that base <code>ifelse()</code> hides.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb201"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb201-1"><a href="#cb201-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb201-2"><a href="#cb201-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb201-3"><a href="#cb201-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">length_class =</span> <span class="fu">case_when</span>(</span>
+<span id="cb201-4"><a href="#cb201-4" aria-hidden="true" tabindex="-1"></a>      runtime <span class="sc">&lt;</span> <span class="dv">90</span> <span class="sc">~</span> <span class="st">"short"</span>,</span>
+<span id="cb201-5"><a href="#cb201-5" aria-hidden="true" tabindex="-1"></a>      runtime <span class="sc">&lt;=</span> <span class="dv">120</span> <span class="sc">~</span> <span class="st">"medium"</span>,</span>
+<span id="cb201-6"><a href="#cb201-6" aria-hidden="true" tabindex="-1"></a>      runtime <span class="sc">&gt;</span> <span class="dv">120</span> <span class="sc">~</span> <span class="st">"long"</span></span>
+<span id="cb201-7"><a href="#cb201-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb201-8"><a href="#cb201-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb201-9"><a href="#cb201-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(length_class)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 4 × 2
+#&gt;   length_class     n
+#&gt;   &lt;chr&gt;        &lt;int&gt;
+#&gt; 1 long           120
+#&gt; 2 medium         428
+#&gt; 3 short          102
+#&gt; 4 &lt;NA&gt;             1</code></pre>
+</div>
+</div>
+<p>Rows that match no condition (here, the movie with an <code>NA</code> runtime) become <code>NA</code>. You can set a default with <code>.default = "unknown"</code>.</p>
+<p><code>mutate()</code> keeps all other columns. To keep only the new ones, use <code>mutate(..., .keep = "none")</code>. This replaces the older <code>transmute()</code>.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Preview: count()">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Preview: count()
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>count(x)</code> counts rows for each value of <code>x</code>. It is shorthand for grouping and summarizing, which is the first topic in Session 2.</p>
+</div>
+</div>
+</section>
+<section id="other-useful-verbs" class="level2" data-number="10.5">
+<h2 data-number="10.5" class="anchored" data-anchor-id="other-useful-verbs"><span class="header-section-number">10.5</span> Other useful verbs</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb203"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb203-1"><a href="#cb203-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">distinct</span>(mpaa_rating)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 6 × 1
+#&gt;   mpaa_rating
+#&gt;   &lt;chr&gt;      
+#&gt; 1 R          
+#&gt; 2 PG-13      
+#&gt; 3 PG         
+#&gt; 4 Unrated    
+#&gt; 5 G          
+#&gt; 6 NC-17</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb205"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb205-1"><a href="#cb205-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">3</span>) <span class="sc">|&gt;</span> <span class="fu">select</span>(title)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 3 × 1
+#&gt;   title              
+#&gt;   &lt;chr&gt;              
+#&gt; 1 Filly Brown        
+#&gt; 2 The Dish           
+#&gt; 3 Waiting for Guffman</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb207"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb207-1"><a href="#cb207-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">slice_max</span>(runtime, <span class="at">n =</span> <span class="dv">3</span>, <span class="at">with_ties =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span> <span class="fu">select</span>(title, runtime)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 3 × 2
+#&gt;   title                                              runtime
+#&gt;   &lt;chr&gt;                                                &lt;dbl&gt;
+#&gt; 1 Hotel Terminus: The Life and Times of Klaus Barbie     267
+#&gt; 2 The Godfather, Part II                                 202
+#&gt; 3 Titanic                                                194</code></pre>
+</div>
+</div>
+<p>For random samples use <code>slice_sample()</code> (this replaces <code>sample_n()</code> and <code>sample_frac()</code>). Set a seed so the sample is reproducible:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb209"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb209-1"><a href="#cb209-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">531</span>)</span>
+<span id="cb209-2"><a href="#cb209-2" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">slice_sample</span>(<span class="at">n =</span> <span class="dv">3</span>) <span class="sc">|&gt;</span> <span class="fu">select</span>(title)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 3 × 1
+#&gt;   title          
+#&gt;   &lt;chr&gt;          
+#&gt; 1 Mad Dog Time   
+#&gt; 2 Blue Valentine 
+#&gt; 3 The Big Red One</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled" title="Audit it: ambiguous questions get confident answers">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Audit it: ambiguous questions get confident answers
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>“How many documentaries are there?” The data has two columns that could mean that:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb211"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb211-1"><a href="#cb211-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(genre <span class="sc">==</span> <span class="st">"Documentary"</span>) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 52</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb213"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb213-1"><a href="#cb213-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(title_type <span class="sc">==</span> <span class="st">"Documentary"</span>) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 55</code></pre>
+</div>
+</div>
+<p>Neither answer is a bug. The <em>question</em> was underspecified. A good prompt names the column, and a good audit confirms which one was used.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="reading-control-flow-loops-and-functions" class="level1" data-number="11">
+<h1 data-number="11"><span class="header-section-number">11</span> Reading control flow, loops, and functions</h1>
+<p>AI-written code often wraps pipelines in functions, loops, and <code>if</code> statements. You will rarely write these from scratch in this course, but you must be able to read them.</p>
+<section id="if-and-else" class="level2" data-number="11.1">
+<h2 data-number="11.1" class="anchored" data-anchor-id="if-and-else"><span class="header-section-number">11.1</span> <code>if</code> and <code>else</code></h2>
+<p><code>if</code> tests <strong>one</strong> <code>TRUE</code>/<code>FALSE</code>. It is not vectorized.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb215"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb215-1"><a href="#cb215-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="dv">7</span></span>
+<span id="cb215-2"><a href="#cb215-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (x <span class="sc">&lt;</span> <span class="dv">0</span>) {</span>
+<span id="cb215-3"><a href="#cb215-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"negative"</span></span>
+<span id="cb215-4"><a href="#cb215-4" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> <span class="cf">if</span> (x <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb215-5"><a href="#cb215-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"positive"</span></span>
+<span id="cb215-6"><a href="#cb215-6" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb215-7"><a href="#cb215-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"zero"</span></span>
+<span id="cb215-8"><a href="#cb215-8" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "positive"</code></pre>
+</div>
+</div>
+<p>To choose values for a whole column, use the vectorized <code>if_else()</code> or <code>case_when()</code> inside <code>mutate()</code> instead.</p>
+<div class="callout callout-style-default callout-warning callout-titled" title="Audit it: if with a vector">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Audit it: if with a vector
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb217"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb217-1"><a href="#cb217-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">FALSE</span>)) {</span>
+<span id="cb217-2"><a href="#cb217-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"yes"</span></span>
+<span id="cb217-3"><a href="#cb217-3" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-error">
+<pre><code>#&gt; Error in `if (c(TRUE, FALSE)) ...`:
+#&gt; ! the condition has length &gt; 1</code></pre>
+</div>
+</div>
+<p>R refuses a condition with length greater than one. If you see <code>if</code> applied to a column, expect an error or a misunderstanding.</p>
+</div>
+</div>
+</section>
+<section id="for-loops" class="level2" data-number="11.2">
+<h2 data-number="11.2" class="anchored" data-anchor-id="for-loops"><span class="header-section-number">11.2</span> <code>for</code> loops</h2>
+<p>A <code>for</code> loop repeats code once per element.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb219"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb219-1"><a href="#cb219-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (g <span class="cf">in</span> <span class="fu">c</span>(<span class="st">"Drama"</span>, <span class="st">"Comedy"</span>)) {</span>
+<span id="cb219-2"><a href="#cb219-2" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">sum</span>(movies<span class="sc">$</span>genre <span class="sc">==</span> g)</span>
+<span id="cb219-3"><a href="#cb219-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(g, <span class="st">":"</span>, n, <span class="st">"movies</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb219-4"><a href="#cb219-4" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; Drama : 305 movies
+#&gt; Comedy : 87 movies</code></pre>
+</div>
+</div>
+<p><strong>How to read it:</strong> “for each genre <code>g</code> in this list, count the movies and print.” Loops are fine, but when AI uses a loop to build up a data frame row by row, ask whether one verb (<code>count()</code>, <code>summarize()</code>) would do the same thing more clearly.</p>
+</section>
+<section id="functions" class="level2" data-number="11.3">
+<h2 data-number="11.3" class="anchored" data-anchor-id="functions"><span class="header-section-number">11.3</span> Functions</h2>
+<p>A function packages code under a name, with <strong>arguments</strong> as inputs and the <strong>last expression</strong> as the returned value.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb221"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb221-1"><a href="#cb221-1" aria-hidden="true" tabindex="-1"></a>to_hours <span class="ot">&lt;-</span> <span class="cf">function</span>(minutes, <span class="at">digits =</span> <span class="dv">1</span>) {</span>
+<span id="cb221-2"><a href="#cb221-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">round</span>(minutes <span class="sc">/</span> <span class="dv">60</span>, digits)</span>
+<span id="cb221-3"><a href="#cb221-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb221-4"><a href="#cb221-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb221-5"><a href="#cb221-5" aria-hidden="true" tabindex="-1"></a><span class="fu">to_hours</span>(<span class="dv">95</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 1.6</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb223"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb223-1"><a href="#cb223-1" aria-hidden="true" tabindex="-1"></a><span class="fu">to_hours</span>(<span class="dv">95</span>, <span class="at">digits =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 1.58</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb225"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb225-1"><a href="#cb225-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb225-2"><a href="#cb225-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">runtime_hrs =</span> <span class="fu">to_hours</span>(runtime)) <span class="sc">|&gt;</span></span>
+<span id="cb225-3"><a href="#cb225-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(title, runtime, runtime_hrs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 651 × 3
+#&gt;   title                runtime runtime_hrs
+#&gt;   &lt;chr&gt;                  &lt;dbl&gt;       &lt;dbl&gt;
+#&gt; 1 Filly Brown               80         1.3
+#&gt; 2 The Dish                 101         1.7
+#&gt; 3 Waiting for Guffman       84         1.4
+#&gt; 4 The Age of Innocence     139         2.3
+#&gt; 5 Malevolence               90         1.5
+#&gt; 6 Old Partner               78         1.3
+#&gt; # ℹ 645 more rows</code></pre>
+</div>
+</div>
+<p><strong>How to read an AI-written function:</strong> find the arguments and their defaults, find what is returned (the last line or an explicit <code>return()</code>), and look for anything it uses that was <em>not</em> passed in. Functions can silently read variables from outside (Appendix B).</p>
+</section>
+</section>
+<section id="practice-problems" class="level1" data-number="12">
+<h1 data-number="12"><span class="header-section-number">12</span> Practice problems</h1>
+<p>Try each one yourself, then open the solution. Where indicated, also <em>audit</em> the code given.</p>
+<div class="problem">
+<p><strong>Problem 1.</strong> How many movies are rated <code>PG-13</code>?</p>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-24-contents" aria-controls="callout-24" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-24" class="callout-24-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb227"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb227-1"><a href="#cb227-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(mpaa_rating <span class="sc">==</span> <span class="st">"PG-13"</span>) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 133</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="problem">
+<p><strong>Problem 2.</strong> List the titles and runtimes (in hours, one decimal) of the three longest movies.</p>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-25-contents" aria-controls="callout-25" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-25" class="callout-25-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb229"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb229-1"><a href="#cb229-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb229-2"><a href="#cb229-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_max</span>(runtime, <span class="at">n =</span> <span class="dv">3</span>, <span class="at">with_ties =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb229-3"><a href="#cb229-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">runtime_hrs =</span> <span class="fu">round</span>(runtime <span class="sc">/</span> <span class="dv">60</span>, <span class="dv">1</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb229-4"><a href="#cb229-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(title, runtime_hrs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 3 × 2
+#&gt;   title                                              runtime_hrs
+#&gt;   &lt;chr&gt;                                                    &lt;dbl&gt;
+#&gt; 1 Hotel Terminus: The Life and Times of Klaus Barbie         4.4
+#&gt; 2 The Godfather, Part II                                     3.4
+#&gt; 3 Titanic                                                    3.2</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="problem">
+<p><strong>Problem 3.</strong> Among movies with an <code>audience_score</code> below 50, which has the highest <code>critics_score</code>? (Critics loved it, audiences did not.)</p>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-26-contents" aria-controls="callout-26" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-26" class="callout-26-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb231"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb231-1"><a href="#cb231-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb231-2"><a href="#cb231-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(audience_score <span class="sc">&lt;</span> <span class="dv">50</span>) <span class="sc">|&gt;</span></span>
+<span id="cb231-3"><a href="#cb231-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_max</span>(critics_score, <span class="at">n =</span> <span class="dv">1</span>, <span class="at">with_ties =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb231-4"><a href="#cb231-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(title, critics_score, audience_score)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 1 × 3
+#&gt;   title                 critics_score audience_score
+#&gt;   &lt;chr&gt;                         &lt;dbl&gt;          &lt;dbl&gt;
+#&gt; 1 Death Line (Raw Meat)            86             44</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="problem">
+<p><strong>Problem 4 (audit).</strong> A user asked: “Keep the R and PG-13 movies.” The AI wrote the code below. Restate it, run it, and fix it.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb233"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb233-1"><a href="#cb233-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(mpaa_rating <span class="sc">==</span> <span class="fu">c</span>(<span class="st">"R"</span>, <span class="st">"PG-13"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-27-contents" aria-controls="callout-27" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-27" class="callout-27-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p><code>==</code> against a length-2 vector recycles by position. Use <code>%in%</code>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb234"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb234-1"><a href="#cb234-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(mpaa_rating <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"R"</span>, <span class="st">"PG-13"</span>)) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 462</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="problem">
+<p><strong>Problem 5 (audit).</strong> The AI says the average runtime of all movies is <code>NA</code>. Is that a bug in the data, a bug in the code, or both? Fix it, and say what you assumed.</p>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-28-contents" aria-controls="callout-28" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-28" class="callout-28-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>One movie has no runtime, so <code>mean()</code> returns <code>NA</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb236"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb236-1"><a href="#cb236-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(movies<span class="sc">$</span>runtime, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 105.8215</code></pre>
+</div>
+</div>
+<p>The assumption: the one missing movie is not systematically different from the other 650. With a single missing value in 651 rows that is easy to defend, but you should still state it.</p>
+</div>
+</div>
+</div>
+<div class="problem">
+<p><strong>Problem 6 (audit).</strong> The AI says the “top 3 R-rated movies by IMDb rating” are given by this code. Find the problem.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb238"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb238-1"><a href="#cb238-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb238-2"><a href="#cb238-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(mpaa_rating <span class="sc">==</span> <span class="st">"R"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb238-3"><a href="#cb238-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(imdb_rating) <span class="sc">|&gt;</span></span>
+<span id="cb238-4"><a href="#cb238-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(title, imdb_rating) <span class="sc">|&gt;</span></span>
+<span id="cb238-5"><a href="#cb238-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-29-contents" aria-controls="callout-29" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-29" class="callout-29-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Ascending sort again: this returns the three lowest. Fix:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb239"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb239-1"><a href="#cb239-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb239-2"><a href="#cb239-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(mpaa_rating <span class="sc">==</span> <span class="st">"R"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb239-3"><a href="#cb239-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_max</span>(imdb_rating, <span class="at">n =</span> <span class="dv">3</span>, <span class="at">with_ties =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb239-4"><a href="#cb239-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(title, imdb_rating)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 3 × 2
+#&gt;   title                  imdb_rating
+#&gt;   &lt;chr&gt;                        &lt;dbl&gt;
+#&gt; 1 The Godfather, Part II         9  
+#&gt; 2 Django Unchained               8.5
+#&gt; 3 Memento                        8.5</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="appendix" class="level1 unnumbered">
+<h1 class="unnumbered">Appendix</h1>
+<p>These sections cover material from the older notes that you will meet in AI-written code but will not use often.</p>
+<section id="a.-matrices-and-arrays" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="a.-matrices-and-arrays">A. Matrices and arrays</h2>
+<p>A matrix is a vector with a <code>dim</code> attribute. It is filled one <strong>column</strong> at a time.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb241"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb241-1"><a href="#cb241-1" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>, <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">3</span>)</span>
+<span id="cb241-2"><a href="#cb241-2" aria-hidden="true" tabindex="-1"></a>m</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;      [,1] [,2] [,3]
+#&gt; [1,]    1    3    5
+#&gt; [2,]    2    4    6</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb243"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb243-1"><a href="#cb243-1" aria-hidden="true" tabindex="-1"></a>m[<span class="dv">1</span>, <span class="dv">3</span>] <span class="co"># row 1, column 3</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 5</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb245"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb245-1"><a href="#cb245-1" aria-hidden="true" tabindex="-1"></a>m[, <span class="dv">2</span>] <span class="co"># all of column 2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 3 4</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb247"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb247-1"><a href="#cb247-1" aria-hidden="true" tabindex="-1"></a>m[<span class="sc">-</span><span class="dv">1</span>, ] <span class="co"># drop row 1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 2 4 6</code></pre>
+</div>
+</div>
+<p>Data frames are <em>not</em> matrices, but <code>df[row, col]</code> indexing works similarly.</p>
+</section>
+<section id="b.-scope-and-lazy-evaluation" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="b.-scope-and-lazy-evaluation">B. Scope and lazy evaluation</h2>
+<p><strong>Scope.</strong> If a function cannot find a variable inside itself, R looks in the surrounding environment. This is convenient and risky: a function can quietly depend on a variable that is not one of its arguments.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb249"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb249-1"><a href="#cb249-1" aria-hidden="true" tabindex="-1"></a>cutoff <span class="ot">&lt;-</span> <span class="dv">100</span></span>
+<span id="cb249-2"><a href="#cb249-2" aria-hidden="true" tabindex="-1"></a>is_long <span class="ot">&lt;-</span> <span class="cf">function</span>(minutes) minutes <span class="sc">&gt;</span> cutoff <span class="co"># cutoff is NOT an argument</span></span>
+<span id="cb249-3"><a href="#cb249-3" aria-hidden="true" tabindex="-1"></a><span class="fu">is_long</span>(<span class="dv">120</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] TRUE</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb251"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb251-1"><a href="#cb251-1" aria-hidden="true" tabindex="-1"></a>cutoff <span class="ot">&lt;-</span> <span class="dv">150</span></span>
+<span id="cb251-2"><a href="#cb251-2" aria-hidden="true" tabindex="-1"></a><span class="fu">is_long</span>(<span class="dv">120</span>) <span class="co"># same call, different answer</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] FALSE</code></pre>
+</div>
+</div>
+<p><strong>Lazy evaluation.</strong> Function arguments are only evaluated when they are used.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb253"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb253-1"><a href="#cb253-1" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb253-2"><a href="#cb253-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"Hello</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb253-3"><a href="#cb253-3" aria-hidden="true" tabindex="-1"></a>  x</span>
+<span id="cb253-4"><a href="#cb253-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb253-5"><a href="#cb253-5" aria-hidden="true" tabindex="-1"></a><span class="fu">f</span>(<span class="fu">stop</span>(<span class="st">"this error only fires when x is used"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; Hello</code></pre>
+</div>
+<div class="cell-output cell-output-error">
+<pre><code>#&gt; Error in `f()`:
+#&gt; ! this error only fires when x is used</code></pre>
+</div>
+</div>
+<p>“Hello” prints first: the broken argument is not touched until the function needs it. You will meet the same idea at a larger scale with the arrow package in Session 2, where a query on a huge Parquet file is <strong>not run</strong> until you ask for the result.</p>
+</section>
+<section id="c.-vectorization" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="c.-vectorization">C. Vectorization</h2>
+<p>Most R functions work on whole vectors at once, which is faster and shorter than a loop. But vectorized code can hide edge cases.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb256"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb256-1"><a href="#cb256-1" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="dv">0</span>, <span class="dv">0</span>)</span>
+<span id="cb256-2"><a href="#cb256-2" aria-hidden="true" tabindex="-1"></a><span class="sc">-</span><span class="fu">sum</span>(p <span class="sc">*</span> <span class="fu">log</span>(p)) <span class="co"># entropy: wrong, 0 * log(0) is NaN</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] NaN</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb258"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb258-1"><a href="#cb258-1" aria-hidden="true" tabindex="-1"></a>p_pos <span class="ot">&lt;-</span> p[p <span class="sc">&gt;</span> <span class="dv">0</span>]</span>
+<span id="cb258-2"><a href="#cb258-2" aria-hidden="true" tabindex="-1"></a><span class="sc">-</span><span class="fu">sum</span>(p_pos <span class="sc">*</span> <span class="fu">log</span>(p_pos)) <span class="co"># right: drop the zero-probability cells</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 0.6931472</code></pre>
+</div>
+</div>
+<p><code>NaN</code> means “not a number”. It is a cousin of <code>NA</code> that spreads the same way, and <code>is.na()</code> detects both.</p>
+<p>If a function was written for single values and you need it for vectors, <code>Vectorize()</code> can wrap it, but <code>if_else()</code> and <code>case_when()</code> are usually better inside <code>mutate()</code>.</p>
+</section>
+<section id="d.-the-apply-family-and-purrr" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="d.-the-apply-family-and-purrr">D. The apply family and purrr</h2>
+<p><code>apply()</code> and <code>lapply()</code> apply a function across rows, columns, or list elements. The tidyverse version is <code>purrr::map()</code>, with variants that return a specific type (<code>map_dbl()</code> for numbers, <code>map_chr()</code> for text).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb260"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb260-1"><a href="#cb260-1" aria-hidden="true" tabindex="-1"></a>nums <span class="ot">&lt;-</span> movies <span class="sc">|&gt;</span> <span class="fu">select</span>(imdb_rating, critics_score, audience_score, runtime)</span>
+<span id="cb260-2"><a href="#cb260-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb260-3"><a href="#cb260-3" aria-hidden="true" tabindex="-1"></a><span class="fu">lapply</span>(nums, mean, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> <span class="fu">unlist</span>() <span class="co"># base R</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;    imdb_rating  critics_score audience_score        runtime 
+#&gt;       6.493088      57.688172      62.362519     105.821538</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb262"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb262-1"><a href="#cb262-1" aria-hidden="true" tabindex="-1"></a><span class="fu">map_dbl</span>(nums, mean, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="co"># purrr: guaranteed numeric result</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;    imdb_rating  critics_score audience_score        runtime 
+#&gt;       6.493088      57.688172      62.362519     105.821538</code></pre>
+</div>
+</div>
+<p>Prefer <code>map_*()</code> over <code>sapply()</code>: <code>sapply()</code> guesses the output type, and a surprise type is a classic silent failure.</p>
+</section>
+<section id="e.-old-syntax-to-new-syntax" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="e.-old-syntax-to-new-syntax">E. Old syntax to new syntax</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Older code you may see</th>
+<th style="text-align: left;">Use now</th>
+<th style="text-align: left;">Why</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>x %&gt;% f()</code></td>
+<td style="text-align: left;"><code>x \|&gt; f()</code></td>
+<td style="text-align: left;">built into R, no package needed</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>sample_n(df, 5)</code> / <code>sample_frac(df, .1)</code></td>
+<td style="text-align: left;"><code>slice_sample(df, n = 5)</code> / <code>slice_sample(df, prop = .1)</code></td>
+<td style="text-align: left;">one consistent <code>slice_*</code> family</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>arrange(desc(x)) \|&gt; head(n)</code></td>
+<td style="text-align: left;"><code>slice_max(x, n = n)</code></td>
+<td style="text-align: left;">states the intent</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>transmute(...)</code></td>
+<td style="text-align: left;"><code>mutate(..., .keep = "none")</code></td>
+<td style="text-align: left;"><code>transmute()</code> is superseded</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>ifelse(test, a, b)</code></td>
+<td style="text-align: left;"><code>if_else(test, a, b)</code></td>
+<td style="text-align: left;">checks types, safer</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>tidyr::separate(col, into, sep)</code></td>
+<td style="text-align: left;"><code>separate_wider_delim()</code> / <code>separate_wider_position()</code></td>
+<td style="text-align: left;">stricter, warns about bad rows</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>group_by(g) \|&gt; summarize(...)</code></td>
+<td style="text-align: left;"><code>summarize(..., .by = g)</code></td>
+<td style="text-align: left;">no leftover grouping (Session 2)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>lapply()</code> / <code>sapply()</code></td>
+<td style="text-align: left;"><code>purrr::map()</code> / <code>map_dbl()</code></td>
+<td style="text-align: left;">predictable output type</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>by = c("a" = "b")</code> in joins</td>
+<td style="text-align: left;"><code>by = join_by(a == b)</code></td>
+<td style="text-align: left;">more readable (Session 2)</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="f.-quick-reference" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="f.-quick-reference">F. Quick reference</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Task</th>
+<th style="text-align: left;">Code</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Assign</td>
+<td style="text-align: left;"><code>x &lt;- 5</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Make a vector</td>
+<td style="text-align: left;"><code>c(1, 2, 3)</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Count TRUEs / fraction TRUE</td>
+<td style="text-align: left;"><code>sum(x &gt; 5)</code> / <code>mean(x &gt; 5)</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Missing?</td>
+<td style="text-align: left;"><code>is.na(x)</code>, <code>sum(is.na(x))</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Ignore NA in a summary</td>
+<td style="text-align: left;"><code>mean(x, na.rm = TRUE)</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Peek at a table</td>
+<td style="text-align: left;"><code>glimpse(df)</code>, <code>summary(df)</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Pick columns</td>
+<td style="text-align: left;"><code>select(df, a, b)</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Keep rows</td>
+<td style="text-align: left;"><code>filter(df, a &gt; 5, b %in% c("x", "y"))</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Sort</td>
+<td style="text-align: left;"><code>arrange(df, desc(a))</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">New column</td>
+<td style="text-align: left;"><code>mutate(df, c = a / b)</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Top / bottom N</td>
+<td style="text-align: left;"><code>slice_max(df, a, n = 5)</code> / <code>slice_min()</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Unique values</td>
+<td style="text-align: left;"><code>distinct(df, a)</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Count by group</td>
+<td style="text-align: left;"><code>count(df, a)</code></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="where-to-go-next" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="where-to-go-next">Where to go next</h2>
+<ul>
+<li><em>R for Data Science</em> (2nd edition): <a href="https://r4ds.hadley.nz/data-transform.html">Data transformation</a></li>
+<li>The dplyr documentation: <a href="https://dplyr.tidyverse.org" class="uri">https://dplyr.tidyverse.org</a></li>
+<li>Next session: summarizing, joins, pivots, and big data with Parquet.</li>
+</ul>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>STAT 531: Ethics and Practice of Data Science</p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

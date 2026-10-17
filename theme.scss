@@ -1,0 +1,142 @@
+/*-- scss:defaults --*/
+
+// PSU palette (https://www.pdx.edu/university-communications/tools-and-templates/brand-colors)
+$psu-green: #6d8d24;
+$psu-forest: #213921;
+$psu-electric: #cfd82d;
+$psu-blue: #008ac1;
+$psu-orange: #f68b1f;
+$psu-sand: #e8d3a2;
+
+// Bootstrap / Quarto variables
+$primary: $psu-green;
+$link-color: #4d6a14;
+$link-hover-color: $psu-forest;
+$headings-color: $psu-forest;
+$headings-font-weight: 700;
+$body-color: #1f2a1f;
+$font-size-base: 1.04rem;
+$line-height-base: 1.7;
+$code-color: $psu-forest;
+$code-bg: #eef3e0;
+
+$navbar-bg: $psu-forest;
+$navbar-fg: #ffffff;
+$navbar-hl: $psu-electric;
+
+$callout-color-note: $psu-green;
+$callout-color-warning: $psu-orange;
+$callout-color-tip: $psu-blue;
+
+/*-- scss:rules --*/
+
+// ---- Navbar ----
+.navbar {
+  border-bottom: 4px solid $psu-green;
+}
+
+// ---- Title banner ----
+.quarto-title-banner {
+  border-bottom: 6px solid $psu-green;
+  .quarto-title .title { font-weight: 800; }
+  .subtitle { color: $psu-electric !important; opacity: 1; }
+}
+
+// ---- Headings ----
+h1.anchored, h1 {
+  margin-top: 3rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 3px solid $psu-green;
+  font-size: 1.9rem;
+}
+h2 {
+  margin-top: 2.2rem;
+  padding-left: 0.7rem;
+  border-left: 6px solid $psu-electric;
+  font-size: 1.4rem;
+}
+h3 { margin-top: 1.6rem; color: $psu-green; }
+.header-section-number { color: $psu-green; margin-right: 0.3rem; }
+
+// ---- Text ----
+strong { color: $psu-forest; }
+p { margin-bottom: 1rem; }
+li { margin-bottom: 0.25rem; }
+blockquote {
+  border-left: 5px solid $psu-green;
+  background: #f6f9ee;
+  padding: 0.6rem 1rem;
+}
+
+// ---- Code ----
+div.sourceCode {
+  border-left: 6px solid $psu-green;
+  border-radius: 0 6px 6px 0;
+  background-color: #f6f9ee;
+  margin-bottom: 0.4rem;
+}
+div.cell-output pre, div.cell-output-stdout pre {
+  background-color: #ffffff;
+  border: 1px solid #dfe5cf;
+  border-left: 6px solid $psu-electric;
+  border-radius: 0 6px 6px 0;
+  font-size: 0.85em;
+}
+p code, li code, td code {
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  font-size: 0.88em;
+}
+
+// ---- Tables ----
+table.table, .table {
+  font-size: 0.95rem;
+  thead tr, thead th {
+    background-color: $psu-forest !important;
+    color: #ffffff !important;
+    border-bottom: 3px solid $psu-green;
+  }
+  tbody tr:nth-child(even) { background-color: #f6f9ee; }
+  tbody tr:hover { background-color: #eef3e0; }
+  td, th { padding: 0.5rem 0.75rem; vertical-align: top; }
+}
+
+// ---- Callouts ----
+.callout {
+  border-radius: 6px;
+  margin: 1.4rem 0;
+  &.callout-style-default { border-left-width: 8px !important; }
+}
+.callout-warning.callout > .callout-header { background-color: #fef1e2 !important; }
+.callout-note.callout > .callout-header    { background-color: #f1f6e3 !important; }
+.callout-tip.callout > .callout-header     { background-color: #e8f5fb !important; }
+.callout-title-container { font-weight: 700; }
+
+// ---- Practice problems ----
+.problem {
+  background: #e8f5fb;
+  border-left: 8px solid $psu-blue;
+  border-radius: 0 6px 6px 0;
+  padding: 0.7rem 1.1rem 0.2rem;
+  margin: 1.8rem 0 0.8rem;
+}
+
+// ---- Table of contents ----
+#TOC, .sidebar nav[role=doc-toc] {
+  .nav-link { color: #3c4a3c; }
+  .nav-link.active, a.active {
+    color: $psu-green !important;
+    border-left-color: $psu-green !important;
+    font-weight: 700;
+  }
+}
+
+// ---- Footer ----
+.nav-footer { border-top: 3px solid $psu-green; }
+
+// ---- Print ----
+@media print {
+  .navbar, #quarto-sidebar, #quarto-margin-sidebar { display: none !important; }
+  h1 { page-break-before: auto; }
+  .callout, div.sourceCode, table { page-break-inside: avoid; }
+}

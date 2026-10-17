@@ -1,0 +1,19 @@
+---
+title: "Session 5 Slides: Data Cleaning 1: Strings and Categories"
+description: "Regex, stringr, Unicode handling, forcats, and janitor"
+date: 2026-11-16
+categories: [Slides]
+format: revealjs
+draft: true
+---
+
+## Planned outline
+
+- 10-minute retrieval warm-up
+- Regex fundamentals: classes, quantifiers, anchors, groups; str_view() for debugging
+- str_detect / str_extract / str_replace / str_squish, separate_wider_regex, parse_number
+- Unicode: non-ASCII detection and normalization (homoglyphs)
+- forcats and janitor (clean_names, get_dupes, tabyl)
+- Spec-first exercise: students write input/output tables, AI writes the regex, tests judge it
+
+*Draft: remove `draft: true` from the top of this file to publish it.*

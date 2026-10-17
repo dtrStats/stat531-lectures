@@ -1,0 +1,875 @@
+---
+title: "Session 1 Handout: R Basics and Data Manipulation"
+subtitle: "Reference companion to the Session 1 slides"
+author: "DTR"
+description: "Full reference for R basics and the core dplyr verbs, with Audit it boxes and practice"
+date: 2026-10-19
+categories: [Handout]
+format:
+  html:
+    number-sections: true
+    title-block-banner: "#213921"
+    title-block-banner-color: "#ffffff"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", message = FALSE, warning = FALSE)
+library(tidyverse)
+options(tibble.print_max = 6, tibble.print_min = 6, width = 90)
+movies <- read_csv("data/movies.csv", show_col_types = FALSE)
+```
+
+# How to use this handout
+
+The slides move fast and are built for discussion. This handout is the slow, complete version: read it before class if you like, and return to it when you are auditing code.
+
+Every section follows the same pattern: a short explanation, code you can run, and **Audit it** boxes that show a mistake an AI assistant (or a human) could easily make.
+
+::: {.callout-note title="The Audit Loop"}
+1. **Read** the code.
+2. **Run** it.
+3. **Restate** it in plain English. If you cannot say what a line does, you cannot vouch for it.
+4. **Refine** it or **Reject** it.
+:::
+
+**Setup for the examples.** Every example uses `movies.csv` (651 movies, 32 columns). [Download it here](data/movies.csv) and put it in a `data` folder inside your Positron project. The setup code for this handout is:
+
+```{r}
+#| eval: false
+library(tidyverse)
+movies <- read_csv("data/movies.csv")
+```
+
+**What changed since the older course notes.** Some syntax has been modernized. The short version: use the native pipe `|>`, use `slice_max()` and `slice_sample()` instead of `sample_n()`, and use `if_else()` and `case_when()` for conditions. Appendix E has a full old-to-new table.
+
+# R as a calculator, and naming things
+
+R follows normal arithmetic precedence. Use parentheses whenever you are unsure.
+
+```{r}
+2 + 3 * 4
+(2 + 3) * 4
+2^10
+10 %/% 3 # integer division
+10 %% 3 # remainder
+```
+
+Store a result with `<-`, read it aloud as "gets". Names are case-sensitive, can contain letters, numbers, `_` and `.`, and cannot start with a number.
+
+```{r}
+runtime_min <- 95
+runtime_min / 60
+runtime_min <- runtime_min + 5 # overwrites the old value
+runtime_min
+```
+
+::: {.callout-note title="Convention"}
+`=` also assigns, but R users use `<-` for assignment and reserve `=` for naming function arguments. If you see `=` inside a `filter()`, that is almost always a bug (see Section 10).
+:::
+
+::: {.callout-warning title="Audit it: decimals are approximate"}
+Computers store most decimals approximately, so exact comparison can fail.
+
+```{r}
+0.1 + 0.2 == 0.3
+dplyr::near(0.1 + 0.2, 0.3)
+```
+
+When AI-written code tests two decimals for equality with `==`, ask whether `near()` is what it meant.
+:::
+
+# Functions and arguments
+
+A function has a **name** and **arguments** in parentheses. Arguments can be given by position or by name; names are safer and easier to read.
+
+```{r}
+round(3.14159, 2) # by position
+round(3.14159, digits = 2) # by name
+round(digits = 2, x = 3.14159) # names can be in any order
+```
+
+Many arguments have **defaults**. `?round` opens the help page; the *Usage* section shows every argument and its default.
+
+```{r}
+round(3.14159) # digits defaults to 0
+```
+
+# Vectors and types
+
+The basic unit in R is the **vector**: an ordered collection of values of **one type**. Even a single number is a vector of length 1. Combine values with `c()`.
+
+```{r}
+scores <- c(72, 88, 91, 65)
+length(scores)
+scores * 2 # arithmetic works on every element
+1:5 # a range
+seq(0, 1, by = 0.25)
+rep("Drama", 3)
+```
+
+## The types you will meet
+
+| Type | Example | `class()` |
+|:--|:--|:--|
+| numeric (double) | `3.5`, `72` | `"numeric"` |
+| integer | `5L` | `"integer"` |
+| character | `"Drama"` | `"character"` |
+| logical | `TRUE`, `FALSE` | `"logical"` |
+
+```{r}
+class(72)
+class(5L)
+class("Drama")
+class(TRUE)
+```
+
+## Coercion: when types are mixed
+
+A vector holds one type, so R converts everything to the "most flexible" type present. The order is:
+
+`logical` < `integer` < `numeric` < `character`
+
+```{r}
+c(TRUE, 2L) # logical -> integer
+c(TRUE, 2L, 3.1) # -> numeric
+c(TRUE, 2L, 3.1, "a") # -> character
+```
+
+You can also convert on purpose with `as.numeric()`, `as.character()`, `as.logical()`, `as.integer()`.
+
+::: {.callout-tip title="Key idea"}
+A vector holds exactly **one type**, and R converts silently to make that true. After reading or converting data, always check the types.
+:::
+
+::: {.callout-warning title="Audit it: converting messy text to numbers"}
+`as.numeric()` quietly turns anything it cannot read into `NA`. Real data is full of text such as `"159.8 lbs"`.
+
+```{r}
+#| warning: true
+as.numeric(c("72", "159.8 lbs", "kg"))
+```
+
+R prints a warning, but only once and easily ignored in a long script. After any conversion, count the new `NA`s: `sum(is.na(x))`. You will do this with real wearable data in the cleaning sessions.
+:::
+
+## Recycling
+
+When vectors of different lengths are combined, the shorter one is **recycled**. This is fine for a single number and dangerous otherwise.
+
+```{r}
+c(1, 2, 3, 4) + 10 # 10 is recycled: intended
+c(1, 2, 3, 4) + c(10, 20) # recycled in a pattern: legal, rarely intended
+```
+
+```{r}
+#| warning: true
+1:3 + 1:2 # lengths don't divide evenly: R warns
+```
+
+## Logical vectors: yes/no questions
+
+Comparisons produce logical vectors. Combine them with `&` (and), `|` (or), and `!` (not).
+
+```{r}
+scores > 70
+scores > 70 & scores < 90
+!(scores > 70)
+```
+
+Because `TRUE` counts as 1 and `FALSE` as 0, you can count and take proportions:
+
+```{r}
+sum(scores > 70) # how many
+mean(scores > 70) # what fraction
+any(scores > 90) # is at least one TRUE?
+all(scores > 60) # are all TRUE?
+```
+
+`%in%` asks whether each value appears anywhere in a set. Compare it with `==`:
+
+```{r}
+genres <- c("Drama", "Comedy", "Horror")
+genres == "Comedy"
+genres %in% c("Drama", "Horror")
+```
+
+::: {.callout-tip title="Key idea"}
+Comparisons make logical vectors, and logical vectors can be **counted** (`sum`), turned into **proportions** (`mean`), and used to **select** (`x[condition]`). Most of `filter()` is this idea applied to a column.
+:::
+
+# Subsetting vectors
+
+Square brackets `[ ]` select elements. R counts from **1**.
+
+```{r}
+scores[1] # first
+scores[c(1, 3)] # first and third
+scores[-1] # everything except the first
+scores[scores > 70] # keep where the condition is TRUE
+```
+
+`which()` converts a logical vector into positions:
+
+```{r}
+which(scores > 70)
+```
+
+::: {.callout-warning title="Audit it: out of range returns NA, not an error"}
+```{r}
+scores[10]
+```
+
+No error and no warning. If AI-written code indexes by position, check that the positions can exist.
+:::
+
+# Missing values
+
+`NA` means "not available": a value exists in the world but we do not know it. Almost any calculation involving an unknown gives an unknown.
+
+```{r}
+NA + 1
+NA > 5
+NA == NA # is one unknown equal to another unknown? Unknown.
+```
+
+There are a few exceptions where the answer does not depend on the unknown:
+
+```{r}
+NA & FALSE # FALSE no matter what NA is
+NA | TRUE # TRUE no matter what NA is
+```
+
+## Finding and counting NAs
+
+`NA == NA` is `NA`, so you cannot test for missing values with `==`. Use `is.na()`.
+
+```{r}
+x <- c(4, 8, NA, 2)
+is.na(x)
+sum(is.na(x)) # how many are missing
+mean(is.na(x)) # what fraction
+```
+
+## Summaries with missing values
+
+```{r}
+mean(x) # the unknown spreads
+mean(x, na.rm = TRUE) # remove NAs first
+```
+
+::: {.callout-tip title="na.rm = TRUE is a decision, not a fix"}
+Using `na.rm = TRUE` means "compute this on the cases where I happen to know the value". That is only reasonable if the missing cases are not systematically different from the observed ones. In real data they often are. For example, if a smartwatch drops readings more often for certain users, ignoring missing readings quietly changes *whose* data you are analyzing. Always ask: **who is missing, and why?**
+:::
+
+::: {.callout-warning title="Audit it: NA inside a logical subset"}
+```{r}
+x[x > 5]
+```
+
+The result contains an `NA` row for the unknown. Applying the same idea to a data frame with `filter()` behaves differently (it drops those rows), which is also a quiet change. See Section 10.
+:::
+
+# Lists and data frames
+
+A **list** is like a vector but each element can be a different type or length.
+
+```{r}
+car <- list(make = "Ford", year = 1999, used = TRUE)
+car$make # by name
+car[["year"]] # double brackets pull out the element itself
+car["year"] # single brackets return a smaller list
+```
+
+A **data frame** is a list of equal-length vectors, one per column. In the tidyverse we use **tibbles**, which are data frames that print more helpfully.
+
+```{r}
+df <- tibble(
+  title = c("A", "B", "C"),
+  runtime = c(95, 120, NA),
+  rated_r = c(TRUE, FALSE, TRUE)
+)
+df
+```
+
+Every column is a vector, so everything from Sections 4 to 6 applies to columns.
+
+```{r}
+df$runtime # pull one column out as a vector
+mean(df$runtime, na.rm = TRUE)
+```
+
+## Looking at a data frame
+
+```{r}
+dim(movies) # rows, columns
+nrow(movies)
+names(movies)[1:6]
+```
+
+`glimpse()` shows every column, its type, and the first values. Make it your first move on any new table.
+
+```{r}
+movies |> select(title:mpaa_rating) |> glimpse()
+```
+
+`summary()` gives quick numeric summaries, including how many `NA`s each column has:
+
+```{r}
+summary(movies$runtime)
+```
+
+::: {.callout-tip title="Key idea"}
+A data frame is a list of equal-length vectors, so **each column is a vector** and every vector rule above applies to it.
+:::
+
+# Importing data
+
+`readr::read_csv()` reads a comma-separated file. It guesses each column's type from the first rows and tells you what it chose.
+
+```{r}
+#| eval: false
+movies <- read_csv("data/movies.csv")
+```
+
+Useful arguments:
+
+| Argument | What it does | Example |
+|:--|:--|:--|
+| `na =` | which text means missing | `na = c("", "NA", "-999")` |
+| `skip =` | skip metadata lines at the top | `skip = 2` |
+| `comment =` | ignore lines starting with a character | `comment = "#"` |
+| `col_types =` | set types yourself | `cols(zip = col_character())` |
+| `n_max =` | read only the first rows | `n_max = 1000` |
+
+Related readers: `read_tsv()` (tabs), `read_delim()` (any delimiter), `readxl::read_excel()` (Excel files), and `arrow::read_parquet()` (Parquet, which we use for large data in Session 2).
+
+**Where is my file?** Paths like `"data/movies.csv"` are relative to your **working directory**. Check it with `getwd()`. In Positron, opening a folder as your workspace sets the working directory to that folder.
+
+::: {.callout-warning title="Audit it: the guessed type can destroy information"}
+ZIP codes look like numbers, and R will happily treat them as numbers, dropping the leading zero.
+
+```{r}
+read_csv(I("zip,n\n01234,5"))
+read_csv(I("zip,n\n01234,5"), col_types = cols(zip = col_character()))
+```
+
+Always check the column types after reading a file, and set `col_types` for identifiers, codes, and anything with leading zeros.
+:::
+
+# The pipe
+
+The pipe `|>` takes what is on its left and passes it as the **first argument** of the function on its right. Read it as **"then"**.
+
+```{r}
+#| eval: false
+# nested: read from the inside out
+head(arrange(filter(movies, genre == "Drama"), imdb_rating), 3)
+
+# piped: read top to bottom
+movies |>
+  filter(genre == "Drama") |>
+  arrange(imdb_rating) |>
+  head(3)
+```
+
+**Style:** one verb per line, pipe at the end of the line, indent two spaces. Short lines are easier to restate.
+
+**Debugging a pipeline:** run it one step at a time. Highlight everything up to a pipe (not including it) and run it to see the intermediate result.
+
+**Other pipes you will see.** `%>%` is the older tidyverse pipe and behaves the same for almost everything in this course. AI tools and older tutorials use both. They differ in how you place the data when it is *not* the first argument:
+
+```{r}
+#| eval: false
+movies |> lm(imdb_rating ~ critics_score, data = _) # native pipe: placeholder is _
+movies %>% lm(imdb_rating ~ critics_score, data = .) # magrittr pipe: placeholder is .
+```
+
+::: {.callout-tip title="Key idea"}
+Read `|>` as "then". When a pipeline misbehaves, run it one step at a time and look at each intermediate result.
+:::
+
+# Data manipulation with dplyr
+
+`dplyr` verbs follow four rules:
+
+1. The first argument is a data frame.
+2. The other arguments say what to do with it.
+3. The result is a data frame.
+4. **Nothing is modified in place.**
+
+The four core verbs, at a glance:
+
+| Verb | Works on | What it does |
+|:--|:--|:--|
+| `select()` | columns | choose, drop, or reorder columns |
+| `filter()` | rows | keep rows where a condition is `TRUE` |
+| `arrange()` | rows | change the order of rows |
+| `mutate()` | columns | create or change columns |
+
+::: {.callout-warning title="Audit it: a pipeline that is never saved"}
+```{r}
+movies |> filter(genre == "Drama") |> nrow()
+nrow(movies) # movies itself is unchanged
+```
+
+If you want to keep a result, assign it: `dramas <- movies |> filter(genre == "Drama")`. Conversely, AI code that starts `movies <- movies |> filter(...)` permanently overwrites your data. Check which one you are reading.
+:::
+
+## `select()`: choose columns
+
+```{r}
+movies |> select(title, genre, imdb_rating)
+```
+
+Selection helpers save typing:
+
+```{r}
+movies |> select(title, ends_with("score"))
+movies |> select(title, starts_with("thtr"))
+movies |> select(where(is.numeric)) |> ncol() # how many numeric columns
+movies |> select(-starts_with("dvd"), -ends_with("url")) |> ncol()
+```
+
+Other helpers: `contains()`, `matches()` (regular expression), `everything()`, `last_col()`. Rename with `rename(new = old)`, and use `pull()` to extract one column as a vector:
+
+```{r}
+movies |> rename(rating = imdb_rating) |> select(title, rating)
+movies |> pull(title) |> head(3)
+```
+
+## `filter()`: keep rows
+
+`filter()` keeps rows where the condition is `TRUE`. Several conditions separated by commas mean **and**.
+
+```{r}
+movies |>
+  filter(genre == "Drama", imdb_rating > 8) |>
+  select(title, imdb_rating)
+```
+
+More tools: `|` (or), `%in%` (membership), `between()` (inclusive range), and `is.na()`.
+
+```{r}
+movies |> filter(genre %in% c("Drama", "Comedy")) |> nrow()
+movies |> filter(between(imdb_rating, 7, 8)) |> nrow()
+movies |> filter(is.na(runtime)) |> select(title, runtime)
+```
+
+::: {.callout-warning title="Audit it: == against a vector"}
+`==` compares position by position and **recycles** the shorter vector. It does not mean "equal to either".
+
+```{r}
+movies |> filter(genre == c("Drama", "Comedy")) |> nrow() # wrong
+movies |> filter(genre %in% c("Drama", "Comedy")) |> nrow() # right
+```
+
+R prints a warning about lengths in your console. Warnings are clues.
+:::
+
+::: {.callout-warning title="Audit it: comparing with NA"}
+Anything compared with `NA` is `NA`, and `filter()` drops rows where the condition is not `TRUE`.
+
+```{r}
+movies |> filter(dvd_rel_year != NA) |> nrow() # wrong: zero rows
+movies |> filter(!is.na(dvd_rel_year)) |> nrow() # right
+```
+:::
+
+::: {.callout-warning title="Audit it: filter() silently drops NA rows"}
+```{r}
+nrow(movies)
+movies |> filter(runtime > 0) |> nrow() # every runtime is positive, but one row vanished
+movies |> filter(runtime > 0 | is.na(runtime)) |> nrow() # keep unknowns on purpose
+```
+
+Any time a row count changes unexpectedly, ask where the rows went. Row-count checks before and after each step are a core habit.
+:::
+
+::: {.callout-warning title="Audit it: and/or precedence"}
+`&` is evaluated before `|`, like multiplication before addition. Use parentheses.
+
+```{r}
+movies |>
+  filter(genre == "Drama" | genre == "Comedy" & imdb_rating > 8) |>
+  nrow()
+movies |>
+  filter((genre == "Drama" | genre == "Comedy") & imdb_rating > 8) |>
+  nrow()
+```
+:::
+
+::: {.callout-warning title="Audit it: typos and case give zero rows, not errors"}
+Text comparison is exact and case-sensitive.
+
+```{r}
+movies |> filter(genre == "drama") |> nrow()
+movies |> filter(genre == "Drama") |> nrow()
+```
+
+A result with zero rows is a clue that a category name is wrong. Check the real values first with `distinct(genre)`.
+:::
+
+::: {.callout-warning title="Audit it: = instead of =="}
+```{r}
+#| error: true
+movies |> filter(genre = "Drama")
+```
+
+This one is friendly: dplyr stops and explains. Not every mistake is.
+:::
+
+## `arrange()`: sort rows
+
+Sorting is **ascending** by default. Use `desc()` for descending, and add more columns to break ties.
+
+```{r}
+movies |>
+  arrange(desc(imdb_rating), title) |>
+  select(title, imdb_rating)
+```
+
+::: {.callout-warning title="Audit it: the most common AI mistake"}
+"Show the 5 highest-rated movies" written as `arrange(imdb_rating) |> head(5)` returns the five **lowest**. No error, no warning, a believable table.
+
+```{r}
+movies |> arrange(imdb_rating) |> select(title, imdb_rating) |> head(5)
+```
+
+For top-N questions, `slice_max()` states the intent directly:
+
+```{r}
+movies |>
+  slice_max(imdb_rating, n = 5, with_ties = FALSE) |>
+  select(title, imdb_rating)
+```
+
+`with_ties = FALSE` returns exactly 5 rows. The default keeps all tied rows, which can return more than you asked for.
+:::
+
+## `mutate()`: create or change columns
+
+`mutate()` adds new columns (at the end) or overwrites existing ones.
+
+```{r}
+movies |>
+       mutate(runtime_hrs = runtime / 60, decade = thtr_rel_year %/% 10 * 10) |>
+       select(title, runtime_hrs, decade)
+```
+
+Use `if_else()` for two outcomes and `case_when()` for several. They check that the outcomes are the same type, which catches mistakes that base `ifelse()` hides.
+
+```{r}
+movies |>
+  mutate(
+    length_class = case_when(
+      runtime < 90 ~ "short",
+      runtime <= 120 ~ "medium",
+      runtime > 120 ~ "long"
+    )
+  ) |>
+  count(length_class)
+```
+
+Rows that match no condition (here, the movie with an `NA` runtime) become `NA`. You can set a default with `.default = "unknown"`.
+
+`mutate()` keeps all other columns. To keep only the new ones, use `mutate(..., .keep = "none")`. This replaces the older `transmute()`.
+
+::: {.callout-note title="Preview: count()"}
+`count(x)` counts rows for each value of `x`. It is shorthand for grouping and summarizing, which is the first topic in Session 2.
+:::
+
+## Other useful verbs
+
+```{r}
+movies |> distinct(mpaa_rating)
+movies |> slice_head(n = 3) |> select(title)
+movies |> slice_max(runtime, n = 3, with_ties = FALSE) |> select(title, runtime)
+```
+
+For random samples use `slice_sample()` (this replaces `sample_n()` and `sample_frac()`). Set a seed so the sample is reproducible:
+
+```{r}
+set.seed(531)
+movies |> slice_sample(n = 3) |> select(title)
+```
+
+::: {.callout-warning title="Audit it: ambiguous questions get confident answers"}
+"How many documentaries are there?" The data has two columns that could mean that:
+
+```{r}
+movies |> filter(genre == "Documentary") |> nrow()
+movies |> filter(title_type == "Documentary") |> nrow()
+```
+
+Neither answer is a bug. The *question* was underspecified. A good prompt names the column, and a good audit confirms which one was used.
+:::
+
+# Reading control flow, loops, and functions
+
+AI-written code often wraps pipelines in functions, loops, and `if` statements. You will rarely write these from scratch in this course, but you must be able to read them.
+
+## `if` and `else`
+
+`if` tests **one** `TRUE`/`FALSE`. It is not vectorized.
+
+```{r}
+x <- 7
+if (x < 0) {
+  "negative"
+} else if (x > 0) {
+  "positive"
+} else {
+  "zero"
+}
+```
+
+To choose values for a whole column, use the vectorized `if_else()` or `case_when()` inside `mutate()` instead.
+
+::: {.callout-warning title="Audit it: if with a vector"}
+```{r}
+#| error: true
+if (c(TRUE, FALSE)) {
+  "yes"
+}
+```
+
+R refuses a condition with length greater than one. If you see `if` applied to a column, expect an error or a misunderstanding.
+:::
+
+## `for` loops
+
+A `for` loop repeats code once per element.
+
+```{r}
+for (g in c("Drama", "Comedy")) {
+  n <- sum(movies$genre == g)
+  cat(g, ":", n, "movies\n")
+}
+```
+
+**How to read it:** "for each genre `g` in this list, count the movies and print." Loops are fine, but when AI uses a loop to build up a data frame row by row, ask whether one verb (`count()`, `summarize()`) would do the same thing more clearly.
+
+## Functions
+
+A function packages code under a name, with **arguments** as inputs and the **last expression** as the returned value.
+
+```{r}
+to_hours <- function(minutes, digits = 1) {
+  round(minutes / 60, digits)
+}
+
+to_hours(95)
+to_hours(95, digits = 2)
+```
+
+```{r}
+movies |>
+  mutate(runtime_hrs = to_hours(runtime)) |>
+  select(title, runtime, runtime_hrs)
+```
+
+**How to read an AI-written function:** find the arguments and their defaults, find what is returned (the last line or an explicit `return()`), and look for anything it uses that was *not* passed in. Functions can silently read variables from outside (Appendix B).
+
+# Practice problems
+
+Try each one yourself, then open the solution. Where indicated, also *audit* the code given.
+
+::: {.problem}
+**Problem 1.** How many movies are rated `PG-13`?
+:::
+
+::: {.callout-note collapse="true" title="Solution"}
+```{r}
+movies |> filter(mpaa_rating == "PG-13") |> nrow()
+```
+:::
+
+::: {.problem}
+**Problem 2.** List the titles and runtimes (in hours, one decimal) of the three longest movies.
+:::
+
+::: {.callout-note collapse="true" title="Solution"}
+```{r}
+movies |>
+  slice_max(runtime, n = 3, with_ties = FALSE) |>
+  mutate(runtime_hrs = round(runtime / 60, 1)) |>
+  select(title, runtime_hrs)
+```
+:::
+
+::: {.problem}
+**Problem 3.** Among movies with an `audience_score` below 50, which has the highest `critics_score`? (Critics loved it, audiences did not.)
+:::
+
+::: {.callout-note collapse="true" title="Solution"}
+```{r}
+movies |>
+  filter(audience_score < 50) |>
+  slice_max(critics_score, n = 1, with_ties = FALSE) |>
+  select(title, critics_score, audience_score)
+```
+:::
+
+::: {.problem}
+**Problem 4 (audit).** A user asked: "Keep the R and PG-13 movies." The AI wrote the code below. Restate it, run it, and fix it.
+
+```{r}
+#| eval: false
+movies |> filter(mpaa_rating == c("R", "PG-13"))
+```
+:::
+
+::: {.callout-note collapse="true" title="Solution"}
+`==` against a length-2 vector recycles by position. Use `%in%`:
+
+```{r}
+movies |> filter(mpaa_rating %in% c("R", "PG-13")) |> nrow()
+```
+:::
+
+::: {.problem}
+**Problem 5 (audit).** The AI says the average runtime of all movies is `NA`. Is that a bug in the data, a bug in the code, or both? Fix it, and say what you assumed.
+:::
+
+::: {.callout-note collapse="true" title="Solution"}
+One movie has no runtime, so `mean()` returns `NA`.
+
+```{r}
+mean(movies$runtime, na.rm = TRUE)
+```
+
+The assumption: the one missing movie is not systematically different from the other 650. With a single missing value in 651 rows that is easy to defend, but you should still state it.
+:::
+
+::: {.problem}
+**Problem 6 (audit).** The AI says the "top 3 R-rated movies by IMDb rating" are given by this code. Find the problem.
+
+```{r}
+#| eval: false
+movies |>
+  filter(mpaa_rating == "R") |>
+  arrange(imdb_rating) |>
+  select(title, imdb_rating) |>
+  head(3)
+```
+:::
+
+::: {.callout-note collapse="true" title="Solution"}
+Ascending sort again: this returns the three lowest. Fix:
+
+```{r}
+movies |>
+  filter(mpaa_rating == "R") |>
+  slice_max(imdb_rating, n = 3, with_ties = FALSE) |>
+  select(title, imdb_rating)
+```
+:::
+
+# Appendix {.unnumbered}
+
+These sections cover material from the older notes that you will meet in AI-written code but will not use often.
+
+## A. Matrices and arrays {.unnumbered}
+
+A matrix is a vector with a `dim` attribute. It is filled one **column** at a time.
+
+```{r}
+m <- matrix(1:6, nrow = 2, ncol = 3)
+m
+m[1, 3] # row 1, column 3
+m[, 2] # all of column 2
+m[-1, ] # drop row 1
+```
+
+Data frames are *not* matrices, but `df[row, col]` indexing works similarly.
+
+## B. Scope and lazy evaluation {.unnumbered}
+
+**Scope.** If a function cannot find a variable inside itself, R looks in the surrounding environment. This is convenient and risky: a function can quietly depend on a variable that is not one of its arguments.
+
+```{r}
+cutoff <- 100
+is_long <- function(minutes) minutes > cutoff # cutoff is NOT an argument
+is_long(120)
+cutoff <- 150
+is_long(120) # same call, different answer
+```
+
+**Lazy evaluation.** Function arguments are only evaluated when they are used.
+
+```{r}
+#| error: true
+f <- function(x) {
+  cat("Hello\n")
+  x
+}
+f(stop("this error only fires when x is used"))
+```
+
+"Hello" prints first: the broken argument is not touched until the function needs it. You will meet the same idea at a larger scale with the arrow package in Session 2, where a query on a huge Parquet file is **not run** until you ask for the result.
+
+## C. Vectorization {.unnumbered}
+
+Most R functions work on whole vectors at once, which is faster and shorter than a loop. But vectorized code can hide edge cases.
+
+```{r}
+p <- c(0.5, 0.5, 0, 0)
+-sum(p * log(p)) # entropy: wrong, 0 * log(0) is NaN
+p_pos <- p[p > 0]
+-sum(p_pos * log(p_pos)) # right: drop the zero-probability cells
+```
+
+`NaN` means "not a number". It is a cousin of `NA` that spreads the same way, and `is.na()` detects both.
+
+If a function was written for single values and you need it for vectors, `Vectorize()` can wrap it, but `if_else()` and `case_when()` are usually better inside `mutate()`.
+
+## D. The apply family and purrr {.unnumbered}
+
+`apply()` and `lapply()` apply a function across rows, columns, or list elements. The tidyverse version is `purrr::map()`, with variants that return a specific type (`map_dbl()` for numbers, `map_chr()` for text).
+
+```{r}
+nums <- movies |> select(imdb_rating, critics_score, audience_score, runtime)
+
+lapply(nums, mean, na.rm = TRUE) |> unlist() # base R
+map_dbl(nums, mean, na.rm = TRUE) # purrr: guaranteed numeric result
+```
+
+Prefer `map_*()` over `sapply()`: `sapply()` guesses the output type, and a surprise type is a classic silent failure.
+
+## E. Old syntax to new syntax {.unnumbered}
+
+| Older code you may see | Use now | Why |
+|:--|:--|:--|
+| `x %>% f()` | `x \|> f()` | built into R, no package needed |
+| `sample_n(df, 5)` / `sample_frac(df, .1)` | `slice_sample(df, n = 5)` / `slice_sample(df, prop = .1)` | one consistent `slice_*` family |
+| `arrange(desc(x)) \|> head(n)` | `slice_max(x, n = n)` | states the intent |
+| `transmute(...)` | `mutate(..., .keep = "none")` | `transmute()` is superseded |
+| `ifelse(test, a, b)` | `if_else(test, a, b)` | checks types, safer |
+| `tidyr::separate(col, into, sep)` | `separate_wider_delim()` / `separate_wider_position()` | stricter, warns about bad rows |
+| `group_by(g) \|> summarize(...)` | `summarize(..., .by = g)` | no leftover grouping (Session 2) |
+| `lapply()` / `sapply()` | `purrr::map()` / `map_dbl()` | predictable output type |
+| `by = c("a" = "b")` in joins | `by = join_by(a == b)` | more readable (Session 2) |
+
+## F. Quick reference {.unnumbered}
+
+| Task | Code |
+|:--|:--|
+| Assign | `x <- 5` |
+| Make a vector | `c(1, 2, 3)` |
+| Count TRUEs / fraction TRUE | `sum(x > 5)` / `mean(x > 5)` |
+| Missing? | `is.na(x)`, `sum(is.na(x))` |
+| Ignore NA in a summary | `mean(x, na.rm = TRUE)` |
+| Peek at a table | `glimpse(df)`, `summary(df)` |
+| Pick columns | `select(df, a, b)` |
+| Keep rows | `filter(df, a > 5, b %in% c("x", "y"))` |
+| Sort | `arrange(df, desc(a))` |
+| New column | `mutate(df, c = a / b)` |
+| Top / bottom N | `slice_max(df, a, n = 5)` / `slice_min()` |
+| Unique values | `distinct(df, a)` |
+| Count by group | `count(df, a)` |
+
+## Where to go next {.unnumbered}
+
+- *R for Data Science* (2nd edition): [Data transformation](https://r4ds.hadley.nz/data-transform.html)
+- The dplyr documentation: <https://dplyr.tidyverse.org>
+- Next session: summarizing, joins, pivots, and big data with Parquet.

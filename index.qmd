@@ -1,0 +1,33 @@
+---
+title: "R in the AI Era"
+subtitle: "STAT 531: Ethics and Practice of Data Science"
+format: html
+toc: false
+listing:
+  contents:
+    - "0*.qmd"
+  type: table
+  fields: [date, title, description, categories]
+  sort: ["date", "categories"]
+  sort-ui: false
+  filter-ui: false
+  categories: false
+---
+
+Course materials for learning R, data wrangling, visualization, and data cleaning in a world where AI writes much of the code and **you navigate and audit it**.
+
+## The Audit Loop
+
+1. **Read** the code
+2. **Run** it
+3. **Restate** it in plain English
+4. **Refine** it or **Reject** it
+
+## Sessions
+
+New sessions appear in the table below as they are published. Slides are for class and handouts are the detailed reference. The lab instructions for Sessions 4 and 7 live in the [course project repo](https://github.com/YOUR-USERNAME/YOUR-PROJECT-REPO).
+
+::: {#listing}
+:::
+
+Course dataset for the in-class examples: [movies.csv](data/movies.csv)

@@ -1,0 +1,1601 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.34">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="DTR">
+<meta name="dcterms.date" content="2026-10-19">
+<meta name="description" content="Driver-navigator mindset, the Audit Loop, R essentials, and the first dplyr verbs">
+
+<title>You Navigate, AI Drives – STAT 531: R in the AI Era</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-c8ad9e5dbd60b7b70b38521ab19b7da4.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-d7294beede67a4f0c1d75a160eaed9e1.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+
+</head>
+
+<body class="floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">STAT 531: R in the AI Era</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Contents</h2>
+   
+  <ul class="collapse">
+  <li><a href="#welcome" id="toc-welcome" class="nav-link active" data-scroll-target="#welcome">Welcome</a>
+  <ul class="collapse">
+  <li><a href="#todays-route" id="toc-todays-route" class="nav-link" data-scroll-target="#todays-route">Today’s route</a></li>
+  <li><a href="#pair-up" id="toc-pair-up" class="nav-link" data-scroll-target="#pair-up">Pair up!</a></li>
+  <li><a href="#smoke-test" id="toc-smoke-test" class="nav-link" data-scroll-target="#smoke-test">Smoke test</a></li>
+  <li><a href="#you-should-see" id="toc-you-should-see" class="nav-link" data-scroll-target="#you-should-see">You should see</a></li>
+  <li><a href="#two-truths-and-a-lie" id="toc-two-truths-and-a-lie" class="nav-link" data-scroll-target="#two-truths-and-a-lie">Two truths and a lie</a></li>
+  <li><a href="#the-lie-was-2" id="toc-the-lie-was-2" class="nav-link" data-scroll-target="#the-lie-was-2">The lie was #2</a></li>
+  </ul></li>
+  <li><a href="#whos-driving" id="toc-whos-driving" class="nav-link" data-scroll-target="#whos-driving">Who’s driving?</a>
+  <ul class="collapse">
+  <li><a href="#the-new-division-of-labor" id="toc-the-new-division-of-labor" class="nav-link" data-scroll-target="#the-new-division-of-labor">The new division of labor</a></li>
+  <li><a href="#what-does-a-navigator-do" id="toc-what-does-a-navigator-do" class="nav-link" data-scroll-target="#what-does-a-navigator-do">What does a navigator do?</a></li>
+  <li><a href="#why-learn-r-if-ai-writes-it" id="toc-why-learn-r-if-ai-writes-it" class="nav-link" data-scroll-target="#why-learn-r-if-ai-writes-it">Why learn R if AI writes it?</a></li>
+  <li><a href="#the-audit-loop" id="toc-the-audit-loop" class="nav-link" data-scroll-target="#the-audit-loop">The Audit Loop</a></li>
+  <li><a href="#bug-bounty-rules" id="toc-bug-bounty-rules" class="nav-link" data-scroll-target="#bug-bounty-rules">Bug Bounty rules</a></li>
+  <li><a href="#case-0-the-request" id="toc-case-0-the-request" class="nav-link" data-scroll-target="#case-0-the-request">Case #0: the request</a></li>
+  <li><a href="#your-turn-restate-it" id="toc-your-turn-restate-it" class="nav-link" data-scroll-target="#your-turn-restate-it">Your turn: Restate it</a></li>
+  <li><a href="#run-it" id="toc-run-it" class="nav-link" data-scroll-target="#run-it">Run it</a></li>
+  <li><a href="#why-this-one-is-sneaky" id="toc-why-this-one-is-sneaky" class="nav-link" data-scroll-target="#why-this-one-is-sneaky">Why this one is sneaky</a></li>
+  </ul></li>
+  <li><a href="#reading-the-map" id="toc-reading-the-map" class="nav-link" data-scroll-target="#reading-the-map">Reading the map</a>
+  <ul class="collapse">
+  <li><a href="#names-and-assignment" id="toc-names-and-assignment" class="nav-link" data-scroll-target="#names-and-assignment">Names and assignment</a></li>
+  <li><a href="#functions" id="toc-functions" class="nav-link" data-scroll-target="#functions">Functions</a></li>
+  <li><a href="#vectors" id="toc-vectors" class="nav-link" data-scroll-target="#vectors">Vectors</a></li>
+  <li><a href="#three-types-youll-meet" id="toc-three-types-youll-meet" class="nav-link" data-scroll-target="#three-types-youll-meet">Three types you’ll meet</a></li>
+  <li><a href="#yesno-questions" id="toc-yesno-questions" class="nav-link" data-scroll-target="#yesno-questions">Yes/no questions</a></li>
+  <li><a href="#square-brackets-pick-things" id="toc-square-brackets-pick-things" class="nav-link" data-scroll-target="#square-brackets-pick-things">Square brackets pick things</a></li>
+  <li><a href="#challenge-1-swap-roles-predict-first" id="toc-challenge-1-swap-roles-predict-first" class="nav-link" data-scroll-target="#challenge-1-swap-roles-predict-first">Challenge 1 (swap roles): predict first</a></li>
+  <li><a href="#challenge-1-answers" id="toc-challenge-1-answers" class="nav-link" data-scroll-target="#challenge-1-answers">Challenge 1: answers</a></li>
+  <li><a href="#na-means-i-dont-know" id="toc-na-means-i-dont-know" class="nav-link" data-scroll-target="#na-means-i-dont-know">NA means “I don’t know”</a></li>
+  <li><a href="#na-spreads" id="toc-na-spreads" class="nav-link" data-scroll-target="#na-spreads">NA spreads</a></li>
+  <li><a href="#handling-na" id="toc-handling-na" class="nav-link" data-scroll-target="#handling-na">Handling NA</a></li>
+  <li><a href="#a-column-is-a-vector" id="toc-a-column-is-a-vector" class="nav-link" data-scroll-target="#a-column-is-a-vector">A column is a vector</a></li>
+  <li><a href="#mystery" id="toc-mystery" class="nav-link" data-scroll-target="#mystery">Mystery</a></li>
+  <li><a href="#solving-the-mystery" id="toc-solving-the-mystery" class="nav-link" data-scroll-target="#solving-the-mystery">Solving the mystery</a></li>
+  <li><a href="#challenge-2-swap-roles-find-something-weird" id="toc-challenge-2-swap-roles-find-something-weird" class="nav-link" data-scroll-target="#challenge-2-swap-roles-find-something-weird">Challenge 2 (swap roles): find something weird</a></li>
+  </ul></li>
+  <li><a href="#verbs-and-the-pipe" id="toc-verbs-and-the-pipe" class="nav-link" data-scroll-target="#verbs-and-the-pipe">Verbs and the pipe</a>
+  <ul class="collapse">
+  <li><a href="#data-wrangling-is-a-sentence" id="toc-data-wrangling-is-a-sentence" class="nav-link" data-scroll-target="#data-wrangling-is-a-sentence">Data wrangling is a sentence</a></li>
+  <li><a href="#same-thing-two-ways" id="toc-same-thing-two-ways" class="nav-link" data-scroll-target="#same-thing-two-ways">Same thing, two ways</a></li>
+  <li><a href="#youll-see-two-pipes" id="toc-youll-see-two-pipes" class="nav-link" data-scroll-target="#youll-see-two-pipes">You’ll see two pipes</a></li>
+  <li><a href="#select-choose-columns" id="toc-select-choose-columns" class="nav-link" data-scroll-target="#select-choose-columns"><code>select()</code>: choose columns</a></li>
+  <li><a href="#filter-keep-rows" id="toc-filter-keep-rows" class="nav-link" data-scroll-target="#filter-keep-rows"><code>filter()</code>: keep rows</a></li>
+  <li><a href="#conditions-you-can-use" id="toc-conditions-you-can-use" class="nav-link" data-scroll-target="#conditions-you-can-use">Conditions you can use</a></li>
+  <li><a href="#filter-with-two-conditions" id="toc-filter-with-two-conditions" class="nav-link" data-scroll-target="#filter-with-two-conditions"><code>filter()</code> with two conditions</a></li>
+  <li><a href="#challenge-3-swap-roles" id="toc-challenge-3-swap-roles" class="nav-link" data-scroll-target="#challenge-3-swap-roles">Challenge 3 (swap roles)</a></li>
+  <li><a href="#challenge-3-one-answer" id="toc-challenge-3-one-answer" class="nav-link" data-scroll-target="#challenge-3-one-answer">Challenge 3: one answer</a></li>
+  <li><a href="#bug-court-is-in-session" id="toc-bug-court-is-in-session" class="nav-link" data-scroll-target="#bug-court-is-in-session">Bug Court is in session</a></li>
+  <li><a href="#case-1-the-request" id="toc-case-1-the-request" class="nav-link" data-scroll-target="#case-1-the-request">Case #1: the request</a></li>
+  <li><a href="#case-1-the-evidence" id="toc-case-1-the-evidence" class="nav-link" data-scroll-target="#case-1-the-evidence">Case #1: the evidence</a></li>
+  <li><a href="#case-2-the-request" id="toc-case-2-the-request" class="nav-link" data-scroll-target="#case-2-the-request">Case #2: the request</a></li>
+  <li><a href="#case-2-the-evidence" id="toc-case-2-the-evidence" class="nav-link" data-scroll-target="#case-2-the-evidence">Case #2: the evidence</a></li>
+  <li><a href="#case-2b-where-did-it-go" id="toc-case-2b-where-did-it-go" class="nav-link" data-scroll-target="#case-2b-where-did-it-go">Case #2b: where did it go?</a></li>
+  <li><a href="#case-3-the-request" id="toc-case-3-the-request" class="nav-link" data-scroll-target="#case-3-the-request">Case #3: the request</a></li>
+  <li><a href="#case-3-the-evidence" id="toc-case-3-the-evidence" class="nav-link" data-scroll-target="#case-3-the-evidence">Case #3: the evidence</a></li>
+  <li><a href="#arrange-sort-rows" id="toc-arrange-sort-rows" class="nav-link" data-scroll-target="#arrange-sort-rows"><code>arrange()</code>: sort rows</a></li>
+  <li><a href="#mutate-make-new-columns" id="toc-mutate-make-new-columns" class="nav-link" data-scroll-target="#mutate-make-new-columns"><code>mutate()</code>: make new columns</a></li>
+  <li><a href="#four-verbs-four-jobs" id="toc-four-verbs-four-jobs" class="nav-link" data-scroll-target="#four-verbs-four-jobs">Four verbs, four jobs</a></li>
+  </ul></li>
+  <li><a href="#movie-night" id="toc-movie-night" class="nav-link" data-scroll-target="#movie-night">Movie Night</a>
+  <ul class="collapse">
+  <li><a href="#how-movie-night-works" id="toc-how-movie-night-works" class="nav-link" data-scroll-target="#how-movie-night-works">How Movie Night works</a></li>
+  <li><a href="#round-1-by-hand" id="toc-round-1-by-hand" class="nav-link" data-scroll-target="#round-1-by-hand">Round 1 (by hand)</a></li>
+  <li><a href="#round-2-by-hand" id="toc-round-2-by-hand" class="nav-link" data-scroll-target="#round-2-by-hand">Round 2 (by hand)</a></li>
+  <li><a href="#a-good-prompt-is-a-spec" id="toc-a-good-prompt-is-a-spec" class="nav-link" data-scroll-target="#a-good-prompt-is-a-spec">A good prompt is a spec</a></li>
+  <li><a href="#round-3-with-your-ai" id="toc-round-3-with-your-ai" class="nav-link" data-scroll-target="#round-3-with-your-ai">Round 3 (with your AI)</a></li>
+  </ul></li>
+  <li><a href="#wrap-up" id="toc-wrap-up" class="nav-link" data-scroll-target="#wrap-up">Wrap-up</a>
+  <ul class="collapse">
+  <li><a href="#bug-bounty-results" id="toc-bug-bounty-results" class="nav-link" data-scroll-target="#bug-bounty-results">Bug Bounty results</a></li>
+  <li><a href="#the-audit-loop-1" id="toc-the-audit-loop-1" class="nav-link" data-scroll-target="#the-audit-loop-1">The Audit Loop</a></li>
+  <li><a href="#exit-ticket" id="toc-exit-ticket" class="nav-link" data-scroll-target="#exit-ticket">Exit ticket</a></li>
+  <li><a href="#before-wednesday" id="toc-before-wednesday" class="nav-link" data-scroll-target="#before-wednesday">Before Wednesday</a></li>
+  </ul></li>
+  <li><a href="#appendix" id="toc-appendix" class="nav-link" data-scroll-target="#appendix">Appendix</a>
+  <ul class="collapse">
+  <li><a href="#backup-ai-answer-for-round-3" id="toc-backup-ai-answer-for-round-3" class="nav-link" data-scroll-target="#backup-ai-answer-for-round-3">Backup: AI answer for Round 3</a></li>
+  <li><a href="#backup-running-it" id="toc-backup-running-it" class="nav-link" data-scroll-target="#backup-running-it">Backup: running it</a></li>
+  <li><a href="#backup-the-fix" id="toc-backup-the-fix" class="nav-link" data-scroll-target="#backup-the-fix">Backup: the fix</a></li>
+  </ul></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="W04L07_slides.html"><i class="bi bi-file-slides"></i>RevealJS</a></li></ul></div></nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">You Navigate, AI Drives</h1>
+<p class="subtitle lead">R basics for the AI era · Session 1</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">Slides</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    Driver-navigator mindset, the Audit Loop, R essentials, and the first dplyr verbs
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>DTR </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">October 19, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="welcome" class="level1" data-background-color="#f3f6ea">
+<h1 data-background-color="#f3f6ea">Welcome</h1>
+<div class="notes">
+<p>Time 0:00–0:08 · Warm-up. Press <strong>S</strong> for speaker view. Answers to every poll are in the notes.</p>
+</div>
+<section id="todays-route" class="level2">
+<h2 class="anchored" data-anchor-id="todays-route">Today’s route</h2>
+<ul>
+<li>Who’s driving? (you + AI)</li>
+<li>Reading R: the essentials</li>
+<li>Verbs and the pipe</li>
+<li>Movie Night: team challenge</li>
+<li>Bug Bounty runs all session</li>
+</ul>
+<div class="notes">
+<p>Write a Bug Bounty scoreboard on the whiteboard: one column per team. Points: +1 catch a bug, +1 explain WHY the AI would make it.</p>
+</div>
+</section>
+<section id="pair-up" class="level2">
+<h2 class="anchored" data-anchor-id="pair-up">Pair up!</h2>
+<p>Sit next to someone.</p>
+<p><strong>Driver</strong> = hands on the keyboard</p>
+<p><strong>Navigator</strong> = reads, predicts, directs</p>
+<p>We swap whenever a slide says <strong>swap roles</strong></p>
+<p>. . .</p>
+<div class="vote">
+<p>Soon, an AI will be one of the two seats. Practice with a human first.</p>
+</div>
+</section>
+<section id="smoke-test" class="level2">
+<h2 class="anchored" data-anchor-id="smoke-test">Smoke test</h2>
+<p>Run this in Positron. Wave when you see a table.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>movies <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/movies.csv"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>movies</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="notes">
+<p>Setup is already done, so this should take 2 minutes. Anyone stuck: pair them with a neighbor and move on.</p>
+</div>
+</section>
+<section id="you-should-see" class="level2">
+<h2 class="anchored" data-anchor-id="you-should-see">You should see</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>movies</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 651 × 32
+#&gt;   title        title_type genre runtime mpaa_rating studio thtr_rel_year
+#&gt;   &lt;chr&gt;        &lt;chr&gt;      &lt;chr&gt;   &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;          &lt;dbl&gt;
+#&gt; 1 Filly Brown  Feature F… Drama      80 R           Indom…          2013
+#&gt; 2 The Dish     Feature F… Drama     101 PG-13       Warne…          2001
+#&gt; 3 Waiting for… Feature F… Come…      84 R           Sony …          1996
+#&gt; 4 The Age of … Feature F… Drama     139 PG          Colum…          1993
+#&gt; 5 Malevolence  Feature F… Horr…      90 R           Ancho…          2004
+#&gt; # ℹ 646 more rows
+#&gt; # ℹ 25 more variables: thtr_rel_month &lt;dbl&gt;, thtr_rel_day &lt;dbl&gt;, …</code></pre>
+</div>
+</div>
+<p>651 rows, 32 columns. Today’s dataset: movies.</p>
+</section>
+<section id="two-truths-and-a-lie" class="level2">
+<h2 class="anchored" data-anchor-id="two-truths-and-a-lie">Two truths and a lie</h2>
+<p>An AI told me three things about R, very confidently.</p>
+<ol type="1">
+<li>R starts counting at 1, not 0.</li>
+<li><code>mean(c(1, 2, NA))</code> returns <code>1.5</code>.</li>
+<li><code>c(1, "a", TRUE)</code> turns everything into text.</li>
+</ol>
+<p>. . .</p>
+<div class="vote">
+<p>Vote with fingers (1, 2, 3): which one is the lie?</p>
+</div>
+</section>
+<section id="the-lie-was-2" class="level2">
+<h2 class="anchored" data-anchor-id="the-lie-was-2">The lie was #2</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>)[<span class="dv">1</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 10</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="cn">NA</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] NA</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="dv">1</span>, <span class="st">"a"</span>, <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "1"    "a"    "TRUE"</code></pre>
+</div>
+</div>
+<p>. . .</p>
+<div class="bug">
+<p><strong>Bug:</strong> A confident wrong answer looks exactly like a confident right one.</p>
+</div>
+<div class="notes">
+<p>Two truths and a lie: #2 is the lie (it returns NA). Don’t explain NA yet, we come back to it in the essentials section.</p>
+</div>
+</section>
+</section>
+<section id="whos-driving" class="level1" data-background-color="#f3f6ea">
+<h1 data-background-color="#f3f6ea">Who’s driving?</h1>
+<div class="notes">
+<p>Time 0:08–0:20 · Framing + first live bug.</p>
+</div>
+<section id="the-new-division-of-labor" class="level2">
+<h2 class="anchored" data-anchor-id="the-new-division-of-labor">The new division of labor</h2>
+<p><strong>AI drives</strong>: writes code fast</p>
+<p><strong>You navigate</strong>: choose the destination, read the map, check the route</p>
+<p>. . .</p>
+<p>Fast driving is great. Driving into a lake is not.</p>
+</section>
+<section id="what-does-a-navigator-do" class="level2">
+<h2 class="anchored" data-anchor-id="what-does-a-navigator-do">What does a navigator do?</h2>
+<ol type="1">
+<li><strong>Set the destination</strong>: say clearly what you want</li>
+<li><strong>Read the route</strong>: understand the code</li>
+<li><strong>Check the road</strong>: run it, test it</li>
+<li><strong>Make the call</strong>: accept, fix, or reject</li>
+</ol>
+</section>
+<section id="why-learn-r-if-ai-writes-it" class="level2">
+<h2 class="anchored" data-anchor-id="why-learn-r-if-ai-writes-it">Why learn R if AI writes it?</h2>
+<p>You can’t catch a wrong turn on a map you can’t read.</p>
+<p>. . .</p>
+<p>The scariest bugs don’t crash. They run fine and give a believable answer.</p>
+</section>
+<section id="the-audit-loop" class="level2">
+<h2 class="anchored" data-anchor-id="the-audit-loop">The Audit Loop</h2>
+<ol type="1">
+<li><strong>Read</strong> it</li>
+<li><strong>Run</strong> it</li>
+<li><strong>Restate</strong> it in plain English</li>
+<li><strong>Refine</strong> it or <strong>Reject</strong> it</li>
+</ol>
+<p>. . .</p>
+<div class="vote">
+<p>Restate is the superpower. If you can’t say what a line does, you can’t vouch for it.</p>
+</div>
+</section>
+<section id="bug-bounty-rules" class="level2">
+<h2 class="anchored" data-anchor-id="bug-bounty-rules">Bug Bounty rules</h2>
+<ul>
+<li>Every bug you catch: <strong>+1 point</strong> for your team</li>
+<li>Explain <em>why</em> an AI would make that mistake: <strong>+1 bonus</strong></li>
+<li>Bugs hide in code <strong>and</strong> in answers that look fine</li>
+</ul>
+<div class="notes">
+<p>Keep the tally visible. Call on a different team each round.</p>
+</div>
+</section>
+<section id="case-0-the-request" class="level2">
+<h2 class="anchored" data-anchor-id="case-0-the-request">Case #0: the request</h2>
+<blockquote class="blockquote">
+<p>“Show me the 5 highest-rated movies on IMDb.”</p>
+</blockquote>
+<p>The AI wrote:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(imdb_rating) <span class="sc">|&gt;</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(title, imdb_rating) <span class="sc">|&gt;</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="your-turn-restate-it" class="level2">
+<h2 class="anchored" data-anchor-id="your-turn-restate-it">Your turn: Restate it</h2>
+<p>With your partner, 60 seconds:</p>
+<p>Say each line in plain English. Does it match the request?</p>
+<div class="vote">
+<p>Navigator speaks, driver listens. Then swap.</p>
+</div>
+</section>
+<section id="run-it" class="level2">
+<h2 class="anchored" data-anchor-id="run-it">Run it</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(imdb_rating) <span class="sc">|&gt;</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(title, imdb_rating) <span class="sc">|&gt;</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 5 × 2
+#&gt;   title             imdb_rating
+#&gt;   &lt;chr&gt;                   &lt;dbl&gt;
+#&gt; 1 Disaster Movie            1.9
+#&gt; 2 Epic Movie                2.3
+#&gt; 3 Battlefield Earth         2.4
+#&gt; 4 Viva Knievel!             2.7
+#&gt; 5 Doogal                    2.8</code></pre>
+</div>
+</div>
+<p>. . .</p>
+<div class="vote">
+<p>Does this answer the request? Hands up: yes / no</p>
+</div>
+<div class="notes">
+<p>No.&nbsp;<code>arrange()</code> sorts ascending by default, so these are the five WORST rated (Disaster Movie 1.9, Epic Movie 2.3, Battlefield Earth 2.4, Viva Knievel! 2.7, Doogal 2.8). No error, no warning. Fix later with <code>desc()</code>. Award points.</p>
+</div>
+</section>
+<section id="why-this-one-is-sneaky" class="level2">
+<h2 class="anchored" data-anchor-id="why-this-one-is-sneaky">Why this one is sneaky</h2>
+<ul>
+<li>No error</li>
+<li>No warning</li>
+<li>A clean table that looks right</li>
+</ul>
+<p>. . .</p>
+<p><strong>Errors are the friendly failures.</strong></p>
+</section>
+</section>
+<section id="reading-the-map" class="level1" data-background-color="#f3f6ea">
+<h1 data-background-color="#f3f6ea">Reading the map</h1>
+<div class="notes">
+<p>Time 0:20–0:45 · R essentials. Swap driver/navigator at each “swap roles” slide. Always have them PREDICT before running.</p>
+</div>
+<section id="names-and-assignment" class="level2">
+<h2 class="anchored" data-anchor-id="names-and-assignment">Names and assignment</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>n_movies <span class="ot">&lt;-</span> <span class="dv">651</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>n_movies</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 651</code></pre>
+</div>
+</div>
+<p>Read <code>&lt;-</code> as “gets”.</p>
+</section>
+<section id="functions" class="level2">
+<h2 class="anchored" data-anchor-id="functions">Functions</h2>
+<p>A function has a name and arguments in parentheses.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="dv">16</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 4</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fl">3.14159</span>, <span class="at">digits =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 3.14</code></pre>
+</div>
+</div>
+</section>
+<section id="vectors" class="level2">
+<h2 class="anchored" data-anchor-id="vectors">Vectors</h2>
+<p>A vector is a row of values of one type. <code>c()</code> combines.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>scores <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">72</span>, <span class="dv">88</span>, <span class="dv">91</span>, <span class="dv">65</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(scores)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 79</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>scores <span class="sc">*</span> <span class="dv">2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 144 176 182 130</code></pre>
+</div>
+</div>
+</section>
+<section id="three-types-youll-meet" class="level2">
+<h2 class="anchored" data-anchor-id="three-types-youll-meet">Three types you’ll meet</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(<span class="dv">72</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "numeric"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(<span class="st">"Drama"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "character"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(<span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "logical"</code></pre>
+</div>
+</div>
+<p>numeric, character, logical</p>
+</section>
+<section id="yesno-questions" class="level2">
+<h2 class="anchored" data-anchor-id="yesno-questions">Yes/no questions</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>scores <span class="sc">&gt;</span> <span class="dv">70</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1]  TRUE  TRUE  TRUE FALSE</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(scores <span class="sc">&gt;</span> <span class="dv">70</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 3</code></pre>
+</div>
+</div>
+<p><code>TRUE</code> counts as 1, so <code>sum()</code> counts the yeses.</p>
+</section>
+<section id="square-brackets-pick-things" class="level2">
+<h2 class="anchored" data-anchor-id="square-brackets-pick-things">Square brackets pick things</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>scores[<span class="dv">1</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 72</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>scores[<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 72 91</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>scores[scores <span class="sc">&gt;</span> <span class="dv">70</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 72 88 91</code></pre>
+</div>
+</div>
+</section>
+<section id="challenge-1-swap-roles-predict-first" class="level2">
+<h2 class="anchored" data-anchor-id="challenge-1-swap-roles-predict-first">Challenge 1 (swap roles): predict first</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>genres <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Drama"</span>, <span class="st">"Comedy"</span>, <span class="st">"Horror"</span>)</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>genres <span class="sc">==</span> <span class="st">"Comedy"</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>genres <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Drama"</span>, <span class="st">"Horror"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="swap">
+<p>Navigator: predict both outputs out loud. Driver: type and run.</p>
+</div>
+</section>
+<section id="challenge-1-answers" class="level2">
+<h2 class="anchored" data-anchor-id="challenge-1-answers">Challenge 1: answers</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>genres <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Drama"</span>, <span class="st">"Comedy"</span>, <span class="st">"Horror"</span>)</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>genres <span class="sc">==</span> <span class="st">"Comedy"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] FALSE  TRUE FALSE</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>genres <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Drama"</span>, <span class="st">"Horror"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1]  TRUE FALSE  TRUE</code></pre>
+</div>
+</div>
+<p><code>%in%</code> asks: “is each value anywhere in this set?”</p>
+<div class="notes">
+<p>Keep this one in mind: Case #1 (== vs %in%) depends on it.</p>
+</div>
+</section>
+<section id="na-means-i-dont-know" class="level2">
+<h2 class="anchored" data-anchor-id="na-means-i-dont-know">NA means “I don’t know”</h2>
+<p>Predict:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="cn">NA</span> <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="cn">NA</span> <span class="sc">&gt;</span> <span class="dv">5</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="cn">NA</span> <span class="sc">==</span> <span class="cn">NA</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>. . .</p>
+<div class="vote">
+<p>Vote: what do these print?</p>
+</div>
+</section>
+<section id="na-spreads" class="level2">
+<h2 class="anchored" data-anchor-id="na-spreads">NA spreads</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="cn">NA</span> <span class="sc">+</span> <span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] NA</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="cn">NA</span> <span class="sc">&gt;</span> <span class="dv">5</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] NA</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="cn">NA</span> <span class="sc">==</span> <span class="cn">NA</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] NA</code></pre>
+</div>
+</div>
+<p>Is one unknown equal to another unknown? Unknown!</p>
+</section>
+<section id="handling-na" class="level2">
+<h2 class="anchored" data-anchor-id="handling-na">Handling NA</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">8</span>, <span class="cn">NA</span>)</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] NA</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(x, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 6</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="fu">is.na</span>(x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] FALSE FALSE  TRUE</code></pre>
+</div>
+</div>
+<p>. . .</p>
+<div class="bug">
+<p><code>na.rm = TRUE</code> is a <strong>decision</strong>, not a fix. You chose to ignore the unknowns.</p>
+</div>
+<div class="notes">
+<p>Plant the seed: dropping missing values changes who is in your analysis. This returns in the WellSync cleaning sessions.</p>
+</div>
+</section>
+<section id="a-column-is-a-vector" class="level2">
+<h2 class="anchored" data-anchor-id="a-column-is-a-vector">A column is a vector</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>movies<span class="sc">$</span>runtime <span class="sc">|&gt;</span> <span class="fu">head</span>(<span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;  [1]  80 101  84 139  90  78 142  93  88 119</code></pre>
+</div>
+</div>
+<p><code>$</code> pulls one column out of a table.</p>
+</section>
+<section id="mystery" class="level2">
+<h2 class="anchored" data-anchor-id="mystery">Mystery</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(movies<span class="sc">$</span>runtime)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] NA</code></pre>
+</div>
+</div>
+<p>. . .</p>
+<div class="vote">
+<p>Why NA? Talk to your partner (30 seconds).</p>
+</div>
+</section>
+<section id="solving-the-mystery" class="level2">
+<h2 class="anchored" data-anchor-id="solving-the-mystery">Solving the mystery</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(movies<span class="sc">$</span>runtime))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 1</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>movies<span class="sc">$</span>title[<span class="fu">is.na</span>(movies<span class="sc">$</span>runtime)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "The End of America"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(movies<span class="sc">$</span>runtime, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 105.8215</code></pre>
+</div>
+</div>
+<p>. . .</p>
+<div class="bug">
+<p><strong>Bug:</strong> One missing runtime made the whole mean unknown.</p>
+</div>
+</section>
+<section id="challenge-2-swap-roles-find-something-weird" class="level2">
+<h2 class="anchored" data-anchor-id="challenge-2-swap-roles-find-something-weird">Challenge 2 (swap roles): find something weird</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(movies)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>You have 90 seconds. Find <strong>one thing</strong> in this table that looks odd, surprising, or worth asking about.</p>
+<div class="swap">
+<p>Share your weird thing with a nearby team.</p>
+</div>
+<div class="notes">
+<p>Likely finds: dvd_rel_year / dvd_rel_month / dvd_rel_day missing for 8 movies; studio missing for 8; one missing runtime; two different “documentary” columns (title_type and genre); Upright/Spilled audience ratings. Collect 3 from the room. This sets the “look first” habit used in Lab 1.</p>
+</div>
+</section>
+</section>
+<section id="verbs-and-the-pipe" class="level1" data-background-color="#f3f6ea">
+<h1 data-background-color="#f3f6ea">Verbs and the pipe</h1>
+<div class="notes">
+<p>Time 0:45–0:70 · dplyr verbs, Bug Court, Movie Night.</p>
+</div>
+<section id="data-wrangling-is-a-sentence" class="level2">
+<h2 class="anchored" data-anchor-id="data-wrangling-is-a-sentence">Data wrangling is a sentence</h2>
+<p>“Take movies, <strong>then</strong> keep the dramas, <strong>then</strong> sort by rating, <strong>then</strong> show the top 3.”</p>
+<p>. . .</p>
+<p>The pipe <code>|&gt;</code> reads as <strong>then</strong>.</p>
+</section>
+<section id="same-thing-two-ways" class="level2">
+<h2 class="anchored" data-anchor-id="same-thing-two-ways">Same thing, two ways</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">arrange</span>(<span class="fu">filter</span>(movies, genre <span class="sc">==</span> <span class="st">"Drama"</span>), imdb_rating), <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(genre <span class="sc">==</span> <span class="st">"Drama"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb69-3"><a href="#cb69-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(imdb_rating) <span class="sc">|&gt;</span></span>
+<span id="cb69-4"><a href="#cb69-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="youll-see-two-pipes" class="level2">
+<h2 class="anchored" data-anchor-id="youll-see-two-pipes">You’ll see two pipes</h2>
+<p><code>|&gt;</code> is built into R.</p>
+<p><code>%&gt;%</code> is the older tidyverse pipe. AI and old tutorials use both.</p>
+<p>They behave the same for what we do.</p>
+<div class="notes">
+<p>In Positron the pipe shortcut is Ctrl/Cmd+Shift+M. A setting decides which pipe it inserts.</p>
+</div>
+</section>
+<section id="select-choose-columns" class="level2">
+<h2 class="anchored" data-anchor-id="select-choose-columns"><code>select()</code>: choose columns</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb70-2"><a href="#cb70-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(title, genre, runtime, imdb_rating)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 651 × 4
+#&gt;   title                genre  runtime imdb_rating
+#&gt;   &lt;chr&gt;                &lt;chr&gt;    &lt;dbl&gt;       &lt;dbl&gt;
+#&gt; 1 Filly Brown          Drama       80         5.5
+#&gt; 2 The Dish             Drama      101         7.3
+#&gt; 3 Waiting for Guffman  Comedy      84         7.6
+#&gt; 4 The Age of Innocence Drama      139         7.2
+#&gt; 5 Malevolence          Horror      90         5.1
+#&gt; # ℹ 646 more rows</code></pre>
+</div>
+</div>
+</section>
+<section id="filter-keep-rows" class="level2">
+<h2 class="anchored" data-anchor-id="filter-keep-rows"><code>filter()</code>: keep rows</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb72"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb72-2"><a href="#cb72-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(title, genre, imdb_rating) <span class="sc">|&gt;</span></span>
+<span id="cb72-3"><a href="#cb72-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(genre <span class="sc">==</span> <span class="st">"Drama"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 305 × 3
+#&gt;   title                genre imdb_rating
+#&gt;   &lt;chr&gt;                &lt;chr&gt;       &lt;dbl&gt;
+#&gt; 1 Filly Brown          Drama         5.5
+#&gt; 2 The Dish             Drama         7.3
+#&gt; 3 The Age of Innocence Drama         7.2
+#&gt; 4 Lady Jane            Drama         7.2
+#&gt; 5 Mad Dog Time         Drama         5.5
+#&gt; # ℹ 300 more rows</code></pre>
+</div>
+</div>
+</section>
+<section id="conditions-you-can-use" class="level2">
+<h2 class="anchored" data-anchor-id="conditions-you-can-use">Conditions you can use</h2>
+<ul>
+<li><code>==</code> equal, <code>!=</code> not equal</li>
+<li><code>&gt;</code>, <code>&gt;=</code>, <code>&lt;</code>, <code>&lt;=</code></li>
+<li><code>%in%</code> is in this set</li>
+<li><code>is.na()</code> is missing</li>
+<li><code>,</code> or <code>&amp;</code> means <strong>and</strong>; <code>|</code> means <strong>or</strong></li>
+</ul>
+</section>
+<section id="filter-with-two-conditions" class="level2">
+<h2 class="anchored" data-anchor-id="filter-with-two-conditions"><code>filter()</code> with two conditions</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb74"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb74-2"><a href="#cb74-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(title, genre, imdb_rating) <span class="sc">|&gt;</span></span>
+<span id="cb74-3"><a href="#cb74-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(genre <span class="sc">==</span> <span class="st">"Drama"</span>, imdb_rating <span class="sc">&gt;</span> <span class="dv">8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 8 × 3
+#&gt;   title             genre imdb_rating
+#&gt;   &lt;chr&gt;             &lt;chr&gt;       &lt;dbl&gt;
+#&gt; 1 Warrior           Drama         8.2
+#&gt; 2 V for Vendetta    Drama         8.2
+#&gt; 3 The Help          Drama         8.1
+#&gt; 4 Good Will Hunting Drama         8.3
+#&gt; 5 The Prestige      Drama         8.5
+#&gt; # ℹ 3 more rows</code></pre>
+</div>
+</div>
+</section>
+<section id="challenge-3-swap-roles" class="level2">
+<h2 class="anchored" data-anchor-id="challenge-3-swap-roles">Challenge 3 (swap roles)</h2>
+<p>Write a pipe that keeps only <strong>R-rated</strong> movies with a <strong>runtime over 150 minutes</strong>, showing <code>title</code>, <code>runtime</code>, <code>imdb_rating</code>.</p>
+<p>How many rows do you get?</p>
+<div class="swap">
+<p>Columns to use: <code>mpaa_rating</code>, <code>runtime</code>.</p>
+</div>
+</section>
+<section id="challenge-3-one-answer" class="level2">
+<h2 class="anchored" data-anchor-id="challenge-3-one-answer">Challenge 3: one answer</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb76"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(mpaa_rating <span class="sc">==</span> <span class="st">"R"</span>, runtime <span class="sc">&gt;</span> <span class="dv">150</span>) <span class="sc">|&gt;</span></span>
+<span id="cb76-3"><a href="#cb76-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(title, runtime, imdb_rating)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 6 × 3
+#&gt;   title                  runtime imdb_rating
+#&gt;   &lt;chr&gt;                    &lt;dbl&gt;       &lt;dbl&gt;
+#&gt; 1 The English Patient        162         7.4
+#&gt; 2 Django Unchained           165         8.5
+#&gt; 3 Topsy-Turvy                154         7.4
+#&gt; 4 The Godfather, Part II     202         9  
+#&gt; 5 Cloud Atlas                172         7.5
+#&gt; # ℹ 1 more row</code></pre>
+</div>
+</div>
+</section>
+<section id="bug-court-is-in-session" class="level2">
+<h2 class="anchored" data-anchor-id="bug-court-is-in-session">Bug Court is in session</h2>
+<p>Each case: the request, the AI’s code, and your verdict.</p>
+<p><strong>Guilty</strong> = it’s wrong. <strong>Innocent</strong> = it’s fine.</p>
+<p>Use the Audit Loop. Restate before you vote.</p>
+</section>
+<section id="case-1-the-request" class="level2">
+<h2 class="anchored" data-anchor-id="case-1-the-request">Case #1: the request</h2>
+<blockquote class="blockquote">
+<p>“Keep the Drama and Comedy movies.”</p>
+</blockquote>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb78"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb78-2"><a href="#cb78-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(genre <span class="sc">==</span> <span class="fu">c</span>(<span class="st">"Drama"</span>, <span class="st">"Comedy"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="vote">
+<p>Restate it. Guilty or innocent?</p>
+</div>
+</section>
+<section id="case-1-the-evidence" class="level2">
+<h2 class="anchored" data-anchor-id="case-1-the-evidence">Case #1: the evidence</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb79"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(genre <span class="sc">==</span> <span class="fu">c</span>(<span class="st">"Drama"</span>, <span class="st">"Comedy"</span>)) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 191</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb81"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(genre <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Drama"</span>, <span class="st">"Comedy"</span>)) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 392</code></pre>
+</div>
+</div>
+<p>. . .</p>
+<div class="bug">
+<p><strong>Bug:</strong> <code>==</code> lines the two names up with rows one by one, back and forth. In your own console R also prints a warning. <strong>Warnings are clues.</strong></p>
+</div>
+<div class="notes">
+<p>Guilty. 191 vs 392 rows. The recycling makes row 1 compare to “Drama”, row 2 to “Comedy”, row 3 to “Drama”, and so on. Tie back to Challenge 1.</p>
+</div>
+</section>
+<section id="case-2-the-request" class="level2">
+<h2 class="anchored" data-anchor-id="case-2-the-request">Case #2: the request</h2>
+<blockquote class="blockquote">
+<p>“Keep movies that have a DVD release year.”</p>
+</blockquote>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb83"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb83-2"><a href="#cb83-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(dvd_rel_year <span class="sc">!=</span> <span class="cn">NA</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="vote">
+<p>Guilty or innocent?</p>
+</div>
+</section>
+<section id="case-2-the-evidence" class="level2">
+<h2 class="anchored" data-anchor-id="case-2-the-evidence">Case #2: the evidence</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb84"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(dvd_rel_year <span class="sc">!=</span> <span class="cn">NA</span>) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 0</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb86"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(dvd_rel_year)) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 643</code></pre>
+</div>
+</div>
+<p>. . .</p>
+<div class="bug">
+<p><strong>Bug:</strong> Anything compared with <code>NA</code> is <code>NA</code>, and <code>filter()</code> drops those. Zero rows, no error.</p>
+</div>
+</section>
+<section id="case-2b-where-did-it-go" class="level2">
+<h2 class="anchored" data-anchor-id="case-2b-where-did-it-go">Case #2b: where did it go?</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb88"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(movies)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 651</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb90"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(runtime <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 650</code></pre>
+</div>
+</div>
+<p>. . .</p>
+<div class="bug">
+<p><strong>Bug:</strong> Every movie has a runtime above 0, yet one vanished: its runtime is <code>NA</code>. <code>filter()</code> <strong>quietly drops</strong> rows where the condition is <code>NA</code>.</p>
+</div>
+<div class="notes">
+<p>650 vs 651. This is the first appearance of “who disappears silently?” which becomes the cleaning impact audit in Lab 2.</p>
+</div>
+</section>
+<section id="case-3-the-request" class="level2">
+<h2 class="anchored" data-anchor-id="case-3-the-request">Case #3: the request</h2>
+<blockquote class="blockquote">
+<p>“How many documentaries are in the data?”</p>
+</blockquote>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb92"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb92-1"><a href="#cb92-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb92-2"><a href="#cb92-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(genre <span class="sc">==</span> <span class="st">"Documentary"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb92-3"><a href="#cb92-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="vote">
+<p>Guilty or innocent? Look closely at the column names first.</p>
+</div>
+</section>
+<section id="case-3-the-evidence" class="level2">
+<h2 class="anchored" data-anchor-id="case-3-the-evidence">Case #3: the evidence</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb93"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb93-1"><a href="#cb93-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(genre <span class="sc">==</span> <span class="st">"Documentary"</span>) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 52</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb95"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb95-1"><a href="#cb95-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span> <span class="fu">filter</span>(title_type <span class="sc">==</span> <span class="st">"Documentary"</span>) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 55</code></pre>
+</div>
+</div>
+<p>. . .</p>
+<div class="bug">
+<p><strong>Bug:</strong> The code is fine. The <strong>question</strong> was ambiguous. Two columns, two answers (52 vs 55).</p>
+</div>
+<div class="notes">
+<p>Neither answer is wrong. The navigator’s job is to specify which column, or ask the AI which one it used. Great Week-3 theme: a good spec removes ambiguity.</p>
+</div>
+</section>
+<section id="arrange-sort-rows" class="level2">
+<h2 class="anchored" data-anchor-id="arrange-sort-rows"><code>arrange()</code>: sort rows</h2>
+<p>Now fix Case #0.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb97"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb97-1"><a href="#cb97-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb97-2"><a href="#cb97-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(imdb_rating)) <span class="sc">|&gt;</span></span>
+<span id="cb97-3"><a href="#cb97-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(title, imdb_rating)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 651 × 2
+#&gt;   title                  imdb_rating
+#&gt;   &lt;chr&gt;                        &lt;dbl&gt;
+#&gt; 1 The Godfather, Part II         9  
+#&gt; 2 Promises                       8.5
+#&gt; 3 Django Unchained               8.5
+#&gt; 4 Memento                        8.5
+#&gt; 5 The Prestige                   8.5
+#&gt; # ℹ 646 more rows</code></pre>
+</div>
+</div>
+</section>
+<section id="mutate-make-new-columns" class="level2">
+<h2 class="anchored" data-anchor-id="mutate-make-new-columns"><code>mutate()</code>: make new columns</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb99"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb99-1"><a href="#cb99-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb99-2"><a href="#cb99-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">runtime_hrs =</span> runtime <span class="sc">/</span> <span class="dv">60</span>) <span class="sc">|&gt;</span></span>
+<span id="cb99-3"><a href="#cb99-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(title, runtime, runtime_hrs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 651 × 3
+#&gt;   title                runtime runtime_hrs
+#&gt;   &lt;chr&gt;                  &lt;dbl&gt;       &lt;dbl&gt;
+#&gt; 1 Filly Brown               80        1.33
+#&gt; 2 The Dish                 101        1.68
+#&gt; 3 Waiting for Guffman       84        1.4 
+#&gt; 4 The Age of Innocence     139        2.32
+#&gt; 5 Malevolence               90        1.5 
+#&gt; # ℹ 646 more rows</code></pre>
+</div>
+</div>
+</section>
+<section id="four-verbs-four-jobs" class="level2">
+<h2 class="anchored" data-anchor-id="four-verbs-four-jobs">Four verbs, four jobs</h2>
+<ul>
+<li><code>select()</code> picks <strong>columns</strong></li>
+<li><code>filter()</code> keeps <strong>rows</strong></li>
+<li><code>arrange()</code> changes <strong>order</strong></li>
+<li><code>mutate()</code> makes <strong>new columns</strong></li>
+</ul>
+</section>
+</section>
+<section id="movie-night" class="level1" data-background-color="#f3f6ea">
+<h1 data-background-color="#f3f6ea">Movie Night</h1>
+<div class="notes">
+<p>Time ~0:60–0:70. Teams of 3–4. Rounds 1–2 by hand (5 min), Round 3 with AI (5 min). If short on time, drop Round 2.</p>
+</div>
+<section id="how-movie-night-works" class="level2">
+<h2 class="anchored" data-anchor-id="how-movie-night-works">How Movie Night works</h2>
+<p>Rounds 1 and 2: <strong>by hand</strong>.</p>
+<p>Round 3: <strong>with your AI</strong>, and you audit it.</p>
+<ul>
+<li>Correct answer: <strong>+1</strong></li>
+<li>Each bug you catch in the AI’s code: <strong>+1</strong></li>
+</ul>
+</section>
+<section id="round-1-by-hand" class="level2">
+<h2 class="anchored" data-anchor-id="round-1-by-hand">Round 1 (by hand)</h2>
+<p>Among <strong>R-rated Feature Films</strong> longer than <strong>150 minutes</strong>, which has the <strong>highest IMDb rating</strong>?</p>
+<div class="swap">
+<p>Columns: <code>mpaa_rating</code>, <code>title_type</code>, <code>runtime</code>, <code>imdb_rating</code></p>
+</div>
+<div class="notes">
+<p>Answer: The Godfather, Part II (202 min, IMDb 9.0). Same six rows as Challenge 3: all six are Feature Films, so adding the title_type condition doesn’t change the result. Good moment to point out that the extra condition is still the safer spec.</p>
+</div>
+</section>
+<section id="round-2-by-hand" class="level2">
+<h2 class="anchored" data-anchor-id="round-2-by-hand">Round 2 (by hand)</h2>
+<p>Which <strong>Documentary</strong> (<code>title_type</code>) has the <strong>lowest</strong> <code>audience_score</code>?</p>
+<div class="notes">
+<p>Answer: Sea Monsters: A Prehistoric Adventure (68). Next are Blind Spot: Hitler’s Secretary (70) and Kicking It (71). Watch for teams that use <code>genre == "Documentary"</code> instead: the question names title_type.</p>
+</div>
+</section>
+<section id="a-good-prompt-is-a-spec" class="level2">
+<h2 class="anchored" data-anchor-id="a-good-prompt-is-a-spec">A good prompt is a spec</h2>
+<pre><code>I have a tibble called `movies` with columns
+title, studio, genre, runtime, imdb_rating.
+
+Using dplyr and the |&gt; pipe, find the studio with the
+most movies.
+
+Then explain each line in one plain-English sentence.</code></pre>
+<p>. . .</p>
+<div class="vote">
+<p>Data, task, tools, and ask for the explanation. The explanation feeds your Restate step.</p>
+</div>
+</section>
+<section id="round-3-with-your-ai" class="level2">
+<h2 class="anchored" data-anchor-id="round-3-with-your-ai">Round 3 (with your AI)</h2>
+<p>Which <strong>studio</strong> released the most movies in this dataset?</p>
+<ol type="1">
+<li>Paste the spec into your AI</li>
+<li>Run its code</li>
+<li><strong>Audit Loop</strong>: restate every line</li>
+<li>Does the answer make sense? Hunt for bugs.</li>
+</ol>
+<div class="notes">
+<p>The AI will likely use <code>count()</code> or <code>group_by()</code> + <code>summarize()</code>: verbs students haven’t met. That is the point: restate each step, ask the AI to explain, and check the answer by another route. Backup answer is in the appendix if no AI is available.</p>
+<p>Correct answer: Paramount Pictures (37 movies). Bugs to listen for: ascending sort, an NA studio group sneaking in, or counting <code>distinct(studio)</code> instead of movies per studio.</p>
+</div>
+</section>
+</section>
+<section id="wrap-up" class="level1" data-background-color="#f3f6ea">
+<h1 data-background-color="#f3f6ea">Wrap-up</h1>
+<div class="notes">
+<p>Time 0:70–0:75.</p>
+</div>
+<section id="bug-bounty-results" class="level2">
+<h2 class="anchored" data-anchor-id="bug-bounty-results">Bug Bounty results</h2>
+<p>Which team has the most points?</p>
+<p>. . .</p>
+<p>Bugs from today:</p>
+<ul>
+<li><code>arrange()</code> sorts <strong>ascending</strong> by default</li>
+<li><code>NA</code> spreads through math</li>
+<li><code>==</code> is not <code>%in%</code></li>
+<li><code>!= NA</code> never works</li>
+<li>Ambiguous questions get confident answers</li>
+</ul>
+</section>
+<section id="the-audit-loop-1" class="level2">
+<h2 class="anchored" data-anchor-id="the-audit-loop-1">The Audit Loop</h2>
+<ol type="1">
+<li><strong>Read</strong> it</li>
+<li><strong>Run</strong> it</li>
+<li><strong>Restate</strong> it</li>
+<li><strong>Refine</strong> or <strong>Reject</strong> it</li>
+</ol>
+</section>
+<section id="exit-ticket" class="level2">
+<h2 class="anchored" data-anchor-id="exit-ticket">Exit ticket</h2>
+<p>Three quick answers (paper or your course channel):</p>
+<ol type="1">
+<li>Name the four steps of the Audit Loop</li>
+<li>One thing you’ll now double-check in AI code</li>
+<li>Your muddiest point</li>
+</ol>
+</section>
+<section id="before-wednesday" class="level2">
+<h2 class="anchored" data-anchor-id="before-wednesday">Before Wednesday</h2>
+<ul>
+<li>Re-run this file top to bottom</li>
+<li>Skim <em>R for Data Science</em>, <a href="https://r4ds.hadley.nz/data-transform.html">Data transformation</a> (about 20 min)</li>
+<li>Bring <strong>your best AI bug</strong> to Wednesday’s warm-up</li>
+</ul>
+<p>. . .</p>
+<p>Wednesday: summarizing, joins, pivots, and big data with Parquet.</p>
+</section>
+</section>
+<section id="appendix" class="level1" data-background-color="#f3f6ea">
+<h1 data-background-color="#f3f6ea">Appendix</h1>
+<section id="backup-ai-answer-for-round-3" class="level2">
+<h2 class="anchored" data-anchor-id="backup-ai-answer-for-round-3">Backup: AI answer for Round 3</h2>
+<p>Use this if no AI is available. Audit it!</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb102"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb102-1"><a href="#cb102-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb102-2"><a href="#cb102-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(studio) <span class="sc">|&gt;</span></span>
+<span id="cb102-3"><a href="#cb102-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb102-4"><a href="#cb102-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(n) <span class="sc">|&gt;</span></span>
+<span id="cb102-5"><a href="#cb102-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="notes">
+<p>Same bug as Case #0 in a new costume: <code>arrange(n)</code> is ascending, so this returns a studio with a single movie. Fix: <code>arrange(desc(n))</code>. Pattern: AI repeats failure modes, so learn the common ones.</p>
+</div>
+</section>
+<section id="backup-running-it" class="level2">
+<h2 class="anchored" data-anchor-id="backup-running-it">Backup: running it</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb103"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb103-1"><a href="#cb103-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb103-2"><a href="#cb103-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(studio) <span class="sc">|&gt;</span></span>
+<span id="cb103-3"><a href="#cb103-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb103-4"><a href="#cb103-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(n) <span class="sc">|&gt;</span></span>
+<span id="cb103-5"><a href="#cb103-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 1 × 2
+#&gt;   studio             n
+#&gt;   &lt;chr&gt;          &lt;int&gt;
+#&gt; 1 7-57 Releasing     1</code></pre>
+</div>
+</div>
+</section>
+<section id="backup-the-fix" class="level2">
+<h2 class="anchored" data-anchor-id="backup-the-fix">Backup: the fix</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb105"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb105-1"><a href="#cb105-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb105-2"><a href="#cb105-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(studio) <span class="sc">|&gt;</span></span>
+<span id="cb105-3"><a href="#cb105-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb105-4"><a href="#cb105-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(n)) <span class="sc">|&gt;</span></span>
+<span id="cb105-5"><a href="#cb105-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 1 × 2
+#&gt;   studio                 n
+#&gt;   &lt;chr&gt;              &lt;int&gt;
+#&gt; 1 Paramount Pictures    37</code></pre>
+</div>
+</div>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>STAT 531: Ethics and Practice of Data Science</p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

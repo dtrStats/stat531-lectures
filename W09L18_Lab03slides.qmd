@@ -1,0 +1,18 @@
+---
+title: "Session 7 Slides: Lab 2 Kickoff"
+description: "Goals for Lab 2 (cleaning and hygiene), the cleaning impact audit, and ellmer extraction vs. regex"
+date: 2026-11-25
+categories: [Slides]
+format: revealjs
+draft: true
+---
+
+## Planned outline
+
+- Kickoff and goals
+- Cleaning impact audit: who is removed after each step?
+- ellmer structured extraction vs. regex: accuracy, cost, reproducibility
+- Pointer to the lab instructions in the course project repo (tested cleaning functions, validation report, wellsync_clean.parquet)
+- Note: the Wednesday before Thanksgiving, so design it to work asynchronously
+
+*Draft: remove `draft: true` from the top of this file to publish it.*

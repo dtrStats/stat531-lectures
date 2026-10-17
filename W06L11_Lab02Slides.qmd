@@ -1,0 +1,16 @@
+---
+title: "Session 4 Slides: Lab 1 Kickoff"
+description: "Goals for Lab 1 (ingestion and EDA), an ellmer mini-intro, and a planted-bug code review"
+date: 2026-11-02
+categories: [Slides]
+format: revealjs
+draft: true
+---
+
+## Planned outline
+
+- Kickoff and goals
+- ellmer mini-intro and a planted-bug code review
+- Pointer to the lab instructions in the course project repo (teams open the Parquet with arrow, profile it, and start the grime issues log and AI audit log)
+
+*Draft: remove `draft: true` from the top of this file to publish it.*

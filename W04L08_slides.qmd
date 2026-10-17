@@ -1,0 +1,20 @@
+---
+title: "Session 2 Slides: Summarize, Combine, and Scale"
+description: "Grouped summaries, joins with row-count checks, pivots, and big data with arrow and Parquet"
+date: 2026-10-21
+categories: [Slides]
+format: revealjs
+draft: true
+---
+
+## Planned outline
+
+- Warm-up bug hunt (bring your best AI bug)
+- group_by / summarize / count and the .by argument
+- Joins with join_by(); checking row counts before and after; anti_join; many-to-many
+- pivot_longer / pivot_wider
+- arrow: why Parquet, open_dataset(), lazy filter/select, collect(), inspecting the query plan
+- Big-data demo dataset: Seattle library checkouts (R4DS arrow chapter)
+- Audit beat: silent failures (join row inflation, NA handling, what lazy evaluation hides)
+
+*Draft: remove `draft: true` from the top of this file to publish it.*
