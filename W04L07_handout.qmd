@@ -32,7 +32,7 @@ Every section follows the same pattern: a short explanation, code you can run, a
 4. **Refine** it or **Reject** it.
 :::
 
-**Setup for the examples.** Choose a directory to work from inside of Positron and create a `data` folder in that directory. Every example uses `movies.csv` (651 movies, 32 columns). [Download it here](data/movies.csv) and put it in the `data` folder you created. The setup code for this handout is:
+**Setup for the examples.** Choose a directory to work from inside of Positron and create a `data` folder in that directory. Every example uses `movies.csv` (651 movies, 32 columns). [Download it here](data/movies.csv) and put it in the `data` folder you created. The setup code for this handout is below:
 
 ```{r}
 #| eval: false
@@ -343,16 +343,7 @@ Related readers: `read_tsv()` (tabs), `read_delim()` (any delimiter), `readxl::r
 
 **Where is my file?** Paths like `"data/movies.csv"` are relative to your **working directory**. Check it with `getwd()`. In Positron, opening a folder as your workspace sets the working directory to that folder.
 
-::: {.callout-warning title="Audit it: the guessed type can destroy information"}
-ZIP codes look like numbers, and R will happily treat them as numbers, dropping the leading zero.
 
-```{r}
-read_csv(I("zip,n\n01234,5"))
-read_csv(I("zip,n\n01234,5"), col_types = cols(zip = col_character()))
-```
-
-Always check the column types after reading a file, and set `col_types` for identifiers, codes, and anything with leading zeros.
-:::
 
 # The pipe
 

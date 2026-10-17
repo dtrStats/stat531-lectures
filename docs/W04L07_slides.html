@@ -1261,7 +1261,7 @@ display:block!important;
 <p><strong>You navigate</strong>: choose the destination, read the map, check the route</p>
 <div class="fragment">
 <p>Fast driving is great. Driving into a lake is not.</p>
-<p>You can’t catch a wrong turn on a map you can’t read, so we learn to read R.</p>
+<p>You can’t catch a wrong turn on a map you can’t read.</p>
 </div>
 </section>
 <section id="what-does-a-navigator-do" class="slide level2">
@@ -1283,35 +1283,14 @@ display:block!important;
 </ol>
 <div class="fragment">
 <div class="vote">
-<p>Restate is the superpower. If you can’t say what a line does, you can’t vouch for it.</p>
+<p><strong>Restate</strong> is the <em>skill you want to develop</em>. If you can’t say what a line does, you can’t vouch for it.</p>
 </div>
 </div>
-</section>
-<section id="bug-bounty-rules" class="slide level2">
-<h2>Bug Bounty rules</h2>
-<ul>
-<li>Every bug you catch: <strong>+1 point</strong> for your team</li>
-<li>Explain <em>why</em> an AI would make that mistake: <strong>+1 bonus</strong></li>
-<li>Bugs hide in code <strong>and</strong> in answers that look fine</li>
-</ul>
-<aside class="notes">
-<p>Keep the tally visible. Call on a different team each round.</p>
-<style type="text/css">
-span.MJX_Assistive_MathML {
-position:absolute!important;
-clip: rect(1px, 1px, 1px, 1px);
-padding: 1px 0 0 0!important;
-border: 0!important;
-height: 1px!important;
-width: 1px!important;
-overflow: hidden!important;
-display:block!important;
-}</style></aside>
 </section>
 <section id="case-0-the-request" class="slide level2">
 <h2>Case #0: the request</h2>
 <blockquote>
-<p>“Show me the 5 highest-rated movies on IMDb.”</p>
+<p>“Show me the 5 best-rated movies on IMDb.”</p>
 </blockquote>
 <p>The AI wrote:</p>
 <div class="cell">
@@ -1345,19 +1324,6 @@ display:block!important;
 <div class="bug">
 <p><strong>Bug:</strong> <code>arrange()</code> sorts ascending, so these are the five worst. No error, no warning, a clean table that looks right. Errors are the friendly failures.</p>
 </div>
-<aside class="notes">
-<p>No. <code>arrange()</code> sorts ascending by default, so these are the five WORST rated (Disaster Movie 1.9, Epic Movie 2.3, Battlefield Earth 2.4, Viva Knievel! 2.7, Doogal 2.8). The code is on the previous slide: flip back if someone wants to see it. Fix later with <code>desc()</code>. Award points.</p>
-<style type="text/css">
-span.MJX_Assistive_MathML {
-position:absolute!important;
-clip: rect(1px, 1px, 1px, 1px);
-padding: 1px 0 0 0!important;
-border: 0!important;
-height: 1px!important;
-width: 1px!important;
-overflow: hidden!important;
-display:block!important;
-}</style></aside>
 </div>
 </section></section>
 <section>
@@ -1398,7 +1364,7 @@ display:block!important;
 </section>
 <section id="vectors" class="slide level2">
 <h2>Vectors</h2>
-<p>A vector is a row of values of one type. <code>c()</code> combines.</p>
+<p>A vector is a collection of values of the same type. <code>c()</code> combines.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a></a>scores <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">72</span>, <span class="dv">88</span>, <span class="dv">91</span>, <span class="dv">65</span>)</span>
 <span id="cb18-2"><a></a><span class="fu">mean</span>(scores)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>

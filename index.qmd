@@ -26,7 +26,7 @@ Course materials for learning R, data wrangling, visualization, and data cleanin
 
 ## Sessions
 
-New sessions appear in the table below as they are published. Slides are for class and handouts are the detailed reference. The lab's 2 and 3 instructions will be pushed into your team's repo when the time comes.
+New sessions appear in the table below as they are published. Slides are for class and handouts are the detailed reference. Lab's 2 and 3 instructions will be pushed into your team's repo when the time comes.
 
 ::: {#listing}
 :::

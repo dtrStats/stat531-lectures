@@ -138,7 +138,7 @@ Target: start at 0:08, finish by 0:19. Framing plus the first live bug.
 
 Fast driving is great. Driving into a lake is not.
 
-You can't catch a wrong turn on a map you can't read, so we learn to read R.
+You can't catch a wrong turn on a map you can't read.
 
 ## What does a navigator do?
 
@@ -157,22 +157,13 @@ You can't catch a wrong turn on a map you can't read, so we learn to read R.
 . . .
 
 ::: {.vote}
-Restate is the superpower. If you can't say what a line does, you can't vouch for it.
+**Restate** is the *skill you want to develop*. If you can't say what a line does, you can't vouch for it.
 :::
 
-## Bug Bounty rules
-
-- Every bug you catch: **+1 point** for your team
-- Explain *why* an AI would make that mistake: **+1 bonus**
-- Bugs hide in code **and** in answers that look fine
-
-::: {.notes}
-Keep the tally visible. Call on a different team each round.
-:::
 
 ## Case #0: the request
 
-> "Show me the 5 highest-rated movies on IMDb."
+> "Show me the 5 best-rated movies on IMDb."
 
 The AI wrote:
 
@@ -208,9 +199,6 @@ Hands up: yes or no?
 **Bug:** `arrange()` sorts ascending, so these are the five worst. No error, no warning, a clean table that looks right. Errors are the friendly failures.
 :::
 
-::: {.notes}
-No. `arrange()` sorts ascending by default, so these are the five WORST rated (Disaster Movie 1.9, Epic Movie 2.3, Battlefield Earth 2.4, Viva Knievel! 2.7, Doogal 2.8). The code is on the previous slide: flip back if someone wants to see it. Fix later with `desc()`. Award points.
-:::
 
 # Reading the map {background-color="#f3f6ea"}
 
@@ -231,7 +219,7 @@ Read `<-` as "gets". A function has a name and arguments in parentheses.
 
 ## Vectors
 
-A vector is a row of values of one type. `c()` combines.
+A vector is a collection of values of the same type. `c()` combines.
 
 ```{r}
 scores <- c(72, 88, 91, 65)

@@ -18,14 +18,14 @@
     "href": "index.html#sessions",
     "title": "R in the AI Era",
     "section": "Sessions",
-    "text": "Sessions\nNew sessions appear in the table below as they are published. Slides are for class and handouts are the detailed reference. The lab instructions for Sessions 4 and 7 will be pushed into your team’s repo when the time comes.\n\n\n\n\n\n\nDate\n\n\n\nTitle\n\n\n\nDescription\n\n\n\nCategories\n\n\n\n\n\n\n\n\nOct 19, 2026\n\n\nSession 1 Handout: R Basics and Data Manipulation\n\n\nFull reference for R basics and the core dplyr verbs, with Audit it boxes and practice\n\n\nHandout\n\n\n\n\n\n\nOct 19, 2026\n\n\nYou Navigate, AI Drives\n\n\nDriver-navigator mindset, the Audit Loop, R essentials, and the first dplyr verbs\n\n\nSlides\n\n\n\n\n\n\nNo matching items\n\nCourse dataset for the in-class examples: movies.csv"
+    "text": "Sessions\nNew sessions appear in the table below as they are published. Slides are for class and handouts are the detailed reference. Lab’s 2 and 3 instructions will be pushed into your team’s repo when the time comes.\n\n\n\n\n\n\nDate\n\n\n\nTitle\n\n\n\nDescription\n\n\n\nCategories\n\n\n\n\n\n\n\n\nOct 19, 2026\n\n\nSession 1 Handout: R Basics and Data Manipulation\n\n\nFull reference for R basics and the core dplyr verbs, with Audit it boxes and practice\n\n\nHandout\n\n\n\n\n\n\nOct 19, 2026\n\n\nYou Navigate, AI Drives\n\n\nDriver-navigator mindset, the Audit Loop, R essentials, and the first dplyr verbs\n\n\nSlides\n\n\n\n\n\n\nNo matching items\n\nCourse dataset for the in-class examples: movies.csv"
   },
   {
     "objectID": "W04L07_handout.html",
     "href": "W04L07_handout.html",
     "title": "Session 1 Handout: R Basics and Data Manipulation",
     "section": "",
-    "text": "The slides move fast and are built for discussion. This handout is the slow, complete version: read it before class if you like, and return to it when you are auditing code.\nEvery section follows the same pattern: a short explanation, code you can run, and Audit it boxes that show a mistake an AI assistant (or a human) could easily make.\n\n\n\n\n\n\nThe Audit Loop\n\n\n\n\nRead the code.\nRun it.\nRestate it in plain English. If you cannot say what a line does, you cannot vouch for it.\nRefine it or Reject it.\n\n\n\nSetup for the examples. Choose a directory to work from inside of Positron and create a data folder in that directory. Every example uses movies.csv (651 movies, 32 columns). Download it here and put it in the data folder you created. The setup code for this handout is:\n\nlibrary(tidyverse)\nmovies &lt;- read_csv(\"data/movies.csv\")\n\nWhat changed since the older course notes. Some syntax has been modernized. The short version: use the native pipe |&gt;, use slice_max() and slice_sample() instead of sample_n(), and use if_else() and case_when() for conditions. Appendix E has a full old-to-new table."
+    "text": "The slides move fast and are built for discussion. This handout is the slow, complete version: read it before class if you like, and return to it when you are auditing code.\nEvery section follows the same pattern: a short explanation, code you can run, and Audit it boxes that show a mistake an AI assistant (or a human) could easily make.\n\n\n\n\n\n\nThe Audit Loop\n\n\n\n\nRead the code.\nRun it.\nRestate it in plain English. If you cannot say what a line does, you cannot vouch for it.\nRefine it or Reject it.\n\n\n\nSetup for the examples. Choose a directory to work from inside of Positron and create a data folder in that directory. Every example uses movies.csv (651 movies, 32 columns). Download it here and put it in the data folder you created. The setup code for this handout is below:\n\nlibrary(tidyverse)\nmovies &lt;- read_csv(\"data/movies.csv\")"
   },
   {
     "objectID": "W04L07_handout.html#the-types-you-will-meet",
@@ -228,7 +228,7 @@
     "href": "W04L07_slides.html#the-new-division-of-labor",
     "title": "You Navigate, AI Drives",
     "section": "The new division of labor",
-    "text": "The new division of labor\nAI drives: writes code fast\nYou navigate: choose the destination, read the map, check the route\n\nFast driving is great. Driving into a lake is not.\nYou can’t catch a wrong turn on a map you can’t read, so we learn to read R."
+    "text": "The new division of labor\nAI drives: writes code fast\nYou navigate: choose the destination, read the map, check the route\n\nFast driving is great. Driving into a lake is not.\nYou can’t catch a wrong turn on a map you can’t read."
   },
   {
     "objectID": "W04L07_slides.html#what-does-a-navigator-do",
@@ -242,7 +242,7 @@
     "href": "W04L07_slides.html#the-audit-loop",
     "title": "You Navigate, AI Drives",
     "section": "The Audit Loop",
-    "text": "The Audit Loop\n\nRead it\nRun it\nRestate it in plain English\nRefine it or Reject it\n\n\n\nRestate is the superpower. If you can’t say what a line does, you can’t vouch for it."
+    "text": "The Audit Loop\n\nRead it\nRun it\nRestate it in plain English\nRefine it or Reject it\n\n\n\nRestate is the skill you want to develop. If you can’t say what a line does, you can’t vouch for it."
   },
   {
     "objectID": "W04L07_slides.html#bug-bounty-rules",
@@ -256,14 +256,14 @@
     "href": "W04L07_slides.html#case-0-the-request",
     "title": "You Navigate, AI Drives",
     "section": "Case #0: the request",
-    "text": "Case #0: the request\n\n“Show me the 5 highest-rated movies on IMDb.”\n\nThe AI wrote:\n\nmovies |&gt;\n  arrange(imdb_rating) |&gt;\n  select(title, imdb_rating) |&gt;\n  head(5)\n\n\nWith your partner (60 seconds): restate each line in plain English. Does it match the request? Navigator speaks, driver listens."
+    "text": "Case #0: the request\n\n“Show me the 5 best-rated movies on IMDb.”\n\nThe AI wrote:\n\nmovies |&gt;\n  arrange(imdb_rating) |&gt;\n  select(title, imdb_rating) |&gt;\n  head(5)\n\n\nWith your partner (60 seconds): restate each line in plain English. Does it match the request? Navigator speaks, driver listens."
   },
   {
     "objectID": "W04L07_slides.html#run-it-does-this-answer-the-request",
     "href": "W04L07_slides.html#run-it-does-this-answer-the-request",
     "title": "You Navigate, AI Drives",
     "section": "Run it: does this answer the request?",
-    "text": "Run it: does this answer the request?\n\n\n#&gt; # A tibble: 5 × 2\n#&gt;   title             imdb_rating\n#&gt;   &lt;chr&gt;                   &lt;dbl&gt;\n#&gt; 1 Disaster Movie            1.9\n#&gt; 2 Epic Movie                2.3\n#&gt; 3 Battlefield Earth         2.4\n#&gt; 4 Viva Knievel!             2.7\n#&gt; 5 Doogal                    2.8\n\n\n\nHands up: yes or no?\n\n\n\nBug: arrange() sorts ascending, so these are the five worst. No error, no warning, a clean table that looks right. Errors are the friendly failures.\n\n\nNo. arrange() sorts ascending by default, so these are the five WORST rated (Disaster Movie 1.9, Epic Movie 2.3, Battlefield Earth 2.4, Viva Knievel! 2.7, Doogal 2.8). The code is on the previous slide: flip back if someone wants to see it. Fix later with desc(). Award points."
+    "text": "Run it: does this answer the request?\n\n\n#&gt; # A tibble: 5 × 2\n#&gt;   title             imdb_rating\n#&gt;   &lt;chr&gt;                   &lt;dbl&gt;\n#&gt; 1 Disaster Movie            1.9\n#&gt; 2 Epic Movie                2.3\n#&gt; 3 Battlefield Earth         2.4\n#&gt; 4 Viva Knievel!             2.7\n#&gt; 5 Doogal                    2.8\n\n\n\nHands up: yes or no?\n\n\n\nBug: arrange() sorts ascending, so these are the five worst. No error, no warning, a clean table that looks right. Errors are the friendly failures."
   },
   {
     "objectID": "W04L07_slides.html#names-and-functions",
@@ -277,7 +277,7 @@
     "href": "W04L07_slides.html#vectors",
     "title": "You Navigate, AI Drives",
     "section": "Vectors",
-    "text": "Vectors\nA vector is a row of values of one type. c() combines.\n\nscores &lt;- c(72, 88, 91, 65)\nmean(scores)\n\n#&gt; [1] 79\n\nscores * 2\n\n#&gt; [1] 144 176 182 130"
+    "text": "Vectors\nA vector is a collection of values of the same type. c() combines.\n\nscores &lt;- c(72, 88, 91, 65)\nmean(scores)\n\n#&gt; [1] 79\n\nscores * 2\n\n#&gt; [1] 144 176 182 130"
   },
   {
     "objectID": "W04L07_slides.html#three-types-youll-meet",
