@@ -19,7 +19,11 @@ movies <- read_csv("data/movies.csv", show_col_types = FALSE)
 # Welcome {background-color="#f3f6ea"}
 
 ::: {.notes}
-Time 0:00–0:08 · Warm-up. Press **S** for speaker view. Answers to every poll are in the notes.
+TARGET CLOCK (assumes you skip the flex slides if you fall behind): Welcome 0:00-0:08 | Who's driving 0:08-0:19 | Reading the map 0:19-0:37 | Verbs and the pipe 0:37-0:58 | Movie Night 0:58-0:70 | Wrap-up 0:70-0:75.
+
+FLEX slides, skip if behind: "Two truths and a lie", "Challenge 2", "Case #3". Everything else is core. Material cut from the main flow is in the Appendix.
+
+Press **S** for speaker view. Answers to every poll are in the notes.
 :::
 
 ## Today's route
@@ -87,6 +91,10 @@ An AI told me three things about R, very confidently.
 Vote with fingers (1, 2, 3): which one is the lie?
 :::
 
+::: {.notes}
+FLEX: skip if behind (saves about 4 min). Case #0 makes the same point.
+:::
+
 ## The lie was #2
 
 ```{r}
@@ -108,7 +116,7 @@ Two truths and a lie: #2 is the lie (it returns NA). Don't explain NA yet, we co
 # Who's driving? {background-color="#f3f6ea"}
 
 ::: {.notes}
-Time 0:08–0:20 · Framing + first live bug.
+Target: start at 0:08, finish by 0:19. Framing plus the first live bug.
 :::
 
 ## The new division of labor
@@ -121,20 +129,14 @@ Time 0:08–0:20 · Framing + first live bug.
 
 Fast driving is great. Driving into a lake is not.
 
+You can't catch a wrong turn on a map you can't read, so we learn to read R.
+
 ## What does a navigator do?
 
 1. **Set the destination**: say clearly what you want
 2. **Read the route**: understand the code
 3. **Check the road**: run it, test it
 4. **Make the call**: accept, fix, or reject
-
-## Why learn R if AI writes it?
-
-You can't catch a wrong turn on a map you can't read.
-
-. . .
-
-The scariest bugs don't crash. They run fine and give a believable answer.
 
 ## The Audit Loop
 
@@ -173,68 +175,50 @@ movies |>
   head(5)
 ```
 
-## Your turn: Restate it
-
-With your partner, 60 seconds:
-
-Say each line in plain English. Does it match the request?
-
 ::: {.vote}
-Navigator speaks, driver listens. Then swap.
+With your partner (60 seconds): restate each line in plain English. Does it match the request? Navigator speaks, driver listens.
 :::
 
-## Run it
+## Run it: does this answer the request?
 
 ```{r}
+#| echo: false
 movies |>
   arrange(imdb_rating) |>
   select(title, imdb_rating) |>
   head(5)
 ```
 
+::: {.vote}
+Hands up: yes or no?
+:::
+
 . . .
 
-::: {.vote}
-Does this answer the request? Hands up: yes / no
+::: {.bug}
+**Bug:** `arrange()` sorts ascending, so these are the five worst. No error, no warning, a clean table that looks right. Errors are the friendly failures.
 :::
 
 ::: {.notes}
-No. `arrange()` sorts ascending by default, so these are the five WORST rated (Disaster Movie 1.9, Epic Movie 2.3, Battlefield Earth 2.4, Viva Knievel! 2.7, Doogal 2.8). No error, no warning. Fix later with `desc()`. Award points.
+No. `arrange()` sorts ascending by default, so these are the five WORST rated (Disaster Movie 1.9, Epic Movie 2.3, Battlefield Earth 2.4, Viva Knievel! 2.7, Doogal 2.8). The code is on the previous slide: flip back if someone wants to see it. Fix later with `desc()`. Award points.
 :::
-
-## Why this one is sneaky
-
-- No error
-- No warning
-- A clean table that looks right
-
-. . .
-
-**Errors are the friendly failures.**
 
 # Reading the map {background-color="#f3f6ea"}
 
 ::: {.notes}
-Time 0:20–0:45 · R essentials. Swap driver/navigator at each "swap roles" slide. Always have them PREDICT before running.
+Target: start at 0:19, finish by 0:37. Swap driver/navigator at each "swap roles" slide. Always have them PREDICT before running. Cut material (square brackets) is in the Appendix and in the handout.
 :::
 
-## Names and assignment
+## Names and functions
 
 ```{r}
 n_movies <- 651
 n_movies
-```
-
-Read `<-` as "gets".
-
-## Functions
-
-A function has a name and arguments in parentheses.
-
-```{r}
 sqrt(16)
 round(3.14159, digits = 2)
 ```
+
+Read `<-` as "gets". A function has a name and arguments in parentheses.
 
 ## Vectors
 
@@ -265,14 +249,6 @@ sum(scores > 70)
 
 `TRUE` counts as 1, so `sum()` counts the yeses.
 
-## Square brackets pick things
-
-```{r}
-scores[1]
-scores[c(1, 3)]
-scores[scores > 70]
-```
-
 ## Challenge 1 (swap roles): predict first
 
 ```{r}
@@ -286,9 +262,10 @@ genres %in% c("Drama", "Horror")
 Navigator: predict both outputs out loud. Driver: type and run.
 :::
 
-## Challenge 1: answers
+. . .
 
 ```{r}
+#| echo: false
 genres <- c("Drama", "Comedy", "Horror")
 genres == "Comedy"
 genres %in% c("Drama", "Horror")
@@ -311,15 +288,14 @@ NA > 5
 NA == NA
 ```
 
-. . .
-
 ::: {.vote}
 Vote: what do these print?
 :::
 
-## NA spreads
+. . .
 
 ```{r}
+#| echo: false
 NA + 1
 NA > 5
 NA == NA
@@ -370,7 +346,6 @@ Why NA? Talk to your partner (30 seconds).
 
 ```{r}
 sum(is.na(movies$runtime))
-movies$title[is.na(movies$runtime)]
 mean(movies$runtime, na.rm = TRUE)
 ```
 
@@ -378,6 +353,10 @@ mean(movies$runtime, na.rm = TRUE)
 
 ::: {.bug}
 **Bug:** One missing runtime made the whole mean unknown.
+:::
+
+::: {.notes}
+If asked which movie it is: "The End of America". Finding it with brackets is in the Appendix and the handout; after `filter()` you can do it with `filter(is.na(runtime))`.
 :::
 
 ## Challenge 2 (swap roles): find something weird
@@ -389,18 +368,16 @@ glimpse(movies)
 
 You have 90 seconds. Find **one thing** in this table that looks odd, surprising, or worth asking about.
 
-::: {.swap}
-Share your weird thing with a nearby team.
-:::
-
 ::: {.notes}
-Likely finds: dvd_rel_year / dvd_rel_month / dvd_rel_day missing for 8 movies; studio missing for 8; one missing runtime; two different "documentary" columns (title_type and genre); Upright/Spilled audience ratings. Collect 3 from the room. This sets the "look first" habit used in Lab 1.
+FLEX: skip if behind (saves about 3 min), or move it to the first step of Lab 1 on 11/02. If you run it, no sharing round: collect 2-3 finds from the room only if you are on time.
+
+Likely finds: dvd_rel_year / dvd_rel_month / dvd_rel_day missing for 8 movies; studio missing for 8; one missing runtime; two different "documentary" columns (title_type and genre); Upright/Spilled audience ratings. This sets the "look first" habit used in Lab 1.
 :::
 
 # Verbs and the pipe {background-color="#f3f6ea"}
 
 ::: {.notes}
-Time 0:45–0:70 · dplyr verbs, Bug Court, Movie Night.
+Target: start at 0:37, finish by 0:58. dplyr verbs and Bug Court. Cut material (Challenge 3, Case #2b) is in the Appendix and in the handout.
 :::
 
 ## Data wrangling is a sentence
@@ -426,13 +403,7 @@ movies |>
   head(3)
 ```
 
-## You'll see two pipes
-
-`|>` is built into R.
-
-`%>%` is the older tidyverse pipe. AI and old tutorials use both.
-
-They behave the same for what we do.
+You'll also see `%>%`, the older tidyverse pipe. It behaves the same for what we do.
 
 ::: {.notes}
 In Positron the pipe shortcut is Ctrl/Cmd+Shift+M. A setting decides which pipe it inserts.
@@ -457,35 +428,16 @@ movies |>
 
 - `==` equal, `!=` not equal
 - `>`, `>=`, `<`, `<=`
-- `%in%` is in this set
-- `is.na()` is missing
+- `%in%` is in this set, `is.na()` is missing
 - `,` or `&` means **and**; `|` means **or**
 
-## `filter()` with two conditions
-
 ```{r}
-movies |>
-  select(title, genre, imdb_rating) |>
-  filter(genre == "Drama", imdb_rating > 8)
+movies |> filter(genre == "Drama", imdb_rating > 8) |> nrow()
 ```
 
-## Challenge 3 (swap roles)
-
-Write a pipe that keeps only **R-rated** movies with a **runtime over 150 minutes**, showing `title`, `runtime`, `imdb_rating`.
-
-How many rows do you get?
-
-::: {.swap}
-Columns to use: `mpaa_rating`, `runtime`.
+::: {.notes}
+Dramas rated above 8: 8 movies. Use it to show that a comma means "and".
 :::
-
-## Challenge 3: one answer
-
-```{r}
-movies |>
-  filter(mpaa_rating == "R", runtime > 150) |>
-  select(title, runtime, imdb_rating)
-```
 
 ## Bug Court is in session
 
@@ -550,24 +502,11 @@ movies |> filter(!is.na(dvd_rel_year)) |> nrow()
 . . .
 
 ::: {.bug}
-**Bug:** Anything compared with `NA` is `NA`, and `filter()` drops those. Zero rows, no error.
-:::
-
-## Case #2b: where did it go?
-
-```{r}
-nrow(movies)
-movies |> filter(runtime > 0) |> nrow()
-```
-
-. . .
-
-::: {.bug}
-**Bug:** Every movie has a runtime above 0, yet one vanished: its runtime is `NA`. `filter()` **quietly drops** rows where the condition is `NA`.
+**Bug:** Anything compared with `NA` is `NA`, and `filter()` drops those. Zero rows, no error. The same thing happens quietly elsewhere: `filter(runtime > 0)` turns 651 rows into 650, because one runtime is `NA`.
 :::
 
 ::: {.notes}
-650 vs 651. This is the first appearance of "who disappears silently?" which becomes the cleaning impact audit in Lab 2.
+The 651 to 650 example (Case #2b) is in the Appendix with its code if you want to run it. This is the first appearance of "who disappears silently?", which becomes the cleaning impact audit in Lab 2.
 :::
 
 ## Case #3: the request
@@ -583,6 +522,10 @@ movies |>
 
 ::: {.vote}
 Guilty or innocent? Look closely at the column names first.
+:::
+
+::: {.notes}
+FLEX: skip Case #3 (both slides) if behind, saves about 3 min. The spec slide in Movie Night makes a similar point.
 :::
 
 ## Case #3: the evidence
@@ -630,14 +573,14 @@ movies |>
 # Movie Night {background-color="#f3f6ea"}
 
 ::: {.notes}
-Time ~0:60–0:70. Teams of 3–4. Rounds 1–2 by hand (5 min), Round 3 with AI (5 min). If short on time, drop Round 2.
+Target: start at 0:58, finish by 0:70. Teams of 3-4. Round 1 by hand (4 min), Round 2 with AI (6 min). Round 1 is the students' first hands-on filter practice, so circulate.
 :::
 
 ## How Movie Night works
 
-Rounds 1 and 2: **by hand**.
+Round 1: **by hand**.
 
-Round 3: **with your AI**, and you audit it.
+Round 2: **with your AI**, and you audit it.
 
 - Correct answer: **+1**
 - Each bug you catch in the AI's code: **+1**
@@ -647,19 +590,13 @@ Round 3: **with your AI**, and you audit it.
 Among **R-rated Feature Films** longer than **150 minutes**, which has the **highest IMDb rating**?
 
 ::: {.swap}
-Columns: `mpaa_rating`, `title_type`, `runtime`, `imdb_rating`
+Columns: `mpaa_rating`, `title_type`, `runtime`, `imdb_rating`. Hint: `filter()`, then `arrange(desc(...))`, then `head(1)`.
 :::
 
 ::: {.notes}
-Answer: The Godfather, Part II (202 min, IMDb 9.0). Same six rows as Challenge 3: all six are Feature Films, so adding the title_type condition doesn't change the result. Good moment to point out that the extra condition is still the safer spec.
-:::
+Answer: The Godfather, Part II (202 min, IMDb 9.0). All six R-rated films over 150 minutes in this file are Feature Films, so the title_type condition doesn't change the result; still point out it is the safer spec.
 
-## Round 2 (by hand)
-
-Which **Documentary** (`title_type`) has the **lowest** `audience_score`?
-
-::: {.notes}
-Answer: Sea Monsters: A Prehistoric Adventure (68). Next are Blind Spot: Hitler's Secretary (70) and Kicking It (71). Watch for teams that use `genre == "Documentary"` instead: the question names title_type.
+Round 2 by hand (documentary with the lowest audience_score) is in the Appendix if you have extra time.
 :::
 
 ## A good prompt is a spec
@@ -680,7 +617,7 @@ Then explain each line in one plain-English sentence.
 Data, task, tools, and ask for the explanation. The explanation feeds your Restate step.
 :::
 
-## Round 3 (with your AI)
+## Round 2 (with your AI)
 
 Which **studio** released the most movies in this dataset?
 
@@ -698,7 +635,7 @@ Correct answer: Paramount Pictures (37 movies). Bugs to listen for: ascending so
 # Wrap-up {background-color="#f3f6ea"}
 
 ::: {.notes}
-Time 0:70–0:75.
+Target: start at 0:70, finish by 0:75.
 :::
 
 ## Bug Bounty results
@@ -715,12 +652,7 @@ Bugs from today:
 - `!= NA` never works
 - Ambiguous questions get confident answers
 
-## The Audit Loop
-
-1. **Read** it
-2. **Run** it
-3. **Restate** it
-4. **Refine** or **Reject** it
+**Audit Loop:** Read it, Run it, Restate it, Refine or Reject it.
 
 ## Exit ticket
 
@@ -742,7 +674,60 @@ Wednesday: summarizing, joins, pivots, and big data with Parquet.
 
 # Appendix {background-color="#f3f6ea"}
 
-## Backup: AI answer for Round 3
+::: {.notes}
+Backup slides and material moved out of the main flow to save time. All of it is also in the handout.
+:::
+
+## Moved: square brackets pick things
+
+```{r}
+scores[1]
+scores[c(1, 3)]
+scores[scores > 70]
+```
+
+Finding the movie with the missing runtime:
+
+```{r}
+movies$title[is.na(movies$runtime)]
+```
+
+## Moved: Challenge 3 (swap roles)
+
+Write a pipe that keeps only **R-rated** movies with a **runtime over 150 minutes**, showing `title`, `runtime`, `imdb_rating`.
+
+How many rows do you get?
+
+::: {.swap}
+Columns to use: `mpaa_rating`, `runtime`.
+:::
+
+## Moved: Challenge 3 answer
+
+```{r}
+movies |>
+  filter(mpaa_rating == "R", runtime > 150) |>
+  select(title, runtime, imdb_rating)
+```
+
+## Moved: Case #2b, where did it go?
+
+```{r}
+nrow(movies)
+movies |> filter(runtime > 0) |> nrow()
+```
+
+**Bug:** Every movie has a runtime above 0, yet one vanished: its runtime is `NA`. `filter()` **quietly drops** rows where the condition is `NA`.
+
+## Moved: Movie Night, extra round (by hand)
+
+Which **Documentary** (`title_type`) has the **lowest** `audience_score`?
+
+::: {.notes}
+Answer: Sea Monsters: A Prehistoric Adventure (68). Next are Blind Spot: Hitler's Secretary (70) and Kicking It (71). Watch for teams that use `genre == "Documentary"` instead: the question names title_type.
+:::
+
+## Backup: AI answer for Round 2
 
 Use this if no AI is available. Audit it!
 

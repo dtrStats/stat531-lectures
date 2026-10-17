@@ -18,602 +18,7 @@
     "href": "index.html#sessions",
     "title": "R in the AI Era",
     "section": "Sessions",
-    "text": "Sessions\nNew sessions appear in the table below as they are published. Slides are for class and handouts are the detailed reference. The lab instructions for Sessions 4 and 7 live in the course project repo.\n\n\n\n\n\n\nDate\n\n\n\nTitle\n\n\n\nDescription\n\n\n\nCategories\n\n\n\n\n\n\n\n\nOct 19, 2026\n\n\nSession 1 Handout: R Basics and Data Manipulation\n\n\nFull reference for R basics and the core dplyr verbs, with Audit it boxes and practice\n\n\nHandout\n\n\n\n\n\n\nOct 19, 2026\n\n\nYou Navigate, AI Drives\n\n\nDriver-navigator mindset, the Audit Loop, R essentials, and the first dplyr verbs\n\n\nSlides\n\n\n\n\n\n\nNo matching items\n\nCourse dataset for the in-class examples: movies.csv"
-  },
-  {
-    "objectID": "01_handout.html",
-    "href": "01_handout.html",
-    "title": "Session 1 Handout: R Basics and Data Manipulation",
-    "section": "",
-    "text": "The slides move fast and are built for discussion. This handout is the slow, complete version: read it before class if you like, and return to it when you are auditing code.\nEvery section follows the same pattern: a short explanation, code you can run, and Audit it boxes that show a mistake an AI assistant (or a human) could easily make.\n\n\n\n\n\n\nNoteThe Audit Loop\n\n\n\n\nRead the code.\nRun it.\nRestate it in plain English. If you cannot say what a line does, you cannot vouch for it.\nRefine it or Reject it.\n\n\n\nSetup for the examples. Every example uses movies.csv (651 movies, 32 columns). Download it here and put it in a data folder inside your Positron project. The setup code for this handout is:\n\nlibrary(tidyverse)\nmovies &lt;- read_csv(\"data/movies.csv\")\n\nWhat changed since the older course notes. Some syntax has been modernized. The short version: use the native pipe |&gt;, use slice_max() and slice_sample() instead of sample_n(), and use if_else() and case_when() for conditions. Appendix E has a full old-to-new table."
-  },
-  {
-    "objectID": "01_handout.html#the-types-you-will-meet",
-    "href": "01_handout.html#the-types-you-will-meet",
-    "title": "Session 1 Handout: R Basics and Data Manipulation",
-    "section": "4.1 The types you will meet",
-    "text": "4.1 The types you will meet\n\n\n\nType\nExample\nclass()\n\n\n\n\nnumeric (double)\n3.5, 72\n\"numeric\"\n\n\ninteger\n5L\n\"integer\"\n\n\ncharacter\n\"Drama\"\n\"character\"\n\n\nlogical\nTRUE, FALSE\n\"logical\"\n\n\n\n\nclass(72)\n\n#&gt; [1] \"numeric\"\n\nclass(5L)\n\n#&gt; [1] \"integer\"\n\nclass(\"Drama\")\n\n#&gt; [1] \"character\"\n\nclass(TRUE)\n\n#&gt; [1] \"logical\""
-  },
-  {
-    "objectID": "01_handout.html#coercion-when-types-are-mixed",
-    "href": "01_handout.html#coercion-when-types-are-mixed",
-    "title": "Session 1 Handout: R Basics and Data Manipulation",
-    "section": "4.2 Coercion: when types are mixed",
-    "text": "4.2 Coercion: when types are mixed\nA vector holds one type, so R converts everything to the “most flexible” type present. The order is:\nlogical &lt; integer &lt; numeric &lt; character\n\nc(TRUE, 2L)          # logical -&gt; integer\n\n#&gt; [1] 1 2\n\nc(TRUE, 2L, 3.1)     # -&gt; numeric\n\n#&gt; [1] 1.0 2.0 3.1\n\nc(TRUE, 2L, 3.1, \"a\") # -&gt; character\n\n#&gt; [1] \"TRUE\" \"2\"    \"3.1\"  \"a\"\n\n\nYou can also convert on purpose with as.numeric(), as.character(), as.logical(), as.integer().\n\n\n\n\n\n\nTipKey idea\n\n\n\nA vector holds exactly one type, and R converts silently to make that true. After reading or converting data, always check the types.\n\n\n\n\n\n\n\n\nWarningAudit it: converting messy text to numbers\n\n\n\nas.numeric() quietly turns anything it cannot read into NA. Real data is full of text such as \"159.8 lbs\".\n\nas.numeric(c(\"72\", \"159.8 lbs\", \"kg\"))\n\n#&gt; Warning: NAs introduced by coercion\n\n\n#&gt; [1] 72 NA NA\n\n\nR prints a warning, but only once and easily ignored in a long script. After any conversion, count the new NAs: sum(is.na(x)). You will do this with real wearable data in the cleaning sessions."
-  },
-  {
-    "objectID": "01_handout.html#recycling",
-    "href": "01_handout.html#recycling",
-    "title": "Session 1 Handout: R Basics and Data Manipulation",
-    "section": "4.3 Recycling",
-    "text": "4.3 Recycling\nWhen vectors of different lengths are combined, the shorter one is recycled. This is fine for a single number and dangerous otherwise.\n\nc(1, 2, 3, 4) + 10          # 10 is recycled: intended\n\n#&gt; [1] 11 12 13 14\n\nc(1, 2, 3, 4) + c(10, 20)   # recycled in a pattern: legal, rarely intended\n\n#&gt; [1] 11 22 13 24\n\n\n\n1:3 + 1:2    # lengths don't divide evenly: R warns\n\n#&gt; Warning in 1:3 + 1:2: longer object length is not a multiple of shorter object length\n\n\n#&gt; [1] 2 4 4"
-  },
-  {
-    "objectID": "01_handout.html#logical-vectors-yesno-questions",
-    "href": "01_handout.html#logical-vectors-yesno-questions",
-    "title": "Session 1 Handout: R Basics and Data Manipulation",
-    "section": "4.4 Logical vectors: yes/no questions",
-    "text": "4.4 Logical vectors: yes/no questions\nComparisons produce logical vectors. Combine them with & (and), | (or), and ! (not).\n\nscores &gt; 70\n\n#&gt; [1]  TRUE  TRUE  TRUE FALSE\n\nscores &gt; 70 & scores &lt; 90\n\n#&gt; [1]  TRUE  TRUE FALSE FALSE\n\n!(scores &gt; 70)\n\n#&gt; [1] FALSE FALSE FALSE  TRUE\n\n\nBecause TRUE counts as 1 and FALSE as 0, you can count and take proportions:\n\nsum(scores &gt; 70)      # how many\n\n#&gt; [1] 3\n\nmean(scores &gt; 70)     # what fraction\n\n#&gt; [1] 0.75\n\nany(scores &gt; 90)      # is at least one TRUE?\n\n#&gt; [1] TRUE\n\nall(scores &gt; 60)      # are all TRUE?\n\n#&gt; [1] TRUE\n\n\n%in% asks whether each value appears anywhere in a set. Compare it with ==:\n\ngenres &lt;- c(\"Drama\", \"Comedy\", \"Horror\")\ngenres == \"Comedy\"\n\n#&gt; [1] FALSE  TRUE FALSE\n\ngenres %in% c(\"Drama\", \"Horror\")\n\n#&gt; [1]  TRUE FALSE  TRUE\n\n\n\n\n\n\n\n\nTipKey idea\n\n\n\nComparisons make logical vectors, and logical vectors can be counted (sum), turned into proportions (mean), and used to select (x[condition]). Most of filter() is this idea applied to a column."
-  },
-  {
-    "objectID": "01_handout.html#finding-and-counting-nas",
-    "href": "01_handout.html#finding-and-counting-nas",
-    "title": "Session 1 Handout: R Basics and Data Manipulation",
-    "section": "6.1 Finding and counting NAs",
-    "text": "6.1 Finding and counting NAs\nNA == NA is NA, so you cannot test for missing values with ==. Use is.na().\n\nx &lt;- c(4, 8, NA, 2)\nis.na(x)\n\n#&gt; [1] FALSE FALSE  TRUE FALSE\n\nsum(is.na(x))     # how many are missing\n\n#&gt; [1] 1\n\nmean(is.na(x))    # what fraction\n\n#&gt; [1] 0.25"
-  },
-  {
-    "objectID": "01_handout.html#summaries-with-missing-values",
-    "href": "01_handout.html#summaries-with-missing-values",
-    "title": "Session 1 Handout: R Basics and Data Manipulation",
-    "section": "6.2 Summaries with missing values",
-    "text": "6.2 Summaries with missing values\n\nmean(x)                  # the unknown spreads\n\n#&gt; [1] NA\n\nmean(x, na.rm = TRUE)    # remove NAs first\n\n#&gt; [1] 4.666667\n\n\n\n\n\n\n\n\nTipna.rm = TRUE is a decision, not a fix\n\n\n\nUsing na.rm = TRUE means “compute this on the cases where I happen to know the value”. That is only reasonable if the missing cases are not systematically different from the observed ones. In real data they often are. For example, if a smartwatch drops readings more often for certain users, ignoring missing readings quietly changes whose data you are analyzing. Always ask: who is missing, and why?\n\n\n\n\n\n\n\n\nWarningAudit it: NA inside a logical subset\n\n\n\n\nx[x &gt; 5]\n\n#&gt; [1]  8 NA\n\n\nThe result contains an NA row for the unknown. Applying the same idea to a data frame with filter() behaves differently (it drops those rows), which is also a quiet change. See Section 10."
-  },
-  {
-    "objectID": "01_handout.html#looking-at-a-data-frame",
-    "href": "01_handout.html#looking-at-a-data-frame",
-    "title": "Session 1 Handout: R Basics and Data Manipulation",
-    "section": "7.1 Looking at a data frame",
-    "text": "7.1 Looking at a data frame\n\ndim(movies)       # rows, columns\n\n#&gt; [1] 651  32\n\nnrow(movies)\n\n#&gt; [1] 651\n\nnames(movies)[1:6]\n\n#&gt; [1] \"title\"       \"title_type\"  \"genre\"       \"runtime\"     \"mpaa_rating\" \"studio\"\n\n\nglimpse() shows every column, its type, and the first values. Make it your first move on any new table.\n\nmovies |&gt; select(title:mpaa_rating) |&gt; glimpse()\n\n#&gt; Rows: 651\n#&gt; Columns: 5\n#&gt; $ title       &lt;chr&gt; \"Filly Brown\", \"The Dish\", \"Waiting for Guffman\", \"The Age of Innoce…\n#&gt; $ title_type  &lt;chr&gt; \"Feature Film\", \"Feature Film\", \"Feature Film\", \"Feature Film\", \"Fea…\n#&gt; $ genre       &lt;chr&gt; \"Drama\", \"Drama\", \"Comedy\", \"Drama\", \"Horror\", \"Documentary\", \"Drama…\n#&gt; $ runtime     &lt;dbl&gt; 80, 101, 84, 139, 90, 78, 142, 93, 88, 119, 127, 108, 110, 100, 111,…\n#&gt; $ mpaa_rating &lt;chr&gt; \"R\", \"PG-13\", \"R\", \"PG\", \"R\", \"Unrated\", \"PG-13\", \"R\", \"Unrated\", \"U…\n\n\nsummary() gives quick numeric summaries, including how many NAs each column has:\n\nsummary(movies$runtime)\n\n#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's \n#&gt;    39.0    92.0   103.0   105.8   115.8   267.0       1\n\n\n\n\n\n\n\n\nTipKey idea\n\n\n\nA data frame is a list of equal-length vectors, so each column is a vector and every vector rule above applies to it."
-  },
-  {
-    "objectID": "01_handout.html#select-choose-columns",
-    "href": "01_handout.html#select-choose-columns",
-    "title": "Session 1 Handout: R Basics and Data Manipulation",
-    "section": "10.1 select(): choose columns",
-    "text": "10.1 select(): choose columns\n\nmovies |&gt; select(title, genre, imdb_rating)\n\n#&gt; # A tibble: 651 × 3\n#&gt;   title                genre       imdb_rating\n#&gt;   &lt;chr&gt;                &lt;chr&gt;             &lt;dbl&gt;\n#&gt; 1 Filly Brown          Drama               5.5\n#&gt; 2 The Dish             Drama               7.3\n#&gt; 3 Waiting for Guffman  Comedy              7.6\n#&gt; 4 The Age of Innocence Drama               7.2\n#&gt; 5 Malevolence          Horror              5.1\n#&gt; 6 Old Partner          Documentary         7.8\n#&gt; # ℹ 645 more rows\n\n\nSelection helpers save typing:\n\nmovies |&gt; select(title, ends_with(\"score\"))\n\n#&gt; # A tibble: 651 × 3\n#&gt;   title                critics_score audience_score\n#&gt;   &lt;chr&gt;                        &lt;dbl&gt;          &lt;dbl&gt;\n#&gt; 1 Filly Brown                     45             73\n#&gt; 2 The Dish                        96             81\n#&gt; 3 Waiting for Guffman             91             91\n#&gt; 4 The Age of Innocence            80             76\n#&gt; 5 Malevolence                     33             27\n#&gt; 6 Old Partner                     91             86\n#&gt; # ℹ 645 more rows\n\nmovies |&gt; select(title, starts_with(\"thtr\"))\n\n#&gt; # A tibble: 651 × 4\n#&gt;   title                thtr_rel_year thtr_rel_month thtr_rel_day\n#&gt;   &lt;chr&gt;                        &lt;dbl&gt;          &lt;dbl&gt;        &lt;dbl&gt;\n#&gt; 1 Filly Brown                   2013              4           19\n#&gt; 2 The Dish                      2001              3           14\n#&gt; 3 Waiting for Guffman           1996              8           21\n#&gt; 4 The Age of Innocence          1993             10            1\n#&gt; 5 Malevolence                   2004              9           10\n#&gt; 6 Old Partner                   2009              1           15\n#&gt; # ℹ 645 more rows\n\nmovies |&gt; select(where(is.numeric)) |&gt; ncol()   # how many numeric columns\n\n#&gt; [1] 11\n\nmovies |&gt; select(-starts_with(\"dvd\"), -ends_with(\"url\")) |&gt; ncol()\n\n#&gt; [1] 27\n\n\nOther helpers: contains(), matches() (regular expression), everything(), last_col(). Rename with rename(new = old), and use pull() to extract one column as a vector:\n\nmovies |&gt; rename(rating = imdb_rating) |&gt; select(title, rating)\n\n#&gt; # A tibble: 651 × 2\n#&gt;   title                rating\n#&gt;   &lt;chr&gt;                 &lt;dbl&gt;\n#&gt; 1 Filly Brown             5.5\n#&gt; 2 The Dish                7.3\n#&gt; 3 Waiting for Guffman     7.6\n#&gt; 4 The Age of Innocence    7.2\n#&gt; 5 Malevolence             5.1\n#&gt; 6 Old Partner             7.8\n#&gt; # ℹ 645 more rows\n\nmovies |&gt; pull(title) |&gt; head(3)\n\n#&gt; [1] \"Filly Brown\"         \"The Dish\"            \"Waiting for Guffman\""
-  },
-  {
-    "objectID": "01_handout.html#filter-keep-rows",
-    "href": "01_handout.html#filter-keep-rows",
-    "title": "Session 1 Handout: R Basics and Data Manipulation",
-    "section": "10.2 filter(): keep rows",
-    "text": "10.2 filter(): keep rows\nfilter() keeps rows where the condition is TRUE. Several conditions separated by commas mean and.\n\nmovies |&gt;\n  filter(genre == \"Drama\", imdb_rating &gt; 8) |&gt;\n  select(title, imdb_rating)\n\n#&gt; # A tibble: 8 × 2\n#&gt;   title                  imdb_rating\n#&gt;   &lt;chr&gt;                        &lt;dbl&gt;\n#&gt; 1 Warrior                        8.2\n#&gt; 2 V for Vendetta                 8.2\n#&gt; 3 The Help                       8.1\n#&gt; 4 Good Will Hunting              8.3\n#&gt; 5 The Prestige                   8.5\n#&gt; 6 No Country for Old Men         8.1\n#&gt; # ℹ 2 more rows\n\n\nMore tools: | (or), %in% (membership), between() (inclusive range), and is.na().\n\nmovies |&gt; filter(genre %in% c(\"Drama\", \"Comedy\")) |&gt; nrow()\n\n#&gt; [1] 392\n\nmovies |&gt; filter(between(imdb_rating, 7, 8)) |&gt; nrow()\n\n#&gt; [1] 226\n\nmovies |&gt; filter(is.na(runtime)) |&gt; select(title, runtime)\n\n#&gt; # A tibble: 1 × 2\n#&gt;   title              runtime\n#&gt;   &lt;chr&gt;                &lt;dbl&gt;\n#&gt; 1 The End of America      NA\n\n\n\n\n\n\n\n\nWarningAudit it: == against a vector\n\n\n\n== compares position by position and recycles the shorter vector. It does not mean “equal to either”.\n\nmovies |&gt; filter(genre == c(\"Drama\", \"Comedy\")) |&gt; nrow()    # wrong\n\n#&gt; [1] 191\n\nmovies |&gt; filter(genre %in% c(\"Drama\", \"Comedy\")) |&gt; nrow()  # right\n\n#&gt; [1] 392\n\n\nR prints a warning about lengths in your console. Warnings are clues.\n\n\n\n\n\n\n\n\nWarningAudit it: comparing with NA\n\n\n\nAnything compared with NA is NA, and filter() drops rows where the condition is not TRUE.\n\nmovies |&gt; filter(dvd_rel_year != NA) |&gt; nrow()       # wrong: zero rows\n\n#&gt; [1] 0\n\nmovies |&gt; filter(!is.na(dvd_rel_year)) |&gt; nrow()     # right\n\n#&gt; [1] 643\n\n\n\n\n\n\n\n\n\n\nWarningAudit it: filter() silently drops NA rows\n\n\n\n\nnrow(movies)\n\n#&gt; [1] 651\n\nmovies |&gt; filter(runtime &gt; 0) |&gt; nrow()     # every runtime is positive, but one row vanished\n\n#&gt; [1] 650\n\nmovies |&gt; filter(runtime &gt; 0 | is.na(runtime)) |&gt; nrow()   # keep unknowns on purpose\n\n#&gt; [1] 651\n\n\nAny time a row count changes unexpectedly, ask where the rows went. Row-count checks before and after each step are a core habit.\n\n\n\n\n\n\n\n\nWarningAudit it: and/or precedence\n\n\n\n& is evaluated before |, like multiplication before addition. Use parentheses.\n\nmovies |&gt; filter(genre == \"Drama\" | genre == \"Comedy\" & imdb_rating &gt; 8) |&gt; nrow()\n\n#&gt; [1] 306\n\nmovies |&gt; filter((genre == \"Drama\" | genre == \"Comedy\") & imdb_rating &gt; 8) |&gt; nrow()\n\n#&gt; [1] 9\n\n\n\n\n\n\n\n\n\n\nWarningAudit it: typos and case give zero rows, not errors\n\n\n\nText comparison is exact and case-sensitive.\n\nmovies |&gt; filter(genre == \"drama\") |&gt; nrow()\n\n#&gt; [1] 0\n\nmovies |&gt; filter(genre == \"Drama\") |&gt; nrow()\n\n#&gt; [1] 305\n\n\nA result with zero rows is a clue that a category name is wrong. Check the real values first with distinct(genre).\n\n\n\n\n\n\n\n\nWarningAudit it: = instead of ==\n\n\n\n\nmovies |&gt; filter(genre = \"Drama\")\n\n#&gt; Error in `filter()`:\n#&gt; ! We detected a named input.\n#&gt; ℹ This usually means that you've used `=` instead of `==`.\n#&gt; ℹ Did you mean `genre == \"Drama\"`?\n\n\nThis one is friendly: dplyr stops and explains. Not every mistake is."
-  },
-  {
-    "objectID": "01_handout.html#arrange-sort-rows",
-    "href": "01_handout.html#arrange-sort-rows",
-    "title": "Session 1 Handout: R Basics and Data Manipulation",
-    "section": "10.3 arrange(): sort rows",
-    "text": "10.3 arrange(): sort rows\nSorting is ascending by default. Use desc() for descending, and add more columns to break ties.\n\nmovies |&gt;\n  arrange(desc(imdb_rating), title) |&gt;\n  select(title, imdb_rating)\n\n#&gt; # A tibble: 651 × 2\n#&gt;   title                  imdb_rating\n#&gt;   &lt;chr&gt;                        &lt;dbl&gt;\n#&gt; 1 The Godfather, Part II         9  \n#&gt; 2 Django Unchained               8.5\n#&gt; 3 Memento                        8.5\n#&gt; 4 Promises                       8.5\n#&gt; 5 The Prestige                   8.5\n#&gt; 6 Aliens                         8.4\n#&gt; # ℹ 645 more rows\n\n\n\n\n\n\n\n\nWarningAudit it: the most common AI mistake\n\n\n\n“Show the 5 highest-rated movies” written as arrange(imdb_rating) |&gt; head(5) returns the five lowest. No error, no warning, a believable table.\n\nmovies |&gt; arrange(imdb_rating) |&gt; select(title, imdb_rating) |&gt; head(5)\n\n#&gt; # A tibble: 5 × 2\n#&gt;   title             imdb_rating\n#&gt;   &lt;chr&gt;                   &lt;dbl&gt;\n#&gt; 1 Disaster Movie            1.9\n#&gt; 2 Epic Movie                2.3\n#&gt; 3 Battlefield Earth         2.4\n#&gt; 4 Viva Knievel!             2.7\n#&gt; 5 Doogal                    2.8\n\n\nFor top-N questions, slice_max() states the intent directly:\n\nmovies |&gt; slice_max(imdb_rating, n = 5, with_ties = FALSE) |&gt; select(title, imdb_rating)\n\n#&gt; # A tibble: 5 × 2\n#&gt;   title                  imdb_rating\n#&gt;   &lt;chr&gt;                        &lt;dbl&gt;\n#&gt; 1 The Godfather, Part II         9  \n#&gt; 2 Promises                       8.5\n#&gt; 3 Django Unchained               8.5\n#&gt; 4 Memento                        8.5\n#&gt; 5 The Prestige                   8.5\n\n\nwith_ties = FALSE returns exactly 5 rows. The default keeps all tied rows, which can return more than you asked for."
-  },
-  {
-    "objectID": "01_handout.html#mutate-create-or-change-columns",
-    "href": "01_handout.html#mutate-create-or-change-columns",
-    "title": "Session 1 Handout: R Basics and Data Manipulation",
-    "section": "10.4 mutate(): create or change columns",
-    "text": "10.4 mutate(): create or change columns\nmutate() adds new columns (at the end) or overwrites existing ones.\n\nmovies |&gt;\n  mutate(runtime_hrs = runtime / 60,\n         decade = thtr_rel_year %/% 10 * 10) |&gt;\n  select(title, runtime_hrs, decade)\n\n#&gt; # A tibble: 651 × 3\n#&gt;   title                runtime_hrs decade\n#&gt;   &lt;chr&gt;                      &lt;dbl&gt;  &lt;dbl&gt;\n#&gt; 1 Filly Brown                 1.33   2010\n#&gt; 2 The Dish                    1.68   2000\n#&gt; 3 Waiting for Guffman         1.4    1990\n#&gt; 4 The Age of Innocence        2.32   1990\n#&gt; 5 Malevolence                 1.5    2000\n#&gt; 6 Old Partner                 1.3    2000\n#&gt; # ℹ 645 more rows\n\n\nUse if_else() for two outcomes and case_when() for several. They check that the outcomes are the same type, which catches mistakes that base ifelse() hides.\n\nmovies |&gt;\n  mutate(length_class = case_when(\n    runtime &lt; 90   ~ \"short\",\n    runtime &lt;= 120 ~ \"medium\",\n    runtime &gt; 120  ~ \"long\"\n  )) |&gt;\n  count(length_class)\n\n#&gt; # A tibble: 4 × 2\n#&gt;   length_class     n\n#&gt;   &lt;chr&gt;        &lt;int&gt;\n#&gt; 1 long           120\n#&gt; 2 medium         428\n#&gt; 3 short          102\n#&gt; 4 &lt;NA&gt;             1\n\n\nRows that match no condition (here, the movie with an NA runtime) become NA. You can set a default with .default = \"unknown\".\nmutate() keeps all other columns. To keep only the new ones, use mutate(..., .keep = \"none\"). This replaces the older transmute().\n\n\n\n\n\n\nNotePreview: count()\n\n\n\ncount(x) counts rows for each value of x. It is shorthand for grouping and summarizing, which is the first topic in Session 2."
-  },
-  {
-    "objectID": "01_handout.html#other-useful-verbs",
-    "href": "01_handout.html#other-useful-verbs",
-    "title": "Session 1 Handout: R Basics and Data Manipulation",
-    "section": "10.5 Other useful verbs",
-    "text": "10.5 Other useful verbs\n\nmovies |&gt; distinct(mpaa_rating)\n\n#&gt; # A tibble: 6 × 1\n#&gt;   mpaa_rating\n#&gt;   &lt;chr&gt;      \n#&gt; 1 R          \n#&gt; 2 PG-13      \n#&gt; 3 PG         \n#&gt; 4 Unrated    \n#&gt; 5 G          \n#&gt; 6 NC-17\n\nmovies |&gt; slice_head(n = 3) |&gt; select(title)\n\n#&gt; # A tibble: 3 × 1\n#&gt;   title              \n#&gt;   &lt;chr&gt;              \n#&gt; 1 Filly Brown        \n#&gt; 2 The Dish           \n#&gt; 3 Waiting for Guffman\n\nmovies |&gt; slice_max(runtime, n = 3, with_ties = FALSE) |&gt; select(title, runtime)\n\n#&gt; # A tibble: 3 × 2\n#&gt;   title                                              runtime\n#&gt;   &lt;chr&gt;                                                &lt;dbl&gt;\n#&gt; 1 Hotel Terminus: The Life and Times of Klaus Barbie     267\n#&gt; 2 The Godfather, Part II                                 202\n#&gt; 3 Titanic                                                194\n\n\nFor random samples use slice_sample() (this replaces sample_n() and sample_frac()). Set a seed so the sample is reproducible:\n\nset.seed(531)\nmovies |&gt; slice_sample(n = 3) |&gt; select(title)\n\n#&gt; # A tibble: 3 × 1\n#&gt;   title          \n#&gt;   &lt;chr&gt;          \n#&gt; 1 Mad Dog Time   \n#&gt; 2 Blue Valentine \n#&gt; 3 The Big Red One\n\n\n\n\n\n\n\n\nWarningAudit it: ambiguous questions get confident answers\n\n\n\n“How many documentaries are there?” The data has two columns that could mean that:\n\nmovies |&gt; filter(genre == \"Documentary\") |&gt; nrow()\n\n#&gt; [1] 52\n\nmovies |&gt; filter(title_type == \"Documentary\") |&gt; nrow()\n\n#&gt; [1] 55\n\n\nNeither answer is a bug. The question was underspecified. A good prompt names the column, and a good audit confirms which one was used."
-  },
-  {
-    "objectID": "01_handout.html#if-and-else",
-    "href": "01_handout.html#if-and-else",
-    "title": "Session 1 Handout: R Basics and Data Manipulation",
-    "section": "11.1 if and else",
-    "text": "11.1 if and else\nif tests one TRUE/FALSE. It is not vectorized.\n\nx &lt;- 7\nif (x &lt; 0) {\n  \"negative\"\n} else if (x &gt; 0) {\n  \"positive\"\n} else {\n  \"zero\"\n}\n\n#&gt; [1] \"positive\"\n\n\nTo choose values for a whole column, use the vectorized if_else() or case_when() inside mutate() instead.\n\n\n\n\n\n\nWarningAudit it: if with a vector\n\n\n\n\nif (c(TRUE, FALSE)) \"yes\"\n\n#&gt; Error in if (c(TRUE, FALSE)) \"yes\": the condition has length &gt; 1\n\n\nR refuses a condition with length greater than one. If you see if applied to a column, expect an error or a misunderstanding."
-  },
-  {
-    "objectID": "01_handout.html#for-loops",
-    "href": "01_handout.html#for-loops",
-    "title": "Session 1 Handout: R Basics and Data Manipulation",
-    "section": "11.2 for loops",
-    "text": "11.2 for loops\nA for loop repeats code once per element.\n\nfor (g in c(\"Drama\", \"Comedy\")) {\n  n &lt;- sum(movies$genre == g)\n  cat(g, \":\", n, \"movies\\n\")\n}\n\n#&gt; Drama : 305 movies\n#&gt; Comedy : 87 movies\n\n\nHow to read it: “for each genre g in this list, count the movies and print.” Loops are fine, but when AI uses a loop to build up a data frame row by row, ask whether one verb (count(), summarize()) would do the same thing more clearly."
-  },
-  {
-    "objectID": "01_handout.html#functions",
-    "href": "01_handout.html#functions",
-    "title": "Session 1 Handout: R Basics and Data Manipulation",
-    "section": "11.3 Functions",
-    "text": "11.3 Functions\nA function packages code under a name, with arguments as inputs and the last expression as the returned value.\n\nto_hours &lt;- function(minutes, digits = 1) {\n  round(minutes / 60, digits)\n}\n\nto_hours(95)\n\n#&gt; [1] 1.6\n\nto_hours(95, digits = 2)\n\n#&gt; [1] 1.58\n\n\n\nmovies |&gt;\n  mutate(runtime_hrs = to_hours(runtime)) |&gt;\n  select(title, runtime, runtime_hrs)\n\n#&gt; # A tibble: 651 × 3\n#&gt;   title                runtime runtime_hrs\n#&gt;   &lt;chr&gt;                  &lt;dbl&gt;       &lt;dbl&gt;\n#&gt; 1 Filly Brown               80         1.3\n#&gt; 2 The Dish                 101         1.7\n#&gt; 3 Waiting for Guffman       84         1.4\n#&gt; 4 The Age of Innocence     139         2.3\n#&gt; 5 Malevolence               90         1.5\n#&gt; 6 Old Partner               78         1.3\n#&gt; # ℹ 645 more rows\n\n\nHow to read an AI-written function: find the arguments and their defaults, find what is returned (the last line or an explicit return()), and look for anything it uses that was not passed in. Functions can silently read variables from outside (Appendix B)."
-  },
-  {
-    "objectID": "01_handout.html#a.-matrices-and-arrays",
-    "href": "01_handout.html#a.-matrices-and-arrays",
-    "title": "Session 1 Handout: R Basics and Data Manipulation",
-    "section": "A. Matrices and arrays",
-    "text": "A. Matrices and arrays\nA matrix is a vector with a dim attribute. It is filled one column at a time.\n\nm &lt;- matrix(1:6, nrow = 2, ncol = 3)\nm\n\n#&gt;      [,1] [,2] [,3]\n#&gt; [1,]    1    3    5\n#&gt; [2,]    2    4    6\n\nm[1, 3]      # row 1, column 3\n\n#&gt; [1] 5\n\nm[, 2]       # all of column 2\n\n#&gt; [1] 3 4\n\nm[-1, ]      # drop row 1\n\n#&gt; [1] 2 4 6\n\n\nData frames are not matrices, but df[row, col] indexing works similarly."
-  },
-  {
-    "objectID": "01_handout.html#b.-scope-and-lazy-evaluation",
-    "href": "01_handout.html#b.-scope-and-lazy-evaluation",
-    "title": "Session 1 Handout: R Basics and Data Manipulation",
-    "section": "B. Scope and lazy evaluation",
-    "text": "B. Scope and lazy evaluation\nScope. If a function cannot find a variable inside itself, R looks in the surrounding environment. This is convenient and risky: a function can quietly depend on a variable that is not one of its arguments.\n\ncutoff &lt;- 100\nis_long &lt;- function(minutes) minutes &gt; cutoff    # cutoff is NOT an argument\nis_long(120)\n\n#&gt; [1] TRUE\n\ncutoff &lt;- 150\nis_long(120)                                      # same call, different answer\n\n#&gt; [1] FALSE\n\n\nLazy evaluation. Function arguments are only evaluated when they are used.\n\nf &lt;- function(x) {\n  cat(\"Hello\\n\")\n  x\n}\nf(stop(\"this error only fires when x is used\"))\n\n#&gt; Hello\n\n\n#&gt; Error in f(stop(\"this error only fires when x is used\")): this error only fires when x is used\n\n\n“Hello” prints first: the broken argument is not touched until the function needs it. You will meet the same idea at a larger scale with the arrow package in Session 2, where a query on a huge Parquet file is not run until you ask for the result."
-  },
-  {
-    "objectID": "01_handout.html#c.-vectorization",
-    "href": "01_handout.html#c.-vectorization",
-    "title": "Session 1 Handout: R Basics and Data Manipulation",
-    "section": "C. Vectorization",
-    "text": "C. Vectorization\nMost R functions work on whole vectors at once, which is faster and shorter than a loop. But vectorized code can hide edge cases.\n\np &lt;- c(0.5, 0.5, 0, 0)\n-sum(p * log(p))                 # entropy: wrong, 0 * log(0) is NaN\n\n#&gt; [1] NaN\n\np_pos &lt;- p[p &gt; 0]\n-sum(p_pos * log(p_pos))         # right: drop the zero-probability cells\n\n#&gt; [1] 0.6931472\n\n\nNaN means “not a number”. It is a cousin of NA that spreads the same way, and is.na() detects both.\nIf a function was written for single values and you need it for vectors, Vectorize() can wrap it, but if_else() and case_when() are usually better inside mutate()."
-  },
-  {
-    "objectID": "01_handout.html#d.-the-apply-family-and-purrr",
-    "href": "01_handout.html#d.-the-apply-family-and-purrr",
-    "title": "Session 1 Handout: R Basics and Data Manipulation",
-    "section": "D. The apply family and purrr",
-    "text": "D. The apply family and purrr\napply() and lapply() apply a function across rows, columns, or list elements. The tidyverse version is purrr::map(), with variants that return a specific type (map_dbl() for numbers, map_chr() for text).\n\nnums &lt;- movies |&gt; select(imdb_rating, critics_score, audience_score, runtime)\n\nlapply(nums, mean, na.rm = TRUE) |&gt; unlist()   # base R\n\n#&gt;    imdb_rating  critics_score audience_score        runtime \n#&gt;       6.493088      57.688172      62.362519     105.821538\n\nmap_dbl(nums, mean, na.rm = TRUE)              # purrr: guaranteed numeric result\n\n#&gt;    imdb_rating  critics_score audience_score        runtime \n#&gt;       6.493088      57.688172      62.362519     105.821538\n\n\nPrefer map_*() over sapply(): sapply() guesses the output type, and a surprise type is a classic silent failure."
-  },
-  {
-    "objectID": "01_handout.html#e.-old-syntax-to-new-syntax",
-    "href": "01_handout.html#e.-old-syntax-to-new-syntax",
-    "title": "Session 1 Handout: R Basics and Data Manipulation",
-    "section": "E. Old syntax to new syntax",
-    "text": "E. Old syntax to new syntax\n\n\n\n\n\n\n\n\nOlder code you may see\nUse now\nWhy\n\n\n\n\nx %&gt;% f()\nx \\|&gt; f()\nbuilt into R, no package needed\n\n\nsample_n(df, 5) / sample_frac(df, .1)\nslice_sample(df, n = 5) / slice_sample(df, prop = .1)\none consistent slice_* family\n\n\narrange(desc(x)) \\|&gt; head(n)\nslice_max(x, n = n)\nstates the intent\n\n\ntransmute(...)\nmutate(..., .keep = \"none\")\ntransmute() is superseded\n\n\nifelse(test, a, b)\nif_else(test, a, b)\nchecks types, safer\n\n\ntidyr::separate(col, into, sep)\nseparate_wider_delim() / separate_wider_position()\nstricter, warns about bad rows\n\n\ngroup_by(g) \\|&gt; summarize(...)\nsummarize(..., .by = g)\nno leftover grouping (Session 2)\n\n\nlapply() / sapply()\npurrr::map() / map_dbl()\npredictable output type\n\n\nby = c(\"a\" = \"b\") in joins\nby = join_by(a == b)\nmore readable (Session 2)"
-  },
-  {
-    "objectID": "01_handout.html#f.-quick-reference",
-    "href": "01_handout.html#f.-quick-reference",
-    "title": "Session 1 Handout: R Basics and Data Manipulation",
-    "section": "F. Quick reference",
-    "text": "F. Quick reference\n\n\n\nTask\nCode\n\n\n\n\nAssign\nx &lt;- 5\n\n\nMake a vector\nc(1, 2, 3)\n\n\nCount TRUEs / fraction TRUE\nsum(x &gt; 5) / mean(x &gt; 5)\n\n\nMissing?\nis.na(x), sum(is.na(x))\n\n\nIgnore NA in a summary\nmean(x, na.rm = TRUE)\n\n\nPeek at a table\nglimpse(df), summary(df)\n\n\nPick columns\nselect(df, a, b)\n\n\nKeep rows\nfilter(df, a &gt; 5, b %in% c(\"x\", \"y\"))\n\n\nSort\narrange(df, desc(a))\n\n\nNew column\nmutate(df, c = a / b)\n\n\nTop / bottom N\nslice_max(df, a, n = 5) / slice_min()\n\n\nUnique values\ndistinct(df, a)\n\n\nCount by group\ncount(df, a)"
-  },
-  {
-    "objectID": "01_handout.html#where-to-go-next",
-    "href": "01_handout.html#where-to-go-next",
-    "title": "Session 1 Handout: R Basics and Data Manipulation",
-    "section": "Where to go next",
-    "text": "Where to go next\n\nR for Data Science (2nd edition): Data transformation\nThe dplyr documentation: https://dplyr.tidyverse.org\nNext session: summarizing, joins, pivots, and big data with Parquet."
-  },
-  {
-    "objectID": "01_slides.html#todays-route",
-    "href": "01_slides.html#todays-route",
-    "title": "You Navigate, AI Drives",
-    "section": "Today’s route",
-    "text": "Today’s route\n\nWho’s driving? (you + AI)\nReading R: the essentials\nVerbs and the pipe\nMovie Night: team challenge\nBug Bounty runs all session\n\n\nWrite a Bug Bounty scoreboard on the whiteboard: one column per team. Points: +1 catch a bug, +1 explain WHY the AI would make it."
-  },
-  {
-    "objectID": "01_slides.html#pair-up",
-    "href": "01_slides.html#pair-up",
-    "title": "You Navigate, AI Drives",
-    "section": "Pair up!",
-    "text": "Pair up!\nSit next to someone.\nDriver = hands on the keyboard\nNavigator = reads, predicts, directs\nWe swap whenever a slide says swap roles\n\n\nSoon, an AI will be one of the two seats. Practice with a human first."
-  },
-  {
-    "objectID": "01_slides.html#smoke-test",
-    "href": "01_slides.html#smoke-test",
-    "title": "You Navigate, AI Drives",
-    "section": "Smoke test",
-    "text": "Smoke test\nRun this in Positron. Wave when you see a table.\n\nlibrary(tidyverse)\nmovies &lt;- read_csv(\"data/movies.csv\")\nmovies\n\n\nSetup is already done, so this should take 2 minutes. Anyone stuck: pair them with a neighbor and move on."
-  },
-  {
-    "objectID": "01_slides.html#you-should-see",
-    "href": "01_slides.html#you-should-see",
-    "title": "You Navigate, AI Drives",
-    "section": "You should see",
-    "text": "You should see\n\nmovies\n\n#&gt; # A tibble: 651 × 32\n#&gt;   title        title_type genre runtime mpaa_rating studio thtr_rel_year\n#&gt;   &lt;chr&gt;        &lt;chr&gt;      &lt;chr&gt;   &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;          &lt;dbl&gt;\n#&gt; 1 Filly Brown  Feature F… Drama      80 R           Indom…          2013\n#&gt; 2 The Dish     Feature F… Drama     101 PG-13       Warne…          2001\n#&gt; 3 Waiting for… Feature F… Come…      84 R           Sony …          1996\n#&gt; 4 The Age of … Feature F… Drama     139 PG          Colum…          1993\n#&gt; 5 Malevolence  Feature F… Horr…      90 R           Ancho…          2004\n#&gt; # ℹ 646 more rows\n#&gt; # ℹ 25 more variables: thtr_rel_month &lt;dbl&gt;, thtr_rel_day &lt;dbl&gt;, …\n\n\n651 rows, 32 columns. Today’s dataset: movies."
-  },
-  {
-    "objectID": "01_slides.html#two-truths-and-a-lie",
-    "href": "01_slides.html#two-truths-and-a-lie",
-    "title": "You Navigate, AI Drives",
-    "section": "Two truths and a lie",
-    "text": "Two truths and a lie\nAn AI told me three things about R, very confidently.\n\nR starts counting at 1, not 0.\nmean(c(1, 2, NA)) returns 1.5.\nc(1, \"a\", TRUE) turns everything into text.\n\n\n\nVote with fingers (1, 2, 3): which one is the lie?"
-  },
-  {
-    "objectID": "01_slides.html#the-lie-was-2",
-    "href": "01_slides.html#the-lie-was-2",
-    "title": "You Navigate, AI Drives",
-    "section": "The lie was #2",
-    "text": "The lie was #2\n\nc(10, 20, 30)[1]\n\n#&gt; [1] 10\n\nmean(c(1, 2, NA))\n\n#&gt; [1] NA\n\nc(1, \"a\", TRUE)\n\n#&gt; [1] \"1\"    \"a\"    \"TRUE\"\n\n\n\n\nBug: A confident wrong answer looks exactly like a confident right one.\n\n\nTwo truths and a lie: #2 is the lie (it returns NA). Don’t explain NA yet, we come back to it in the essentials section."
-  },
-  {
-    "objectID": "01_slides.html#the-new-division-of-labor",
-    "href": "01_slides.html#the-new-division-of-labor",
-    "title": "You Navigate, AI Drives",
-    "section": "The new division of labor",
-    "text": "The new division of labor\nAI drives: writes code fast\nYou navigate: choose the destination, read the map, check the route\n\nFast driving is great. Driving into a lake is not."
-  },
-  {
-    "objectID": "01_slides.html#what-does-a-navigator-do",
-    "href": "01_slides.html#what-does-a-navigator-do",
-    "title": "You Navigate, AI Drives",
-    "section": "What does a navigator do?",
-    "text": "What does a navigator do?\n\nSet the destination: say clearly what you want\nRead the route: understand the code\nCheck the road: run it, test it\nMake the call: accept, fix, or reject"
-  },
-  {
-    "objectID": "01_slides.html#why-learn-r-if-ai-writes-it",
-    "href": "01_slides.html#why-learn-r-if-ai-writes-it",
-    "title": "You Navigate, AI Drives",
-    "section": "Why learn R if AI writes it?",
-    "text": "Why learn R if AI writes it?\nYou can’t catch a wrong turn on a map you can’t read.\n\nThe scariest bugs don’t crash. They run fine and give a believable answer."
-  },
-  {
-    "objectID": "01_slides.html#the-audit-loop",
-    "href": "01_slides.html#the-audit-loop",
-    "title": "You Navigate, AI Drives",
-    "section": "The Audit Loop",
-    "text": "The Audit Loop\n\nRead it\nRun it\nRestate it in plain English\nRefine it or Reject it\n\n\n\nRestate is the superpower. If you can’t say what a line does, you can’t vouch for it."
-  },
-  {
-    "objectID": "01_slides.html#bug-bounty-rules",
-    "href": "01_slides.html#bug-bounty-rules",
-    "title": "You Navigate, AI Drives",
-    "section": "Bug Bounty rules",
-    "text": "Bug Bounty rules\n\nEvery bug you catch: +1 point for your team\nExplain why an AI would make that mistake: +1 bonus\nBugs hide in code and in answers that look fine\n\n\nKeep the tally visible. Call on a different team each round."
-  },
-  {
-    "objectID": "01_slides.html#case-0-the-request",
-    "href": "01_slides.html#case-0-the-request",
-    "title": "You Navigate, AI Drives",
-    "section": "Case #0: the request",
-    "text": "Case #0: the request\n\n“Show me the 5 highest-rated movies on IMDb.”\n\nThe AI wrote:\n\nmovies |&gt;\n  arrange(imdb_rating) |&gt;\n  select(title, imdb_rating) |&gt;\n  head(5)"
-  },
-  {
-    "objectID": "01_slides.html#your-turn-restate-it",
-    "href": "01_slides.html#your-turn-restate-it",
-    "title": "You Navigate, AI Drives",
-    "section": "Your turn: Restate it",
-    "text": "Your turn: Restate it\nWith your partner, 60 seconds:\nSay each line in plain English. Does it match the request?\n\nNavigator speaks, driver listens. Then swap."
-  },
-  {
-    "objectID": "01_slides.html#run-it",
-    "href": "01_slides.html#run-it",
-    "title": "You Navigate, AI Drives",
-    "section": "Run it",
-    "text": "Run it\n\nmovies |&gt;\n  arrange(imdb_rating) |&gt;\n  select(title, imdb_rating) |&gt;\n  head(5)\n\n#&gt; # A tibble: 5 × 2\n#&gt;   title             imdb_rating\n#&gt;   &lt;chr&gt;                   &lt;dbl&gt;\n#&gt; 1 Disaster Movie            1.9\n#&gt; 2 Epic Movie                2.3\n#&gt; 3 Battlefield Earth         2.4\n#&gt; 4 Viva Knievel!             2.7\n#&gt; 5 Doogal                    2.8\n\n\n\n\nDoes this answer the request? Hands up: yes / no\n\n\nNo. arrange() sorts ascending by default, so these are the five WORST rated (Disaster Movie 1.9, Epic Movie 2.3, Battlefield Earth 2.4, Viva Knievel! 2.7, Doogal 2.8). No error, no warning. Fix later with desc(). Award points."
-  },
-  {
-    "objectID": "01_slides.html#why-this-one-is-sneaky",
-    "href": "01_slides.html#why-this-one-is-sneaky",
-    "title": "You Navigate, AI Drives",
-    "section": "Why this one is sneaky",
-    "text": "Why this one is sneaky\n\nNo error\nNo warning\nA clean table that looks right\n\n\nErrors are the friendly failures."
-  },
-  {
-    "objectID": "01_slides.html#names-and-assignment",
-    "href": "01_slides.html#names-and-assignment",
-    "title": "You Navigate, AI Drives",
-    "section": "Names and assignment",
-    "text": "Names and assignment\n\nn_movies &lt;- 651\nn_movies\n\n#&gt; [1] 651\n\n\nRead &lt;- as “gets”."
-  },
-  {
-    "objectID": "01_slides.html#functions",
-    "href": "01_slides.html#functions",
-    "title": "You Navigate, AI Drives",
-    "section": "Functions",
-    "text": "Functions\nA function has a name and arguments in parentheses.\n\nsqrt(16)\n\n#&gt; [1] 4\n\nround(3.14159, digits = 2)\n\n#&gt; [1] 3.14"
-  },
-  {
-    "objectID": "01_slides.html#vectors",
-    "href": "01_slides.html#vectors",
-    "title": "You Navigate, AI Drives",
-    "section": "Vectors",
-    "text": "Vectors\nA vector is a row of values of one type. c() combines.\n\nscores &lt;- c(72, 88, 91, 65)\nmean(scores)\n\n#&gt; [1] 79\n\nscores * 2\n\n#&gt; [1] 144 176 182 130"
-  },
-  {
-    "objectID": "01_slides.html#three-types-youll-meet",
-    "href": "01_slides.html#three-types-youll-meet",
-    "title": "You Navigate, AI Drives",
-    "section": "Three types you’ll meet",
-    "text": "Three types you’ll meet\n\nclass(72)\n\n#&gt; [1] \"numeric\"\n\nclass(\"Drama\")\n\n#&gt; [1] \"character\"\n\nclass(TRUE)\n\n#&gt; [1] \"logical\"\n\n\nnumeric, character, logical"
-  },
-  {
-    "objectID": "01_slides.html#yesno-questions",
-    "href": "01_slides.html#yesno-questions",
-    "title": "You Navigate, AI Drives",
-    "section": "Yes/no questions",
-    "text": "Yes/no questions\n\nscores &gt; 70\n\n#&gt; [1]  TRUE  TRUE  TRUE FALSE\n\nsum(scores &gt; 70)\n\n#&gt; [1] 3\n\n\nTRUE counts as 1, so sum() counts the yeses."
-  },
-  {
-    "objectID": "01_slides.html#square-brackets-pick-things",
-    "href": "01_slides.html#square-brackets-pick-things",
-    "title": "You Navigate, AI Drives",
-    "section": "Square brackets pick things",
-    "text": "Square brackets pick things\n\nscores[1]\n\n#&gt; [1] 72\n\nscores[c(1, 3)]\n\n#&gt; [1] 72 91\n\nscores[scores &gt; 70]\n\n#&gt; [1] 72 88 91"
-  },
-  {
-    "objectID": "01_slides.html#challenge-1-swap-roles-predict-first",
-    "href": "01_slides.html#challenge-1-swap-roles-predict-first",
-    "title": "You Navigate, AI Drives",
-    "section": "Challenge 1 (swap roles): predict first",
-    "text": "Challenge 1 (swap roles): predict first\n\ngenres &lt;- c(\"Drama\", \"Comedy\", \"Horror\")\ngenres == \"Comedy\"\ngenres %in% c(\"Drama\", \"Horror\")\n\n\nNavigator: predict both outputs out loud. Driver: type and run."
-  },
-  {
-    "objectID": "01_slides.html#challenge-1-answers",
-    "href": "01_slides.html#challenge-1-answers",
-    "title": "You Navigate, AI Drives",
-    "section": "Challenge 1: answers",
-    "text": "Challenge 1: answers\n\ngenres &lt;- c(\"Drama\", \"Comedy\", \"Horror\")\ngenres == \"Comedy\"\n\n#&gt; [1] FALSE  TRUE FALSE\n\ngenres %in% c(\"Drama\", \"Horror\")\n\n#&gt; [1]  TRUE FALSE  TRUE\n\n\n%in% asks: “is each value anywhere in this set?”\n\nKeep this one in mind: Case #1 (== vs %in%) depends on it."
-  },
-  {
-    "objectID": "01_slides.html#na-means-i-dont-know",
-    "href": "01_slides.html#na-means-i-dont-know",
-    "title": "You Navigate, AI Drives",
-    "section": "NA means “I don’t know”",
-    "text": "NA means “I don’t know”\nPredict:\n\nNA + 1\nNA &gt; 5\nNA == NA\n\n\n\nVote: what do these print?"
-  },
-  {
-    "objectID": "01_slides.html#na-spreads",
-    "href": "01_slides.html#na-spreads",
-    "title": "You Navigate, AI Drives",
-    "section": "NA spreads",
-    "text": "NA spreads\n\nNA + 1\n\n#&gt; [1] NA\n\nNA &gt; 5\n\n#&gt; [1] NA\n\nNA == NA\n\n#&gt; [1] NA\n\n\nIs one unknown equal to another unknown? Unknown!"
-  },
-  {
-    "objectID": "01_slides.html#handling-na",
-    "href": "01_slides.html#handling-na",
-    "title": "You Navigate, AI Drives",
-    "section": "Handling NA",
-    "text": "Handling NA\n\nx &lt;- c(4, 8, NA)\nmean(x)\n\n#&gt; [1] NA\n\nmean(x, na.rm = TRUE)\n\n#&gt; [1] 6\n\nis.na(x)\n\n#&gt; [1] FALSE FALSE  TRUE\n\n\n\n\nna.rm = TRUE is a decision, not a fix. You chose to ignore the unknowns.\n\n\nPlant the seed: dropping missing values changes who is in your analysis. This returns in the WellSync cleaning sessions."
-  },
-  {
-    "objectID": "01_slides.html#a-column-is-a-vector",
-    "href": "01_slides.html#a-column-is-a-vector",
-    "title": "You Navigate, AI Drives",
-    "section": "A column is a vector",
-    "text": "A column is a vector\n\nmovies$runtime |&gt; head(10)\n\n#&gt;  [1]  80 101  84 139  90  78 142  93  88 119\n\n\n$ pulls one column out of a table."
-  },
-  {
-    "objectID": "01_slides.html#mystery",
-    "href": "01_slides.html#mystery",
-    "title": "You Navigate, AI Drives",
-    "section": "Mystery",
-    "text": "Mystery\n\nmean(movies$runtime)\n\n#&gt; [1] NA\n\n\n\n\nWhy NA? Talk to your partner (30 seconds)."
-  },
-  {
-    "objectID": "01_slides.html#solving-the-mystery",
-    "href": "01_slides.html#solving-the-mystery",
-    "title": "You Navigate, AI Drives",
-    "section": "Solving the mystery",
-    "text": "Solving the mystery\n\nsum(is.na(movies$runtime))\n\n#&gt; [1] 1\n\nmovies$title[is.na(movies$runtime)]\n\n#&gt; [1] \"The End of America\"\n\nmean(movies$runtime, na.rm = TRUE)\n\n#&gt; [1] 105.8215\n\n\n\n\nBug: One missing runtime made the whole mean unknown."
-  },
-  {
-    "objectID": "01_slides.html#challenge-2-swap-roles-find-something-weird",
-    "href": "01_slides.html#challenge-2-swap-roles-find-something-weird",
-    "title": "You Navigate, AI Drives",
-    "section": "Challenge 2 (swap roles): find something weird",
-    "text": "Challenge 2 (swap roles): find something weird\n\nglimpse(movies)\n\nYou have 90 seconds. Find one thing in this table that looks odd, surprising, or worth asking about.\n\nShare your weird thing with a nearby team.\n\n\nLikely finds: dvd_rel_year / dvd_rel_month / dvd_rel_day missing for 8 movies; studio missing for 8; one missing runtime; two different “documentary” columns (title_type and genre); Upright/Spilled audience ratings. Collect 3 from the room. This sets the “look first” habit used in Lab 1."
-  },
-  {
-    "objectID": "01_slides.html#data-wrangling-is-a-sentence",
-    "href": "01_slides.html#data-wrangling-is-a-sentence",
-    "title": "You Navigate, AI Drives",
-    "section": "Data wrangling is a sentence",
-    "text": "Data wrangling is a sentence\n“Take movies, then keep the dramas, then sort by rating, then show the top 3.”\n\nThe pipe |&gt; reads as then."
-  },
-  {
-    "objectID": "01_slides.html#same-thing-two-ways",
-    "href": "01_slides.html#same-thing-two-ways",
-    "title": "You Navigate, AI Drives",
-    "section": "Same thing, two ways",
-    "text": "Same thing, two ways\n\nhead(arrange(filter(movies, genre == \"Drama\"), imdb_rating), 3)\n\n\nmovies |&gt;\n  filter(genre == \"Drama\") |&gt;\n  arrange(imdb_rating) |&gt;\n  head(3)"
-  },
-  {
-    "objectID": "01_slides.html#youll-see-two-pipes",
-    "href": "01_slides.html#youll-see-two-pipes",
-    "title": "You Navigate, AI Drives",
-    "section": "You’ll see two pipes",
-    "text": "You’ll see two pipes\n|&gt; is built into R.\n%&gt;% is the older tidyverse pipe. AI and old tutorials use both.\nThey behave the same for what we do.\n\nIn Positron the pipe shortcut is Ctrl/Cmd+Shift+M. A setting decides which pipe it inserts."
-  },
-  {
-    "objectID": "01_slides.html#select-choose-columns",
-    "href": "01_slides.html#select-choose-columns",
-    "title": "You Navigate, AI Drives",
-    "section": "select(): choose columns",
-    "text": "select(): choose columns\n\nmovies |&gt;\n  select(title, genre, runtime, imdb_rating)\n\n#&gt; # A tibble: 651 × 4\n#&gt;   title                genre  runtime imdb_rating\n#&gt;   &lt;chr&gt;                &lt;chr&gt;    &lt;dbl&gt;       &lt;dbl&gt;\n#&gt; 1 Filly Brown          Drama       80         5.5\n#&gt; 2 The Dish             Drama      101         7.3\n#&gt; 3 Waiting for Guffman  Comedy      84         7.6\n#&gt; 4 The Age of Innocence Drama      139         7.2\n#&gt; 5 Malevolence          Horror      90         5.1\n#&gt; # ℹ 646 more rows"
-  },
-  {
-    "objectID": "01_slides.html#filter-keep-rows",
-    "href": "01_slides.html#filter-keep-rows",
-    "title": "You Navigate, AI Drives",
-    "section": "filter(): keep rows",
-    "text": "filter(): keep rows\n\nmovies |&gt;\n  select(title, genre, imdb_rating) |&gt;\n  filter(genre == \"Drama\")\n\n#&gt; # A tibble: 305 × 3\n#&gt;   title                genre imdb_rating\n#&gt;   &lt;chr&gt;                &lt;chr&gt;       &lt;dbl&gt;\n#&gt; 1 Filly Brown          Drama         5.5\n#&gt; 2 The Dish             Drama         7.3\n#&gt; 3 The Age of Innocence Drama         7.2\n#&gt; 4 Lady Jane            Drama         7.2\n#&gt; 5 Mad Dog Time         Drama         5.5\n#&gt; # ℹ 300 more rows"
-  },
-  {
-    "objectID": "01_slides.html#conditions-you-can-use",
-    "href": "01_slides.html#conditions-you-can-use",
-    "title": "You Navigate, AI Drives",
-    "section": "Conditions you can use",
-    "text": "Conditions you can use\n\n== equal, != not equal\n&gt;, &gt;=, &lt;, &lt;=\n%in% is in this set\nis.na() is missing\n, or & means and; | means or"
-  },
-  {
-    "objectID": "01_slides.html#filter-with-two-conditions",
-    "href": "01_slides.html#filter-with-two-conditions",
-    "title": "You Navigate, AI Drives",
-    "section": "filter() with two conditions",
-    "text": "filter() with two conditions\n\nmovies |&gt;\n  select(title, genre, imdb_rating) |&gt;\n  filter(genre == \"Drama\", imdb_rating &gt; 8)\n\n#&gt; # A tibble: 8 × 3\n#&gt;   title             genre imdb_rating\n#&gt;   &lt;chr&gt;             &lt;chr&gt;       &lt;dbl&gt;\n#&gt; 1 Warrior           Drama         8.2\n#&gt; 2 V for Vendetta    Drama         8.2\n#&gt; 3 The Help          Drama         8.1\n#&gt; 4 Good Will Hunting Drama         8.3\n#&gt; 5 The Prestige      Drama         8.5\n#&gt; # ℹ 3 more rows"
-  },
-  {
-    "objectID": "01_slides.html#challenge-3-swap-roles",
-    "href": "01_slides.html#challenge-3-swap-roles",
-    "title": "You Navigate, AI Drives",
-    "section": "Challenge 3 (swap roles)",
-    "text": "Challenge 3 (swap roles)\nWrite a pipe that keeps only R-rated movies with a runtime over 150 minutes, showing title, runtime, imdb_rating.\nHow many rows do you get?\n\nColumns to use: mpaa_rating, runtime."
-  },
-  {
-    "objectID": "01_slides.html#challenge-3-one-answer",
-    "href": "01_slides.html#challenge-3-one-answer",
-    "title": "You Navigate, AI Drives",
-    "section": "Challenge 3: one answer",
-    "text": "Challenge 3: one answer\n\nmovies |&gt;\n  filter(mpaa_rating == \"R\", runtime &gt; 150) |&gt;\n  select(title, runtime, imdb_rating)\n\n#&gt; # A tibble: 6 × 3\n#&gt;   title                  runtime imdb_rating\n#&gt;   &lt;chr&gt;                    &lt;dbl&gt;       &lt;dbl&gt;\n#&gt; 1 The English Patient        162         7.4\n#&gt; 2 Django Unchained           165         8.5\n#&gt; 3 Topsy-Turvy                154         7.4\n#&gt; 4 The Godfather, Part II     202         9  \n#&gt; 5 Cloud Atlas                172         7.5\n#&gt; # ℹ 1 more row"
-  },
-  {
-    "objectID": "01_slides.html#bug-court-is-in-session",
-    "href": "01_slides.html#bug-court-is-in-session",
-    "title": "You Navigate, AI Drives",
-    "section": "Bug Court is in session",
-    "text": "Bug Court is in session\nEach case: the request, the AI’s code, and your verdict.\nGuilty = it’s wrong. Innocent = it’s fine.\nUse the Audit Loop. Restate before you vote."
-  },
-  {
-    "objectID": "01_slides.html#case-1-the-request",
-    "href": "01_slides.html#case-1-the-request",
-    "title": "You Navigate, AI Drives",
-    "section": "Case #1: the request",
-    "text": "Case #1: the request\n\n“Keep the Drama and Comedy movies.”\n\n\nmovies |&gt;\n  filter(genre == c(\"Drama\", \"Comedy\"))\n\n\nRestate it. Guilty or innocent?"
-  },
-  {
-    "objectID": "01_slides.html#case-1-the-evidence",
-    "href": "01_slides.html#case-1-the-evidence",
-    "title": "You Navigate, AI Drives",
-    "section": "Case #1: the evidence",
-    "text": "Case #1: the evidence\n\nmovies |&gt; filter(genre == c(\"Drama\", \"Comedy\")) |&gt; nrow()\n\n#&gt; [1] 191\n\nmovies |&gt; filter(genre %in% c(\"Drama\", \"Comedy\")) |&gt; nrow()\n\n#&gt; [1] 392\n\n\n\n\nBug: == lines the two names up with rows one by one, back and forth. In your own console R also prints a warning. Warnings are clues.\n\n\nGuilty. 191 vs 392 rows. The recycling makes row 1 compare to “Drama”, row 2 to “Comedy”, row 3 to “Drama”, and so on. Tie back to Challenge 1."
-  },
-  {
-    "objectID": "01_slides.html#case-2-the-request",
-    "href": "01_slides.html#case-2-the-request",
-    "title": "You Navigate, AI Drives",
-    "section": "Case #2: the request",
-    "text": "Case #2: the request\n\n“Keep movies that have a DVD release year.”\n\n\nmovies |&gt;\n  filter(dvd_rel_year != NA)\n\n\nGuilty or innocent?"
-  },
-  {
-    "objectID": "01_slides.html#case-2-the-evidence",
-    "href": "01_slides.html#case-2-the-evidence",
-    "title": "You Navigate, AI Drives",
-    "section": "Case #2: the evidence",
-    "text": "Case #2: the evidence\n\nmovies |&gt; filter(dvd_rel_year != NA) |&gt; nrow()\n\n#&gt; [1] 0\n\nmovies |&gt; filter(!is.na(dvd_rel_year)) |&gt; nrow()\n\n#&gt; [1] 643\n\n\n\n\nBug: Anything compared with NA is NA, and filter() drops those. Zero rows, no error."
-  },
-  {
-    "objectID": "01_slides.html#case-2b-where-did-it-go",
-    "href": "01_slides.html#case-2b-where-did-it-go",
-    "title": "You Navigate, AI Drives",
-    "section": "Case #2b: where did it go?",
-    "text": "Case #2b: where did it go?\n\nnrow(movies)\n\n#&gt; [1] 651\n\nmovies |&gt; filter(runtime &gt; 0) |&gt; nrow()\n\n#&gt; [1] 650\n\n\n\n\nBug: Every movie has a runtime above 0, yet one vanished: its runtime is NA. filter() quietly drops rows where the condition is NA.\n\n\n650 vs 651. This is the first appearance of “who disappears silently?” which becomes the cleaning impact audit in Lab 2."
-  },
-  {
-    "objectID": "01_slides.html#case-3-the-request",
-    "href": "01_slides.html#case-3-the-request",
-    "title": "You Navigate, AI Drives",
-    "section": "Case #3: the request",
-    "text": "Case #3: the request\n\n“How many documentaries are in the data?”\n\n\nmovies |&gt;\n  filter(genre == \"Documentary\") |&gt;\n  nrow()\n\n\nGuilty or innocent? Look closely at the column names first."
-  },
-  {
-    "objectID": "01_slides.html#case-3-the-evidence",
-    "href": "01_slides.html#case-3-the-evidence",
-    "title": "You Navigate, AI Drives",
-    "section": "Case #3: the evidence",
-    "text": "Case #3: the evidence\n\nmovies |&gt; filter(genre == \"Documentary\") |&gt; nrow()\n\n#&gt; [1] 52\n\nmovies |&gt; filter(title_type == \"Documentary\") |&gt; nrow()\n\n#&gt; [1] 55\n\n\n\n\nBug: The code is fine. The question was ambiguous. Two columns, two answers (52 vs 55).\n\n\nNeither answer is wrong. The navigator’s job is to specify which column, or ask the AI which one it used. Great Week-3 theme: a good spec removes ambiguity."
-  },
-  {
-    "objectID": "01_slides.html#arrange-sort-rows",
-    "href": "01_slides.html#arrange-sort-rows",
-    "title": "You Navigate, AI Drives",
-    "section": "arrange(): sort rows",
-    "text": "arrange(): sort rows\nNow fix Case #0.\n\nmovies |&gt;\n  arrange(desc(imdb_rating)) |&gt;\n  select(title, imdb_rating)\n\n#&gt; # A tibble: 651 × 2\n#&gt;   title                  imdb_rating\n#&gt;   &lt;chr&gt;                        &lt;dbl&gt;\n#&gt; 1 The Godfather, Part II         9  \n#&gt; 2 Promises                       8.5\n#&gt; 3 Django Unchained               8.5\n#&gt; 4 Memento                        8.5\n#&gt; 5 The Prestige                   8.5\n#&gt; # ℹ 646 more rows"
-  },
-  {
-    "objectID": "01_slides.html#mutate-make-new-columns",
-    "href": "01_slides.html#mutate-make-new-columns",
-    "title": "You Navigate, AI Drives",
-    "section": "mutate(): make new columns",
-    "text": "mutate(): make new columns\n\nmovies |&gt;\n  mutate(runtime_hrs = runtime / 60) |&gt;\n  select(title, runtime, runtime_hrs)\n\n#&gt; # A tibble: 651 × 3\n#&gt;   title                runtime runtime_hrs\n#&gt;   &lt;chr&gt;                  &lt;dbl&gt;       &lt;dbl&gt;\n#&gt; 1 Filly Brown               80        1.33\n#&gt; 2 The Dish                 101        1.68\n#&gt; 3 Waiting for Guffman       84        1.4 \n#&gt; 4 The Age of Innocence     139        2.32\n#&gt; 5 Malevolence               90        1.5 \n#&gt; # ℹ 646 more rows"
-  },
-  {
-    "objectID": "01_slides.html#four-verbs-four-jobs",
-    "href": "01_slides.html#four-verbs-four-jobs",
-    "title": "You Navigate, AI Drives",
-    "section": "Four verbs, four jobs",
-    "text": "Four verbs, four jobs\n\nselect() picks columns\nfilter() keeps rows\narrange() changes order\nmutate() makes new columns"
-  },
-  {
-    "objectID": "01_slides.html#how-movie-night-works",
-    "href": "01_slides.html#how-movie-night-works",
-    "title": "You Navigate, AI Drives",
-    "section": "How Movie Night works",
-    "text": "How Movie Night works\nRounds 1 and 2: by hand.\nRound 3: with your AI, and you audit it.\n\nCorrect answer: +1\nEach bug you catch in the AI’s code: +1"
-  },
-  {
-    "objectID": "01_slides.html#round-1-by-hand",
-    "href": "01_slides.html#round-1-by-hand",
-    "title": "You Navigate, AI Drives",
-    "section": "Round 1 (by hand)",
-    "text": "Round 1 (by hand)\nAmong R-rated Feature Films longer than 150 minutes, which has the highest IMDb rating?\n\nColumns: mpaa_rating, title_type, runtime, imdb_rating\n\n\nAnswer: The Godfather, Part II (202 min, IMDb 9.0). Same six rows as Challenge 3: all six are Feature Films, so adding the title_type condition doesn’t change the result. Good moment to point out that the extra condition is still the safer spec."
-  },
-  {
-    "objectID": "01_slides.html#round-2-by-hand",
-    "href": "01_slides.html#round-2-by-hand",
-    "title": "You Navigate, AI Drives",
-    "section": "Round 2 (by hand)",
-    "text": "Round 2 (by hand)\nWhich Documentary (title_type) has the lowest audience_score?\n\nAnswer: Sea Monsters: A Prehistoric Adventure (68). Next are Blind Spot: Hitler’s Secretary (70) and Kicking It (71). Watch for teams that use genre == \"Documentary\" instead: the question names title_type."
-  },
-  {
-    "objectID": "01_slides.html#a-good-prompt-is-a-spec",
-    "href": "01_slides.html#a-good-prompt-is-a-spec",
-    "title": "You Navigate, AI Drives",
-    "section": "A good prompt is a spec",
-    "text": "A good prompt is a spec\nI have a tibble called `movies` with columns\ntitle, studio, genre, runtime, imdb_rating.\n\nUsing dplyr and the |&gt; pipe, find the studio with the\nmost movies.\n\nThen explain each line in one plain-English sentence.\n\n\nData, task, tools, and ask for the explanation. The explanation feeds your Restate step."
-  },
-  {
-    "objectID": "01_slides.html#round-3-with-your-ai",
-    "href": "01_slides.html#round-3-with-your-ai",
-    "title": "You Navigate, AI Drives",
-    "section": "Round 3 (with your AI)",
-    "text": "Round 3 (with your AI)\nWhich studio released the most movies in this dataset?\n\nPaste the spec into your AI\nRun its code\nAudit Loop: restate every line\nDoes the answer make sense? Hunt for bugs.\n\n\nThe AI will likely use count() or group_by() + summarize(): verbs students haven’t met. That is the point: restate each step, ask the AI to explain, and check the answer by another route. Backup answer is in the appendix if no AI is available.\nCorrect answer: Paramount Pictures (37 movies). Bugs to listen for: ascending sort, an NA studio group sneaking in, or counting distinct(studio) instead of movies per studio."
-  },
-  {
-    "objectID": "01_slides.html#bug-bounty-results",
-    "href": "01_slides.html#bug-bounty-results",
-    "title": "You Navigate, AI Drives",
-    "section": "Bug Bounty results",
-    "text": "Bug Bounty results\nWhich team has the most points?\n\nBugs from today:\n\narrange() sorts ascending by default\nNA spreads through math\n== is not %in%\n!= NA never works\nAmbiguous questions get confident answers"
-  },
-  {
-    "objectID": "01_slides.html#the-audit-loop-1",
-    "href": "01_slides.html#the-audit-loop-1",
-    "title": "You Navigate, AI Drives",
-    "section": "The Audit Loop",
-    "text": "The Audit Loop\n\nRead it\nRun it\nRestate it\nRefine or Reject it"
-  },
-  {
-    "objectID": "01_slides.html#exit-ticket",
-    "href": "01_slides.html#exit-ticket",
-    "title": "You Navigate, AI Drives",
-    "section": "Exit ticket",
-    "text": "Exit ticket\nThree quick answers (paper or your course channel):\n\nName the four steps of the Audit Loop\nOne thing you’ll now double-check in AI code\nYour muddiest point"
-  },
-  {
-    "objectID": "01_slides.html#before-wednesday",
-    "href": "01_slides.html#before-wednesday",
-    "title": "You Navigate, AI Drives",
-    "section": "Before Wednesday",
-    "text": "Before Wednesday\n\nRe-run this file top to bottom\nSkim R for Data Science, Data transformation (about 20 min)\nBring your best AI bug to Wednesday’s warm-up\n\n\nWednesday: summarizing, joins, pivots, and big data with Parquet."
-  },
-  {
-    "objectID": "01_slides.html#backup-ai-answer-for-round-3",
-    "href": "01_slides.html#backup-ai-answer-for-round-3",
-    "title": "You Navigate, AI Drives",
-    "section": "Backup: AI answer for Round 3",
-    "text": "Backup: AI answer for Round 3\nUse this if no AI is available. Audit it!\n\nmovies |&gt;\n  group_by(studio) |&gt;\n  summarize(n = n()) |&gt;\n  arrange(n) |&gt;\n  head(1)\n\n\nSame bug as Case #0 in a new costume: arrange(n) is ascending, so this returns a studio with a single movie. Fix: arrange(desc(n)). Pattern: AI repeats failure modes, so learn the common ones."
-  },
-  {
-    "objectID": "01_slides.html#backup-running-it",
-    "href": "01_slides.html#backup-running-it",
-    "title": "You Navigate, AI Drives",
-    "section": "Backup: running it",
-    "text": "Backup: running it\n\nmovies |&gt;\n  group_by(studio) |&gt;\n  summarize(n = n()) |&gt;\n  arrange(n) |&gt;\n  head(1)\n\n#&gt; # A tibble: 1 × 2\n#&gt;   studio             n\n#&gt;   &lt;chr&gt;          &lt;int&gt;\n#&gt; 1 7-57 Releasing     1"
-  },
-  {
-    "objectID": "01_slides.html#backup-the-fix",
-    "href": "01_slides.html#backup-the-fix",
-    "title": "You Navigate, AI Drives",
-    "section": "Backup: the fix",
-    "text": "Backup: the fix\n\nmovies |&gt;\n  group_by(studio) |&gt;\n  summarize(n = n()) |&gt;\n  arrange(desc(n)) |&gt;\n  head(1)\n\n#&gt; # A tibble: 1 × 2\n#&gt;   studio                 n\n#&gt;   &lt;chr&gt;              &lt;int&gt;\n#&gt; 1 Paramount Pictures    37"
+    "text": "Sessions\nNew sessions appear in the table below as they are published. Slides are for class and handouts are the detailed reference. The lab instructions for Sessions 4 and 7 live in the course project repo.\n\n\n\n\nDate\nTitle\nDescription\nCategories\n\n\n\n\n\nNo matching items\n\nCourse dataset for the in-class examples: movies.csv"
   },
   {
     "objectID": "W04L07_handout.html",
@@ -777,60 +182,53 @@
     "text": "Where to go next\n\nR for Data Science (2nd edition): Data transformation\nThe dplyr documentation: https://dplyr.tidyverse.org\nNext session: summarizing, joins, pivots, and big data with Parquet."
   },
   {
-    "objectID": "W04L07_slides.html",
-    "href": "W04L07_slides.html",
-    "title": "You Navigate, AI Drives",
-    "section": "",
-    "text": "Time 0:00–0:08 · Warm-up. Press S for speaker view. Answers to every poll are in the notes.\n\n\n\n\nWho’s driving? (you + AI)\nReading R: the essentials\nVerbs and the pipe\nMovie Night: team challenge\nBug Bounty runs all session\n\n\nWrite a Bug Bounty scoreboard on the whiteboard: one column per team. Points: +1 catch a bug, +1 explain WHY the AI would make it.\n\n\n\n\nSit next to someone.\nDriver = hands on the keyboard\nNavigator = reads, predicts, directs\nWe swap whenever a slide says swap roles\n. . .\n\nSoon, an AI will be one of the two seats. Practice with a human first.\n\n\n\n\nRun this in Positron. Wave when you see a table.\n\nlibrary(tidyverse)\nmovies &lt;- read_csv(\"data/movies.csv\")\nmovies\n\n\nSetup is already done, so this should take 2 minutes. Anyone stuck: pair them with a neighbor and move on.\n\n\n\n\n\nmovies\n\n#&gt; # A tibble: 651 × 32\n#&gt;   title        title_type genre runtime mpaa_rating studio thtr_rel_year\n#&gt;   &lt;chr&gt;        &lt;chr&gt;      &lt;chr&gt;   &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;          &lt;dbl&gt;\n#&gt; 1 Filly Brown  Feature F… Drama      80 R           Indom…          2013\n#&gt; 2 The Dish     Feature F… Drama     101 PG-13       Warne…          2001\n#&gt; 3 Waiting for… Feature F… Come…      84 R           Sony …          1996\n#&gt; 4 The Age of … Feature F… Drama     139 PG          Colum…          1993\n#&gt; 5 Malevolence  Feature F… Horr…      90 R           Ancho…          2004\n#&gt; # ℹ 646 more rows\n#&gt; # ℹ 25 more variables: thtr_rel_month &lt;dbl&gt;, thtr_rel_day &lt;dbl&gt;, …\n\n\n651 rows, 32 columns. Today’s dataset: movies.\n\n\n\nAn AI told me three things about R, very confidently.\n\nR starts counting at 1, not 0.\nmean(c(1, 2, NA)) returns 1.5.\nc(1, \"a\", TRUE) turns everything into text.\n\n. . .\n\nVote with fingers (1, 2, 3): which one is the lie?\n\n\n\n\n\nc(10, 20, 30)[1]\n\n#&gt; [1] 10\n\nmean(c(1, 2, NA))\n\n#&gt; [1] NA\n\nc(1, \"a\", TRUE)\n\n#&gt; [1] \"1\"    \"a\"    \"TRUE\"\n\n\n. . .\n\nBug: A confident wrong answer looks exactly like a confident right one.\n\n\nTwo truths and a lie: #2 is the lie (it returns NA). Don’t explain NA yet, we come back to it in the essentials section."
-  },
-  {
     "objectID": "W04L07_slides.html#todays-route",
     "href": "W04L07_slides.html#todays-route",
     "title": "You Navigate, AI Drives",
-    "section": "",
-    "text": "Who’s driving? (you + AI)\nReading R: the essentials\nVerbs and the pipe\nMovie Night: team challenge\nBug Bounty runs all session\n\n\nWrite a Bug Bounty scoreboard on the whiteboard: one column per team. Points: +1 catch a bug, +1 explain WHY the AI would make it."
+    "section": "Today’s route",
+    "text": "Today’s route\n\nWho’s driving? (you + AI)\nReading R: the essentials\nVerbs and the pipe\nMovie Night: team challenge\nBug Bounty runs all session\n\n\nWrite a Bug Bounty scoreboard on the whiteboard: one column per team. Points: +1 catch a bug, +1 explain WHY the AI would make it."
   },
   {
     "objectID": "W04L07_slides.html#pair-up",
     "href": "W04L07_slides.html#pair-up",
     "title": "You Navigate, AI Drives",
-    "section": "",
-    "text": "Sit next to someone.\nDriver = hands on the keyboard\nNavigator = reads, predicts, directs\nWe swap whenever a slide says swap roles\n. . .\n\nSoon, an AI will be one of the two seats. Practice with a human first."
+    "section": "Pair up!",
+    "text": "Pair up!\nSit next to someone.\nDriver = hands on the keyboard\nNavigator = reads, predicts, directs\nWe swap whenever a slide says swap roles\n\n\nSoon, an AI will be one of the two seats. Practice with a human first."
   },
   {
     "objectID": "W04L07_slides.html#smoke-test",
     "href": "W04L07_slides.html#smoke-test",
     "title": "You Navigate, AI Drives",
-    "section": "",
-    "text": "Run this in Positron. Wave when you see a table.\n\nlibrary(tidyverse)\nmovies &lt;- read_csv(\"data/movies.csv\")\nmovies\n\n\nSetup is already done, so this should take 2 minutes. Anyone stuck: pair them with a neighbor and move on."
+    "section": "Smoke test",
+    "text": "Smoke test\nRun this in Positron. Wave when you see a table.\n\nlibrary(tidyverse)\nmovies &lt;- read_csv(\"data/movies.csv\")\nmovies\n\n\nSetup is already done, so this should take 2 minutes. Anyone stuck: pair them with a neighbor and move on."
   },
   {
     "objectID": "W04L07_slides.html#you-should-see",
     "href": "W04L07_slides.html#you-should-see",
     "title": "You Navigate, AI Drives",
-    "section": "",
-    "text": "movies\n\n#&gt; # A tibble: 651 × 32\n#&gt;   title        title_type genre runtime mpaa_rating studio thtr_rel_year\n#&gt;   &lt;chr&gt;        &lt;chr&gt;      &lt;chr&gt;   &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;          &lt;dbl&gt;\n#&gt; 1 Filly Brown  Feature F… Drama      80 R           Indom…          2013\n#&gt; 2 The Dish     Feature F… Drama     101 PG-13       Warne…          2001\n#&gt; 3 Waiting for… Feature F… Come…      84 R           Sony …          1996\n#&gt; 4 The Age of … Feature F… Drama     139 PG          Colum…          1993\n#&gt; 5 Malevolence  Feature F… Horr…      90 R           Ancho…          2004\n#&gt; # ℹ 646 more rows\n#&gt; # ℹ 25 more variables: thtr_rel_month &lt;dbl&gt;, thtr_rel_day &lt;dbl&gt;, …\n\n\n651 rows, 32 columns. Today’s dataset: movies."
+    "section": "You should see",
+    "text": "You should see\n\nmovies\n\n#&gt; # A tibble: 651 × 32\n#&gt;   title        title_type genre runtime mpaa_rating studio thtr_rel_year\n#&gt;   &lt;chr&gt;        &lt;chr&gt;      &lt;chr&gt;   &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;          &lt;dbl&gt;\n#&gt; 1 Filly Brown  Feature F… Drama      80 R           Indom…          2013\n#&gt; 2 The Dish     Feature F… Drama     101 PG-13       Warne…          2001\n#&gt; 3 Waiting for… Feature F… Come…      84 R           Sony …          1996\n#&gt; 4 The Age of … Feature F… Drama     139 PG          Colum…          1993\n#&gt; 5 Malevolence  Feature F… Horr…      90 R           Ancho…          2004\n#&gt; # ℹ 646 more rows\n#&gt; # ℹ 25 more variables: thtr_rel_month &lt;dbl&gt;, thtr_rel_day &lt;dbl&gt;, …\n\n\n651 rows, 32 columns. Today’s dataset: movies."
   },
   {
     "objectID": "W04L07_slides.html#two-truths-and-a-lie",
     "href": "W04L07_slides.html#two-truths-and-a-lie",
     "title": "You Navigate, AI Drives",
-    "section": "",
-    "text": "An AI told me three things about R, very confidently.\n\nR starts counting at 1, not 0.\nmean(c(1, 2, NA)) returns 1.5.\nc(1, \"a\", TRUE) turns everything into text.\n\n. . .\n\nVote with fingers (1, 2, 3): which one is the lie?"
+    "section": "Two truths and a lie",
+    "text": "Two truths and a lie\nAn AI told me three things about R, very confidently.\n\nR starts counting at 1, not 0.\nmean(c(1, 2, NA)) returns 1.5.\nc(1, \"a\", TRUE) turns everything into text.\n\n\n\nVote with fingers (1, 2, 3): which one is the lie?\n\n\nFLEX: skip if behind (saves about 4 min). Case #0 makes the same point."
   },
   {
     "objectID": "W04L07_slides.html#the-lie-was-2",
     "href": "W04L07_slides.html#the-lie-was-2",
     "title": "You Navigate, AI Drives",
-    "section": "",
-    "text": "c(10, 20, 30)[1]\n\n#&gt; [1] 10\n\nmean(c(1, 2, NA))\n\n#&gt; [1] NA\n\nc(1, \"a\", TRUE)\n\n#&gt; [1] \"1\"    \"a\"    \"TRUE\"\n\n\n. . .\n\nBug: A confident wrong answer looks exactly like a confident right one.\n\n\nTwo truths and a lie: #2 is the lie (it returns NA). Don’t explain NA yet, we come back to it in the essentials section."
+    "section": "The lie was #2",
+    "text": "The lie was #2\n\nc(10, 20, 30)[1]\n\n#&gt; [1] 10\n\nmean(c(1, 2, NA))\n\n#&gt; [1] NA\n\nc(1, \"a\", TRUE)\n\n#&gt; [1] \"1\"    \"a\"    \"TRUE\"\n\n\n\n\nBug: A confident wrong answer looks exactly like a confident right one.\n\n\nTwo truths and a lie: #2 is the lie (it returns NA). Don’t explain NA yet, we come back to it in the essentials section."
   },
   {
     "objectID": "W04L07_slides.html#the-new-division-of-labor",
     "href": "W04L07_slides.html#the-new-division-of-labor",
     "title": "You Navigate, AI Drives",
     "section": "The new division of labor",
-    "text": "The new division of labor\nAI drives: writes code fast\nYou navigate: choose the destination, read the map, check the route\n. . .\nFast driving is great. Driving into a lake is not."
+    "text": "The new division of labor\nAI drives: writes code fast\nYou navigate: choose the destination, read the map, check the route\n\nFast driving is great. Driving into a lake is not.\nYou can’t catch a wrong turn on a map you can’t read, so we learn to read R."
   },
   {
     "objectID": "W04L07_slides.html#what-does-a-navigator-do",
@@ -840,18 +238,11 @@
     "text": "What does a navigator do?\n\nSet the destination: say clearly what you want\nRead the route: understand the code\nCheck the road: run it, test it\nMake the call: accept, fix, or reject"
   },
   {
-    "objectID": "W04L07_slides.html#why-learn-r-if-ai-writes-it",
-    "href": "W04L07_slides.html#why-learn-r-if-ai-writes-it",
-    "title": "You Navigate, AI Drives",
-    "section": "Why learn R if AI writes it?",
-    "text": "Why learn R if AI writes it?\nYou can’t catch a wrong turn on a map you can’t read.\n. . .\nThe scariest bugs don’t crash. They run fine and give a believable answer."
-  },
-  {
     "objectID": "W04L07_slides.html#the-audit-loop",
     "href": "W04L07_slides.html#the-audit-loop",
     "title": "You Navigate, AI Drives",
     "section": "The Audit Loop",
-    "text": "The Audit Loop\n\nRead it\nRun it\nRestate it in plain English\nRefine it or Reject it\n\n. . .\n\nRestate is the superpower. If you can’t say what a line does, you can’t vouch for it."
+    "text": "The Audit Loop\n\nRead it\nRun it\nRestate it in plain English\nRefine it or Reject it\n\n\n\nRestate is the superpower. If you can’t say what a line does, you can’t vouch for it."
   },
   {
     "objectID": "W04L07_slides.html#bug-bounty-rules",
@@ -865,42 +256,21 @@
     "href": "W04L07_slides.html#case-0-the-request",
     "title": "You Navigate, AI Drives",
     "section": "Case #0: the request",
-    "text": "Case #0: the request\n\n“Show me the 5 highest-rated movies on IMDb.”\n\nThe AI wrote:\n\nmovies |&gt;\n  arrange(imdb_rating) |&gt;\n  select(title, imdb_rating) |&gt;\n  head(5)"
+    "text": "Case #0: the request\n\n“Show me the 5 highest-rated movies on IMDb.”\n\nThe AI wrote:\n\nmovies |&gt;\n  arrange(imdb_rating) |&gt;\n  select(title, imdb_rating) |&gt;\n  head(5)\n\n\nWith your partner (60 seconds): restate each line in plain English. Does it match the request? Navigator speaks, driver listens."
   },
   {
-    "objectID": "W04L07_slides.html#your-turn-restate-it",
-    "href": "W04L07_slides.html#your-turn-restate-it",
+    "objectID": "W04L07_slides.html#run-it-does-this-answer-the-request",
+    "href": "W04L07_slides.html#run-it-does-this-answer-the-request",
     "title": "You Navigate, AI Drives",
-    "section": "Your turn: Restate it",
-    "text": "Your turn: Restate it\nWith your partner, 60 seconds:\nSay each line in plain English. Does it match the request?\n\nNavigator speaks, driver listens. Then swap."
+    "section": "Run it: does this answer the request?",
+    "text": "Run it: does this answer the request?\n\n\n#&gt; # A tibble: 5 × 2\n#&gt;   title             imdb_rating\n#&gt;   &lt;chr&gt;                   &lt;dbl&gt;\n#&gt; 1 Disaster Movie            1.9\n#&gt; 2 Epic Movie                2.3\n#&gt; 3 Battlefield Earth         2.4\n#&gt; 4 Viva Knievel!             2.7\n#&gt; 5 Doogal                    2.8\n\n\n\nHands up: yes or no?\n\n\n\nBug: arrange() sorts ascending, so these are the five worst. No error, no warning, a clean table that looks right. Errors are the friendly failures.\n\n\nNo. arrange() sorts ascending by default, so these are the five WORST rated (Disaster Movie 1.9, Epic Movie 2.3, Battlefield Earth 2.4, Viva Knievel! 2.7, Doogal 2.8). The code is on the previous slide: flip back if someone wants to see it. Fix later with desc(). Award points."
   },
   {
-    "objectID": "W04L07_slides.html#run-it",
-    "href": "W04L07_slides.html#run-it",
+    "objectID": "W04L07_slides.html#names-and-functions",
+    "href": "W04L07_slides.html#names-and-functions",
     "title": "You Navigate, AI Drives",
-    "section": "Run it",
-    "text": "Run it\n\nmovies |&gt;\n  arrange(imdb_rating) |&gt;\n  select(title, imdb_rating) |&gt;\n  head(5)\n\n#&gt; # A tibble: 5 × 2\n#&gt;   title             imdb_rating\n#&gt;   &lt;chr&gt;                   &lt;dbl&gt;\n#&gt; 1 Disaster Movie            1.9\n#&gt; 2 Epic Movie                2.3\n#&gt; 3 Battlefield Earth         2.4\n#&gt; 4 Viva Knievel!             2.7\n#&gt; 5 Doogal                    2.8\n\n\n. . .\n\nDoes this answer the request? Hands up: yes / no\n\n\nNo. arrange() sorts ascending by default, so these are the five WORST rated (Disaster Movie 1.9, Epic Movie 2.3, Battlefield Earth 2.4, Viva Knievel! 2.7, Doogal 2.8). No error, no warning. Fix later with desc(). Award points."
-  },
-  {
-    "objectID": "W04L07_slides.html#why-this-one-is-sneaky",
-    "href": "W04L07_slides.html#why-this-one-is-sneaky",
-    "title": "You Navigate, AI Drives",
-    "section": "Why this one is sneaky",
-    "text": "Why this one is sneaky\n\nNo error\nNo warning\nA clean table that looks right\n\n. . .\nErrors are the friendly failures."
-  },
-  {
-    "objectID": "W04L07_slides.html#names-and-assignment",
-    "href": "W04L07_slides.html#names-and-assignment",
-    "title": "You Navigate, AI Drives",
-    "section": "Names and assignment",
-    "text": "Names and assignment\n\nn_movies &lt;- 651\nn_movies\n\n#&gt; [1] 651\n\n\nRead &lt;- as “gets”."
-  },
-  {
-    "objectID": "W04L07_slides.html#functions",
-    "href": "W04L07_slides.html#functions",
-    "title": "You Navigate, AI Drives",
-    "section": "Functions",
-    "text": "Functions\nA function has a name and arguments in parentheses.\n\nsqrt(16)\n\n#&gt; [1] 4\n\nround(3.14159, digits = 2)\n\n#&gt; [1] 3.14"
+    "section": "Names and functions",
+    "text": "Names and functions\n\nn_movies &lt;- 651\nn_movies\n\n#&gt; [1] 651\n\nsqrt(16)\n\n#&gt; [1] 4\n\nround(3.14159, digits = 2)\n\n#&gt; [1] 3.14\n\n\nRead &lt;- as “gets”. A function has a name and arguments in parentheses."
   },
   {
     "objectID": "W04L07_slides.html#vectors",
@@ -924,46 +294,25 @@
     "text": "Yes/no questions\n\nscores &gt; 70\n\n#&gt; [1]  TRUE  TRUE  TRUE FALSE\n\nsum(scores &gt; 70)\n\n#&gt; [1] 3\n\n\nTRUE counts as 1, so sum() counts the yeses."
   },
   {
-    "objectID": "W04L07_slides.html#square-brackets-pick-things",
-    "href": "W04L07_slides.html#square-brackets-pick-things",
-    "title": "You Navigate, AI Drives",
-    "section": "Square brackets pick things",
-    "text": "Square brackets pick things\n\nscores[1]\n\n#&gt; [1] 72\n\nscores[c(1, 3)]\n\n#&gt; [1] 72 91\n\nscores[scores &gt; 70]\n\n#&gt; [1] 72 88 91"
-  },
-  {
     "objectID": "W04L07_slides.html#challenge-1-swap-roles-predict-first",
     "href": "W04L07_slides.html#challenge-1-swap-roles-predict-first",
     "title": "You Navigate, AI Drives",
     "section": "Challenge 1 (swap roles): predict first",
-    "text": "Challenge 1 (swap roles): predict first\n\ngenres &lt;- c(\"Drama\", \"Comedy\", \"Horror\")\ngenres == \"Comedy\"\ngenres %in% c(\"Drama\", \"Horror\")\n\n\nNavigator: predict both outputs out loud. Driver: type and run."
-  },
-  {
-    "objectID": "W04L07_slides.html#challenge-1-answers",
-    "href": "W04L07_slides.html#challenge-1-answers",
-    "title": "You Navigate, AI Drives",
-    "section": "Challenge 1: answers",
-    "text": "Challenge 1: answers\n\ngenres &lt;- c(\"Drama\", \"Comedy\", \"Horror\")\ngenres == \"Comedy\"\n\n#&gt; [1] FALSE  TRUE FALSE\n\ngenres %in% c(\"Drama\", \"Horror\")\n\n#&gt; [1]  TRUE FALSE  TRUE\n\n\n%in% asks: “is each value anywhere in this set?”\n\nKeep this one in mind: Case #1 (== vs %in%) depends on it."
+    "text": "Challenge 1 (swap roles): predict first\n\ngenres &lt;- c(\"Drama\", \"Comedy\", \"Horror\")\ngenres == \"Comedy\"\ngenres %in% c(\"Drama\", \"Horror\")\n\n\nNavigator: predict both outputs out loud. Driver: type and run.\n\n\n\n\n#&gt; [1] FALSE  TRUE FALSE\n\n\n#&gt; [1]  TRUE FALSE  TRUE\n\n\n%in% asks: “is each value anywhere in this set?”\n\nKeep this one in mind: Case #1 (== vs %in%) depends on it."
   },
   {
     "objectID": "W04L07_slides.html#na-means-i-dont-know",
     "href": "W04L07_slides.html#na-means-i-dont-know",
     "title": "You Navigate, AI Drives",
     "section": "NA means “I don’t know”",
-    "text": "NA means “I don’t know”\nPredict:\n\nNA + 1\nNA &gt; 5\nNA == NA\n\n. . .\n\nVote: what do these print?"
-  },
-  {
-    "objectID": "W04L07_slides.html#na-spreads",
-    "href": "W04L07_slides.html#na-spreads",
-    "title": "You Navigate, AI Drives",
-    "section": "NA spreads",
-    "text": "NA spreads\n\nNA + 1\n\n#&gt; [1] NA\n\nNA &gt; 5\n\n#&gt; [1] NA\n\nNA == NA\n\n#&gt; [1] NA\n\n\nIs one unknown equal to another unknown? Unknown!"
+    "text": "NA means “I don’t know”\nPredict:\n\nNA + 1\nNA &gt; 5\nNA == NA\n\n\nVote: what do these print?\n\n\n\n\n#&gt; [1] NA\n\n\n#&gt; [1] NA\n\n\n#&gt; [1] NA\n\n\nIs one unknown equal to another unknown? Unknown!"
   },
   {
     "objectID": "W04L07_slides.html#handling-na",
     "href": "W04L07_slides.html#handling-na",
     "title": "You Navigate, AI Drives",
     "section": "Handling NA",
-    "text": "Handling NA\n\nx &lt;- c(4, 8, NA)\nmean(x)\n\n#&gt; [1] NA\n\nmean(x, na.rm = TRUE)\n\n#&gt; [1] 6\n\nis.na(x)\n\n#&gt; [1] FALSE FALSE  TRUE\n\n\n. . .\n\nna.rm = TRUE is a decision, not a fix. You chose to ignore the unknowns.\n\n\nPlant the seed: dropping missing values changes who is in your analysis. This returns in the WellSync cleaning sessions."
+    "text": "Handling NA\n\nx &lt;- c(4, 8, NA)\nmean(x)\n\n#&gt; [1] NA\n\nmean(x, na.rm = TRUE)\n\n#&gt; [1] 6\n\nis.na(x)\n\n#&gt; [1] FALSE FALSE  TRUE\n\n\n\n\nna.rm = TRUE is a decision, not a fix. You chose to ignore the unknowns.\n\n\nPlant the seed: dropping missing values changes who is in your analysis. This returns in the WellSync cleaning sessions."
   },
   {
     "objectID": "W04L07_slides.html#a-column-is-a-vector",
@@ -977,42 +326,35 @@
     "href": "W04L07_slides.html#mystery",
     "title": "You Navigate, AI Drives",
     "section": "Mystery",
-    "text": "Mystery\n\nmean(movies$runtime)\n\n#&gt; [1] NA\n\n\n. . .\n\nWhy NA? Talk to your partner (30 seconds)."
+    "text": "Mystery\n\nmean(movies$runtime)\n\n#&gt; [1] NA\n\n\n\n\nWhy NA? Talk to your partner (30 seconds)."
   },
   {
     "objectID": "W04L07_slides.html#solving-the-mystery",
     "href": "W04L07_slides.html#solving-the-mystery",
     "title": "You Navigate, AI Drives",
     "section": "Solving the mystery",
-    "text": "Solving the mystery\n\nsum(is.na(movies$runtime))\n\n#&gt; [1] 1\n\nmovies$title[is.na(movies$runtime)]\n\n#&gt; [1] \"The End of America\"\n\nmean(movies$runtime, na.rm = TRUE)\n\n#&gt; [1] 105.8215\n\n\n. . .\n\nBug: One missing runtime made the whole mean unknown."
+    "text": "Solving the mystery\n\nsum(is.na(movies$runtime))\n\n#&gt; [1] 1\n\nmean(movies$runtime, na.rm = TRUE)\n\n#&gt; [1] 105.8215\n\n\n\n\nBug: One missing runtime made the whole mean unknown.\n\n\nIf asked which movie it is: “The End of America”. Finding it with brackets is in the Appendix and the handout; after filter() you can do it with filter(is.na(runtime))."
   },
   {
     "objectID": "W04L07_slides.html#challenge-2-swap-roles-find-something-weird",
     "href": "W04L07_slides.html#challenge-2-swap-roles-find-something-weird",
     "title": "You Navigate, AI Drives",
     "section": "Challenge 2 (swap roles): find something weird",
-    "text": "Challenge 2 (swap roles): find something weird\n\nglimpse(movies)\n\nYou have 90 seconds. Find one thing in this table that looks odd, surprising, or worth asking about.\n\nShare your weird thing with a nearby team.\n\n\nLikely finds: dvd_rel_year / dvd_rel_month / dvd_rel_day missing for 8 movies; studio missing for 8; one missing runtime; two different “documentary” columns (title_type and genre); Upright/Spilled audience ratings. Collect 3 from the room. This sets the “look first” habit used in Lab 1."
+    "text": "Challenge 2 (swap roles): find something weird\n\nglimpse(movies)\n\nYou have 90 seconds. Find one thing in this table that looks odd, surprising, or worth asking about.\n\nFLEX: skip if behind (saves about 3 min), or move it to the first step of Lab 1 on 11/02. If you run it, no sharing round: collect 2-3 finds from the room only if you are on time.\nLikely finds: dvd_rel_year / dvd_rel_month / dvd_rel_day missing for 8 movies; studio missing for 8; one missing runtime; two different “documentary” columns (title_type and genre); Upright/Spilled audience ratings. This sets the “look first” habit used in Lab 1."
   },
   {
     "objectID": "W04L07_slides.html#data-wrangling-is-a-sentence",
     "href": "W04L07_slides.html#data-wrangling-is-a-sentence",
     "title": "You Navigate, AI Drives",
     "section": "Data wrangling is a sentence",
-    "text": "Data wrangling is a sentence\n“Take movies, then keep the dramas, then sort by rating, then show the top 3.”\n. . .\nThe pipe |&gt; reads as then."
+    "text": "Data wrangling is a sentence\n“Take movies, then keep the dramas, then sort by rating, then show the top 3.”\n\nThe pipe |&gt; reads as then."
   },
   {
     "objectID": "W04L07_slides.html#same-thing-two-ways",
     "href": "W04L07_slides.html#same-thing-two-ways",
     "title": "You Navigate, AI Drives",
     "section": "Same thing, two ways",
-    "text": "Same thing, two ways\n\nhead(arrange(filter(movies, genre == \"Drama\"), imdb_rating), 3)\n\n\nmovies |&gt;\n  filter(genre == \"Drama\") |&gt;\n  arrange(imdb_rating) |&gt;\n  head(3)"
-  },
-  {
-    "objectID": "W04L07_slides.html#youll-see-two-pipes",
-    "href": "W04L07_slides.html#youll-see-two-pipes",
-    "title": "You Navigate, AI Drives",
-    "section": "You’ll see two pipes",
-    "text": "You’ll see two pipes\n|&gt; is built into R.\n%&gt;% is the older tidyverse pipe. AI and old tutorials use both.\nThey behave the same for what we do.\n\nIn Positron the pipe shortcut is Ctrl/Cmd+Shift+M. A setting decides which pipe it inserts."
+    "text": "Same thing, two ways\n\nhead(arrange(filter(movies, genre == \"Drama\"), imdb_rating), 3)\n\n\nmovies |&gt;\n  filter(genre == \"Drama\") |&gt;\n  arrange(imdb_rating) |&gt;\n  head(3)\n\nYou’ll also see %&gt;%, the older tidyverse pipe. It behaves the same for what we do.\n\nIn Positron the pipe shortcut is Ctrl/Cmd+Shift+M. A setting decides which pipe it inserts."
   },
   {
     "objectID": "W04L07_slides.html#select-choose-columns",
@@ -1033,28 +375,7 @@
     "href": "W04L07_slides.html#conditions-you-can-use",
     "title": "You Navigate, AI Drives",
     "section": "Conditions you can use",
-    "text": "Conditions you can use\n\n== equal, != not equal\n&gt;, &gt;=, &lt;, &lt;=\n%in% is in this set\nis.na() is missing\n, or & means and; | means or"
-  },
-  {
-    "objectID": "W04L07_slides.html#filter-with-two-conditions",
-    "href": "W04L07_slides.html#filter-with-two-conditions",
-    "title": "You Navigate, AI Drives",
-    "section": "filter() with two conditions",
-    "text": "filter() with two conditions\n\nmovies |&gt;\n  select(title, genre, imdb_rating) |&gt;\n  filter(genre == \"Drama\", imdb_rating &gt; 8)\n\n#&gt; # A tibble: 8 × 3\n#&gt;   title             genre imdb_rating\n#&gt;   &lt;chr&gt;             &lt;chr&gt;       &lt;dbl&gt;\n#&gt; 1 Warrior           Drama         8.2\n#&gt; 2 V for Vendetta    Drama         8.2\n#&gt; 3 The Help          Drama         8.1\n#&gt; 4 Good Will Hunting Drama         8.3\n#&gt; 5 The Prestige      Drama         8.5\n#&gt; # ℹ 3 more rows"
-  },
-  {
-    "objectID": "W04L07_slides.html#challenge-3-swap-roles",
-    "href": "W04L07_slides.html#challenge-3-swap-roles",
-    "title": "You Navigate, AI Drives",
-    "section": "Challenge 3 (swap roles)",
-    "text": "Challenge 3 (swap roles)\nWrite a pipe that keeps only R-rated movies with a runtime over 150 minutes, showing title, runtime, imdb_rating.\nHow many rows do you get?\n\nColumns to use: mpaa_rating, runtime."
-  },
-  {
-    "objectID": "W04L07_slides.html#challenge-3-one-answer",
-    "href": "W04L07_slides.html#challenge-3-one-answer",
-    "title": "You Navigate, AI Drives",
-    "section": "Challenge 3: one answer",
-    "text": "Challenge 3: one answer\n\nmovies |&gt;\n  filter(mpaa_rating == \"R\", runtime &gt; 150) |&gt;\n  select(title, runtime, imdb_rating)\n\n#&gt; # A tibble: 6 × 3\n#&gt;   title                  runtime imdb_rating\n#&gt;   &lt;chr&gt;                    &lt;dbl&gt;       &lt;dbl&gt;\n#&gt; 1 The English Patient        162         7.4\n#&gt; 2 Django Unchained           165         8.5\n#&gt; 3 Topsy-Turvy                154         7.4\n#&gt; 4 The Godfather, Part II     202         9  \n#&gt; 5 Cloud Atlas                172         7.5\n#&gt; # ℹ 1 more row"
+    "text": "Conditions you can use\n\n== equal, != not equal\n&gt;, &gt;=, &lt;, &lt;=\n%in% is in this set, is.na() is missing\n, or & means and; | means or\n\n\nmovies |&gt; filter(genre == \"Drama\", imdb_rating &gt; 8) |&gt; nrow()\n\n#&gt; [1] 8\n\n\n\nDramas rated above 8: 8 movies. Use it to show that a comma means “and”."
   },
   {
     "objectID": "W04L07_slides.html#bug-court-is-in-session",
@@ -1075,7 +396,7 @@
     "href": "W04L07_slides.html#case-1-the-evidence",
     "title": "You Navigate, AI Drives",
     "section": "Case #1: the evidence",
-    "text": "Case #1: the evidence\n\nmovies |&gt; filter(genre == c(\"Drama\", \"Comedy\")) |&gt; nrow()\n\n#&gt; [1] 191\n\nmovies |&gt; filter(genre %in% c(\"Drama\", \"Comedy\")) |&gt; nrow()\n\n#&gt; [1] 392\n\n\n. . .\n\nBug: == lines the two names up with rows one by one, back and forth. In your own console R also prints a warning. Warnings are clues.\n\n\nGuilty. 191 vs 392 rows. The recycling makes row 1 compare to “Drama”, row 2 to “Comedy”, row 3 to “Drama”, and so on. Tie back to Challenge 1."
+    "text": "Case #1: the evidence\n\nmovies |&gt; filter(genre == c(\"Drama\", \"Comedy\")) |&gt; nrow()\n\n#&gt; [1] 191\n\nmovies |&gt; filter(genre %in% c(\"Drama\", \"Comedy\")) |&gt; nrow()\n\n#&gt; [1] 392\n\n\n\n\nBug: == lines the two names up with rows one by one, back and forth. In your own console R also prints a warning. Warnings are clues.\n\n\nGuilty. 191 vs 392 rows. The recycling makes row 1 compare to “Drama”, row 2 to “Comedy”, row 3 to “Drama”, and so on. Tie back to Challenge 1."
   },
   {
     "objectID": "W04L07_slides.html#case-2-the-request",
@@ -1089,28 +410,21 @@
     "href": "W04L07_slides.html#case-2-the-evidence",
     "title": "You Navigate, AI Drives",
     "section": "Case #2: the evidence",
-    "text": "Case #2: the evidence\n\nmovies |&gt; filter(dvd_rel_year != NA) |&gt; nrow()\n\n#&gt; [1] 0\n\nmovies |&gt; filter(!is.na(dvd_rel_year)) |&gt; nrow()\n\n#&gt; [1] 643\n\n\n. . .\n\nBug: Anything compared with NA is NA, and filter() drops those. Zero rows, no error."
-  },
-  {
-    "objectID": "W04L07_slides.html#case-2b-where-did-it-go",
-    "href": "W04L07_slides.html#case-2b-where-did-it-go",
-    "title": "You Navigate, AI Drives",
-    "section": "Case #2b: where did it go?",
-    "text": "Case #2b: where did it go?\n\nnrow(movies)\n\n#&gt; [1] 651\n\nmovies |&gt; filter(runtime &gt; 0) |&gt; nrow()\n\n#&gt; [1] 650\n\n\n. . .\n\nBug: Every movie has a runtime above 0, yet one vanished: its runtime is NA. filter() quietly drops rows where the condition is NA.\n\n\n650 vs 651. This is the first appearance of “who disappears silently?” which becomes the cleaning impact audit in Lab 2."
+    "text": "Case #2: the evidence\n\nmovies |&gt; filter(dvd_rel_year != NA) |&gt; nrow()\n\n#&gt; [1] 0\n\nmovies |&gt; filter(!is.na(dvd_rel_year)) |&gt; nrow()\n\n#&gt; [1] 643\n\n\n\n\nBug: Anything compared with NA is NA, and filter() drops those. Zero rows, no error. The same thing happens quietly elsewhere: filter(runtime &gt; 0) turns 651 rows into 650, because one runtime is NA.\n\n\nThe 651 to 650 example (Case #2b) is in the Appendix with its code if you want to run it. This is the first appearance of “who disappears silently?”, which becomes the cleaning impact audit in Lab 2."
   },
   {
     "objectID": "W04L07_slides.html#case-3-the-request",
     "href": "W04L07_slides.html#case-3-the-request",
     "title": "You Navigate, AI Drives",
     "section": "Case #3: the request",
-    "text": "Case #3: the request\n\n“How many documentaries are in the data?”\n\n\nmovies |&gt;\n  filter(genre == \"Documentary\") |&gt;\n  nrow()\n\n\nGuilty or innocent? Look closely at the column names first."
+    "text": "Case #3: the request\n\n“How many documentaries are in the data?”\n\n\nmovies |&gt;\n  filter(genre == \"Documentary\") |&gt;\n  nrow()\n\n\nGuilty or innocent? Look closely at the column names first.\n\n\nFLEX: skip Case #3 (both slides) if behind, saves about 3 min. The spec slide in Movie Night makes a similar point."
   },
   {
     "objectID": "W04L07_slides.html#case-3-the-evidence",
     "href": "W04L07_slides.html#case-3-the-evidence",
     "title": "You Navigate, AI Drives",
     "section": "Case #3: the evidence",
-    "text": "Case #3: the evidence\n\nmovies |&gt; filter(genre == \"Documentary\") |&gt; nrow()\n\n#&gt; [1] 52\n\nmovies |&gt; filter(title_type == \"Documentary\") |&gt; nrow()\n\n#&gt; [1] 55\n\n\n. . .\n\nBug: The code is fine. The question was ambiguous. Two columns, two answers (52 vs 55).\n\n\nNeither answer is wrong. The navigator’s job is to specify which column, or ask the AI which one it used. Great Week-3 theme: a good spec removes ambiguity."
+    "text": "Case #3: the evidence\n\nmovies |&gt; filter(genre == \"Documentary\") |&gt; nrow()\n\n#&gt; [1] 52\n\nmovies |&gt; filter(title_type == \"Documentary\") |&gt; nrow()\n\n#&gt; [1] 55\n\n\n\n\nBug: The code is fine. The question was ambiguous. Two columns, two answers (52 vs 55).\n\n\nNeither answer is wrong. The navigator’s job is to specify which column, or ask the AI which one it used. Great Week-3 theme: a good spec removes ambiguity."
   },
   {
     "objectID": "W04L07_slides.html#arrange-sort-rows",
@@ -1138,49 +452,35 @@
     "href": "W04L07_slides.html#how-movie-night-works",
     "title": "You Navigate, AI Drives",
     "section": "How Movie Night works",
-    "text": "How Movie Night works\nRounds 1 and 2: by hand.\nRound 3: with your AI, and you audit it.\n\nCorrect answer: +1\nEach bug you catch in the AI’s code: +1"
+    "text": "How Movie Night works\nRound 1: by hand.\nRound 2: with your AI, and you audit it.\n\nCorrect answer: +1\nEach bug you catch in the AI’s code: +1"
   },
   {
     "objectID": "W04L07_slides.html#round-1-by-hand",
     "href": "W04L07_slides.html#round-1-by-hand",
     "title": "You Navigate, AI Drives",
     "section": "Round 1 (by hand)",
-    "text": "Round 1 (by hand)\nAmong R-rated Feature Films longer than 150 minutes, which has the highest IMDb rating?\n\nColumns: mpaa_rating, title_type, runtime, imdb_rating\n\n\nAnswer: The Godfather, Part II (202 min, IMDb 9.0). Same six rows as Challenge 3: all six are Feature Films, so adding the title_type condition doesn’t change the result. Good moment to point out that the extra condition is still the safer spec."
-  },
-  {
-    "objectID": "W04L07_slides.html#round-2-by-hand",
-    "href": "W04L07_slides.html#round-2-by-hand",
-    "title": "You Navigate, AI Drives",
-    "section": "Round 2 (by hand)",
-    "text": "Round 2 (by hand)\nWhich Documentary (title_type) has the lowest audience_score?\n\nAnswer: Sea Monsters: A Prehistoric Adventure (68). Next are Blind Spot: Hitler’s Secretary (70) and Kicking It (71). Watch for teams that use genre == \"Documentary\" instead: the question names title_type."
+    "text": "Round 1 (by hand)\nAmong R-rated Feature Films longer than 150 minutes, which has the highest IMDb rating?\n\nColumns: mpaa_rating, title_type, runtime, imdb_rating. Hint: filter(), then arrange(desc(...)), then head(1).\n\n\nAnswer: The Godfather, Part II (202 min, IMDb 9.0). All six R-rated films over 150 minutes in this file are Feature Films, so the title_type condition doesn’t change the result; still point out it is the safer spec.\nRound 2 by hand (documentary with the lowest audience_score) is in the Appendix if you have extra time."
   },
   {
     "objectID": "W04L07_slides.html#a-good-prompt-is-a-spec",
     "href": "W04L07_slides.html#a-good-prompt-is-a-spec",
     "title": "You Navigate, AI Drives",
     "section": "A good prompt is a spec",
-    "text": "A good prompt is a spec\nI have a tibble called `movies` with columns\ntitle, studio, genre, runtime, imdb_rating.\n\nUsing dplyr and the |&gt; pipe, find the studio with the\nmost movies.\n\nThen explain each line in one plain-English sentence.\n. . .\n\nData, task, tools, and ask for the explanation. The explanation feeds your Restate step."
+    "text": "A good prompt is a spec\nI have a tibble called `movies` with columns\ntitle, studio, genre, runtime, imdb_rating.\n\nUsing dplyr and the |&gt; pipe, find the studio with the\nmost movies.\n\nThen explain each line in one plain-English sentence.\n\n\nData, task, tools, and ask for the explanation. The explanation feeds your Restate step."
   },
   {
-    "objectID": "W04L07_slides.html#round-3-with-your-ai",
-    "href": "W04L07_slides.html#round-3-with-your-ai",
+    "objectID": "W04L07_slides.html#round-2-with-your-ai",
+    "href": "W04L07_slides.html#round-2-with-your-ai",
     "title": "You Navigate, AI Drives",
-    "section": "Round 3 (with your AI)",
-    "text": "Round 3 (with your AI)\nWhich studio released the most movies in this dataset?\n\nPaste the spec into your AI\nRun its code\nAudit Loop: restate every line\nDoes the answer make sense? Hunt for bugs.\n\n\nThe AI will likely use count() or group_by() + summarize(): verbs students haven’t met. That is the point: restate each step, ask the AI to explain, and check the answer by another route. Backup answer is in the appendix if no AI is available.\nCorrect answer: Paramount Pictures (37 movies). Bugs to listen for: ascending sort, an NA studio group sneaking in, or counting distinct(studio) instead of movies per studio."
+    "section": "Round 2 (with your AI)",
+    "text": "Round 2 (with your AI)\nWhich studio released the most movies in this dataset?\n\nPaste the spec into your AI\nRun its code\nAudit Loop: restate every line\nDoes the answer make sense? Hunt for bugs.\n\n\nThe AI will likely use count() or group_by() + summarize(): verbs students haven’t met. That is the point: restate each step, ask the AI to explain, and check the answer by another route. Backup answer is in the appendix if no AI is available.\nCorrect answer: Paramount Pictures (37 movies). Bugs to listen for: ascending sort, an NA studio group sneaking in, or counting distinct(studio) instead of movies per studio."
   },
   {
     "objectID": "W04L07_slides.html#bug-bounty-results",
     "href": "W04L07_slides.html#bug-bounty-results",
     "title": "You Navigate, AI Drives",
     "section": "Bug Bounty results",
-    "text": "Bug Bounty results\nWhich team has the most points?\n. . .\nBugs from today:\n\narrange() sorts ascending by default\nNA spreads through math\n== is not %in%\n!= NA never works\nAmbiguous questions get confident answers"
-  },
-  {
-    "objectID": "W04L07_slides.html#the-audit-loop-1",
-    "href": "W04L07_slides.html#the-audit-loop-1",
-    "title": "You Navigate, AI Drives",
-    "section": "The Audit Loop",
-    "text": "The Audit Loop\n\nRead it\nRun it\nRestate it\nRefine or Reject it"
+    "text": "Bug Bounty results\nWhich team has the most points?\n\nBugs from today:\n\narrange() sorts ascending by default\nNA spreads through math\n== is not %in%\n!= NA never works\nAmbiguous questions get confident answers\n\nAudit Loop: Read it, Run it, Restate it, Refine or Reject it."
   },
   {
     "objectID": "W04L07_slides.html#exit-ticket",
@@ -1194,14 +494,49 @@
     "href": "W04L07_slides.html#before-wednesday",
     "title": "You Navigate, AI Drives",
     "section": "Before Wednesday",
-    "text": "Before Wednesday\n\nRe-run this file top to bottom\nSkim R for Data Science, Data transformation (about 20 min)\nBring your best AI bug to Wednesday’s warm-up\n\n. . .\nWednesday: summarizing, joins, pivots, and big data with Parquet."
+    "text": "Before Wednesday\n\nRe-run this file top to bottom\nSkim R for Data Science, Data transformation (about 20 min)\nBring your best AI bug to Wednesday’s warm-up\n\n\nWednesday: summarizing, joins, pivots, and big data with Parquet."
   },
   {
-    "objectID": "W04L07_slides.html#backup-ai-answer-for-round-3",
-    "href": "W04L07_slides.html#backup-ai-answer-for-round-3",
+    "objectID": "W04L07_slides.html#moved-square-brackets-pick-things",
+    "href": "W04L07_slides.html#moved-square-brackets-pick-things",
     "title": "You Navigate, AI Drives",
-    "section": "Backup: AI answer for Round 3",
-    "text": "Backup: AI answer for Round 3\nUse this if no AI is available. Audit it!\n\nmovies |&gt;\n  group_by(studio) |&gt;\n  summarize(n = n()) |&gt;\n  arrange(n) |&gt;\n  head(1)\n\n\nSame bug as Case #0 in a new costume: arrange(n) is ascending, so this returns a studio with a single movie. Fix: arrange(desc(n)). Pattern: AI repeats failure modes, so learn the common ones."
+    "section": "Moved: square brackets pick things",
+    "text": "Moved: square brackets pick things\n\nscores[1]\n\n#&gt; [1] 72\n\nscores[c(1, 3)]\n\n#&gt; [1] 72 91\n\nscores[scores &gt; 70]\n\n#&gt; [1] 72 88 91\n\n\nFinding the movie with the missing runtime:\n\nmovies$title[is.na(movies$runtime)]\n\n#&gt; [1] \"The End of America\""
+  },
+  {
+    "objectID": "W04L07_slides.html#moved-challenge-3-swap-roles",
+    "href": "W04L07_slides.html#moved-challenge-3-swap-roles",
+    "title": "You Navigate, AI Drives",
+    "section": "Moved: Challenge 3 (swap roles)",
+    "text": "Moved: Challenge 3 (swap roles)\nWrite a pipe that keeps only R-rated movies with a runtime over 150 minutes, showing title, runtime, imdb_rating.\nHow many rows do you get?\n\nColumns to use: mpaa_rating, runtime."
+  },
+  {
+    "objectID": "W04L07_slides.html#moved-challenge-3-answer",
+    "href": "W04L07_slides.html#moved-challenge-3-answer",
+    "title": "You Navigate, AI Drives",
+    "section": "Moved: Challenge 3 answer",
+    "text": "Moved: Challenge 3 answer\n\nmovies |&gt;\n  filter(mpaa_rating == \"R\", runtime &gt; 150) |&gt;\n  select(title, runtime, imdb_rating)\n\n#&gt; # A tibble: 6 × 3\n#&gt;   title                  runtime imdb_rating\n#&gt;   &lt;chr&gt;                    &lt;dbl&gt;       &lt;dbl&gt;\n#&gt; 1 The English Patient        162         7.4\n#&gt; 2 Django Unchained           165         8.5\n#&gt; 3 Topsy-Turvy                154         7.4\n#&gt; 4 The Godfather, Part II     202         9  \n#&gt; 5 Cloud Atlas                172         7.5\n#&gt; # ℹ 1 more row"
+  },
+  {
+    "objectID": "W04L07_slides.html#moved-case-2b-where-did-it-go",
+    "href": "W04L07_slides.html#moved-case-2b-where-did-it-go",
+    "title": "You Navigate, AI Drives",
+    "section": "Moved: Case #2b, where did it go?",
+    "text": "Moved: Case #2b, where did it go?\n\nnrow(movies)\n\n#&gt; [1] 651\n\nmovies |&gt; filter(runtime &gt; 0) |&gt; nrow()\n\n#&gt; [1] 650\n\n\nBug: Every movie has a runtime above 0, yet one vanished: its runtime is NA. filter() quietly drops rows where the condition is NA."
+  },
+  {
+    "objectID": "W04L07_slides.html#moved-movie-night-extra-round-by-hand",
+    "href": "W04L07_slides.html#moved-movie-night-extra-round-by-hand",
+    "title": "You Navigate, AI Drives",
+    "section": "Moved: Movie Night, extra round (by hand)",
+    "text": "Moved: Movie Night, extra round (by hand)\nWhich Documentary (title_type) has the lowest audience_score?\n\nAnswer: Sea Monsters: A Prehistoric Adventure (68). Next are Blind Spot: Hitler’s Secretary (70) and Kicking It (71). Watch for teams that use genre == \"Documentary\" instead: the question names title_type."
+  },
+  {
+    "objectID": "W04L07_slides.html#backup-ai-answer-for-round-2",
+    "href": "W04L07_slides.html#backup-ai-answer-for-round-2",
+    "title": "You Navigate, AI Drives",
+    "section": "Backup: AI answer for Round 2",
+    "text": "Backup: AI answer for Round 2\nUse this if no AI is available. Audit it!\n\nmovies |&gt;\n  group_by(studio) |&gt;\n  summarize(n = n()) |&gt;\n  arrange(n) |&gt;\n  head(1)\n\n\nSame bug as Case #0 in a new costume: arrange(n) is ascending, so this returns a studio with a single movie. Fix: arrange(desc(n)). Pattern: AI repeats failure modes, so learn the common ones."
   },
   {
     "objectID": "W04L07_slides.html#backup-running-it",
