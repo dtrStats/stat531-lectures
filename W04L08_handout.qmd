@@ -1,20 +1,1164 @@
 ---
 title: "Session 2 Handout: Summarize, Combine, and Scale"
-description: "Grouped summaries, joins with row-count checks, pivots, and big data with arrow and Parquet"
+subtitle: "Reference companion to the Session 2 slides"
+author: "DTR"
+description: "Full reference for grouped summaries, joins, pivots, and big data with arrow and Parquet, with Audit it boxes and practice"
 date: 2026-10-21
 categories: [Handout]
-format: html
-draft: true
+format:
+  html:
+    number-sections: true
+    title-block-banner: "#213921"
+    title-block-banner-color: "#ffffff"
 ---
 
-## Planned outline
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", message = FALSE, warning = FALSE)
+library(tidyverse)
+options(
+  tibble.print_max = 6,
+  tibble.print_min = 6,
+  width = 90,
+  cli.unicode = FALSE
+)
+movies <- read_csv("data/movies.csv", show_col_types = FALSE)
+studios <- read_csv("data/studios.csv", show_col_types = FALSE)
+```
 
-- Warm-up bug hunt (bring your best AI bug)
-- group_by / summarize / count and the .by argument
-- Joins with join_by(); checking row counts before and after; anti_join; many-to-many
-- pivot_longer / pivot_wider
-- arrow: why Parquet, open_dataset(), lazy filter/select, collect(), inspecting the query plan
-- Big-data demo dataset: Seattle library checkouts (R4DS arrow chapter)
-- Audit beat: silent failures (join row inflation, NA handling, what lazy evaluation hides)
+# How to use this handout
 
-*Draft: remove `draft: true` from the top of this file to publish it.*
+The slides move fast. This handout is the slow, complete version: read it before class, and return to it when you audit code. As in last session, every section has **Audit it** boxes that show a mistake an AI assistant (or a human) could easily make.
+
+::: {.callout-note title="The Audit Loop"}
+1. **Read** the code.
+2. **Run** it.
+3. **Restate** it in plain English.
+4. **Refine** it or **Reject** it.
+:::
+
+**Data for this session.**
+
+| File | What it is | Where to get it |
+|:--|:--|:--|
+| [movies.csv](data/movies.csv) | 651 movies (same as last lecture) | `data/` folder of your project |
+| [studios.csv](data/studios.csv) | A hand-made lookup that maps raw studio names to a cleaned `studio_group` | `data/` folder |
+| `views.parquet` | 4 million **simulated** viewing events for the arrow section (about 40 MB) | Shared on Canvas (under Week 04), or generate it with [make-views.R](scripts/make-views.R) after installing `arrow` |
+
+```{r}
+#| eval: false
+library(tidyverse)
+movies <- read_csv("data/movies.csv")
+studios <- read_csv("data/studios.csv")
+```
+
+::: {.callout-note title="About the studios table"}
+`studios.csv` is a table built for this course. It is simplified and deliberately **incomplete** (36 studio names), like most real lookup tables. The `studio_group` and `major` columns are simplifications for practice, not an industry reference.
+:::
+
+# Summaries: `summarize()` and `group_by()`
+
+Every verb from last session returns a table with the same number of rows or fewer, but still one row per **observation**. A **summary** collapses many rows into one number per question.
+
+## `summarize()`: many rows in, one row out
+
+```{r}
+movies |>
+  summarize(avg_score = mean(audience_score))
+```
+
+You can compute several summaries at once. Name each one on the left of `=`.
+
+```{r}
+movies |>
+  summarize(
+    n = n(),
+    avg_score = mean(audience_score),
+    median_score = median(audience_score),
+    sd_score = sd(audience_score),
+    best_imdb = max(imdb_rating),
+    n_studios = n_distinct(studio)
+  )
+```
+
+Summary functions you will use constantly:
+
+| Function | Returns |
+|:--|:--|
+| `n()` | number of rows (only inside `summarize()`, `mutate()`, `filter()`) |
+| `n_distinct(x)` | number of different values |
+| `mean(x)`, `median(x)` | center |
+| `sd(x)`, `IQR(x)` | spread |
+| `min(x)`, `max(x)` | extremes |
+| `sum(x)` | total; on a logical vector, the **count** of `TRUE` |
+| `mean(x)` on a logical vector | the **proportion** of `TRUE` |
+| `first(x)`, `last(x)` | first or last value |
+
+```{r}
+# How many films are Best Picture nominees, and what share is that?
+movies |>
+  summarize(
+    n_nominated = sum(best_pic_nom == "yes"),
+    share = mean(best_pic_nom == "yes")
+  )
+```
+
+## `group_by()`: split the table
+
+`group_by()` does not change the rows. It adds a hidden label saying "do the next verb **separately for each group**." The header of the printout tells you: `Groups: genre [11]`.
+
+```{r}
+movies |>
+  group_by(genre)
+```
+
+## `group_by()` + `summarize()`: one row per group
+
+```{r}
+movies |>
+  group_by(genre) |>
+  summarize(n = n(), avg_score = mean(audience_score)) |>
+  arrange(desc(avg_score))
+```
+
+Read it as: "For each genre, count the films and average the audience score; then sort."
+
+::: {.callout-tip title="Key idea"}
+A grouped summary has **one row per group** and **one column per summary**. Before you trust any grouped result, ask: *what is a row now?*
+:::
+
+::: {.callout-warning title="Audit it: an average without its n"}
+In the table above, Documentary has the highest average (82.8) with 52 films, and Musical & Performing Arts is second with only **12**. Always print `n()` next to a mean. An average of a handful of rows is far less stable than an average of hundreds.
+:::
+
+## `count()`: the shortcut for `group_by()` + `summarize(n=n())`
+
+```{r}
+movies |> count(genre, sort = TRUE)
+
+# same thing, spelled out
+movies |> group_by(genre) |> summarize(n = n()) |> arrange(desc(n))
+```
+
+`count()` accepts several columns, a custom name for the counts, and a weight.
+
+```{r}
+movies |> count(genre, mpaa_rating, name = "films", sort = TRUE)
+```
+
+## Several grouping columns, and what `.groups` does
+
+```{r}
+by_two <- movies |>
+  group_by(genre, mpaa_rating) |>
+  summarize(n = n(), avg_score = mean(audience_score))
+by_two
+```
+
+When you group by two columns, `summarize()` removes only the **last** group, which might be inconvenient. The result is still grouped by `genre`, so later verbs will quietly work **per genre**. The `.groups` argument allows controlling the resulting grouping structure:
+
+```{r}
+movies |>
+  group_by(genre, mpaa_rating) |>
+  summarize(n = n(), .groups = "drop") # plain table, no leftover groups
+```
+
+::: {.callout-warning title="Audit it: hidden groups change later steps"}
+Suppose an AI continues the pipeline that generated `by_two` with `mutate(share = n / sum(n))`. The denominator is the total **within each genre**, not across the whole table, because `by_two` is still grouped by `genre`.
+
+```{r}
+by_two |>
+  mutate(share = n / sum(n)) |> # share within genre, because groups remain
+  select(genre, mpaa_rating, n, share) |>
+  head(4)
+```
+
+Whether that is what you wanted depends on the question. The point is to **know**. Check for `Groups:` in the printout, and finish with `ungroup()` or `.groups = "drop"`.
+:::
+
+## The shortcut: `.by`
+
+In dplyr 1.1 and later, `summarize()`, `mutate()`, `filter()`, and `slice_*()` accept `.by`. It groups **for that one verb only**, and it never leaves hidden groups behind.
+
+```{r}
+movies |>
+  summarize(avg_score = mean(audience_score), .by = genre) |>
+  arrange(desc(avg_score)) |>
+  head(4)
+```
+
+Both styles are correct and you will see both in AI output. `.by` is shorter and safer. `group_by()` is more familiar and reads well when several steps share the same grouping.
+
+## Missing values inside groups
+
+Missing values behave the same as in last session, one group at a time.
+
+```{r}
+movies |>
+  summarize(avg_runtime = mean(runtime), .by = genre) |>
+  filter(is.na(avg_runtime))
+```
+
+One documentary has no runtime, so the whole Documentary average is `NA`. Here are two honest options (a third is in the box below):
+
+```{r}
+# 1. Ignore missing values, and say so
+movies |>
+  summarize(
+    avg_runtime = mean(runtime, na.rm = TRUE),
+    n_missing = sum(is.na(runtime)),
+    .by = genre
+  ) |>
+  filter(genre == "Documentary")
+
+# 2. Remove those rows first
+movies |>
+  filter(!is.na(runtime)) |>
+  summarize(avg_runtime = mean(runtime), .by = genre) |>
+  filter(genre == "Documentary")
+```
+
+::: {.callout-tip title="na.rm = TRUE is a decision, not a fix"}
+Always report how many values were dropped (`n_missing` above). A third option is to **not** summarize at all until you understand why the value is missing.
+:::
+
+## Summarizing many columns with `across()`
+
+```{r}
+movies |>
+  summarize(
+    across(c(critics_score, audience_score, imdb_rating), mean),
+    .by = genre
+  ) |>
+  head(4)
+```
+
+Use a list of functions, and `.names` to control the column names:
+
+```{r}
+movies |>
+  summarize(
+    across(
+      c(critics_score, audience_score),
+      list(mean = mean, sd = sd),
+      .names = "{.col}_{.fn}"
+    )
+  )
+```
+
+## `mutate()` per group: keep every row
+
+`summarize()` shrinks the table. `mutate()` with groups **keeps every row** and adds a column computed per group. This is how you compare each row to its own group.
+
+```{r}
+movies |>
+       mutate(
+              genre_avg = mean(audience_score),
+              .by = genre,
+              vs_genre = audience_score - genre_avg
+       ) |>
+       select(title, genre, audience_score, genre_avg, vs_genre) |>
+       arrange(desc(vs_genre)) |>
+       head(5)
+```
+
+A common use is a share within a group:
+
+```{r}
+movies |>
+  count(genre, mpaa_rating) |>
+  mutate(share = n / sum(n), .by = genre) |>
+  filter(genre == "Horror")
+```
+
+## Top or bottom rows per group with `slice_*()`
+
+```{r}
+movies |>
+  slice_max(imdb_rating, n = 1, by = genre) |>
+  select(genre, title, imdb_rating)
+```
+
+::: {.callout-warning title="Audit it: ties give you extra rows"}
+There are 11 genres, but the result above has 12 rows, because two Musical & Performing Arts films tie at 7.9. `slice_max()` keeps ties by default. Add `with_ties = FALSE` to get exactly one row per genre (it then keeps the first in the data's order, so decide whether that is fair).
+
+```{r}
+movies |>
+  slice_max(imdb_rating, n = 1, by = genre, with_ties = FALSE) |>
+  nrow()
+```
+:::
+
+::: {.callout-warning title="Audit it: the average of averages"}
+After a grouped summary, an AI is often asked for "the overall average" and averages the group averages. That gives a 9-film genre the same weight as a 305-film genre.
+
+```{r}
+genre_means <- movies |> summarize(avg = mean(audience_score), .by = genre)
+
+mean(genre_means$avg) # mean of the group means
+mean(movies$audience_score) # the real overall mean
+```
+
+If you need an overall figure from group summaries, you need a **weighted** mean (`weighted.mean(avg, n)`) or you should go back to the original rows.
+:::
+
+## A full pipeline, read aloud
+
+```{r}
+movies |>
+  filter(title_type == "Feature Film") |>
+  group_by(genre) |>
+  summarize(n = n(), avg_score = mean(audience_score)) |>
+  filter(n >= 20) |>
+  arrange(desc(avg_score))
+```
+
+"Keep feature films. For each genre, count the films and average the audience score. Keep genres with at least 20 films. Sort from highest to lowest." If you cannot say a pipeline in one breath like this, break it into steps and run each one.
+
+::: {.callout-tip title="Checklist for any grouped summary"}
+1. **What is a row** in the input, and what is a row in the output?
+2. **Grouped by what?** The right level? Any hidden groups left?
+3. **What happened to `NA`?** Dropped, kept, or ignored? How many?
+4. **How big is each group?** Is `n` shown?
+5. **Is a mean of means hiding in there?**
+:::
+
+# Joins: combining tables
+
+Real analyses use information from several tables. A **join** matches rows of one table to rows of another using one or more **key** columns.
+
+Our example: `movies` has a raw `studio` name, and `studios` maps each raw name to a cleaned `studio_group`.
+
+```{r}
+studios
+```
+
+The raw names are messy: the same company appears under many spellings. There are eight Warner-related names, and our lookup covers only some of them.
+
+```{r}
+movies |>
+  count(studio, sort = TRUE) |>
+  filter(str_detect(studio, "(?i)warner"))
+```
+
+## `left_join()`: keep every row on the left
+
+```{r}
+joined <- movies |>
+  left_join(studios, by = "studio")
+
+joined |>
+  select(title, studio, studio_group, major)
+```
+
+`left_join(x, y)` keeps **all rows of `x`**, and adds the columns of `y` from the matching row. Where there is no match, the new columns are `NA`.
+
+::: {.callout-tip title="The row-count rule"}
+When the key is **unique in the right table**, a `left_join()` must return **exactly as many rows as the left table**. Make this a habit:
+
+```{r}
+nrow(movies)
+nrow(joined)
+```
+
+If the numbers differ, stop and find out why before doing anything else.
+:::
+
+## Unmatched rows and `anti_join()`
+
+```{r}
+joined |>
+  count(is.na(studio_group))
+```
+
+249 films have no `studio_group`. Either their studio is not in the lookup, or their studio is missing. `anti_join()` returns the rows of the left table that have **no match**, which is your to-do list for improving the lookup.
+
+```{r}
+movies |>
+  anti_join(studios, by = "studio") |>
+  count(studio, sort = TRUE) |>
+  head(6)
+```
+
+::: {.callout-warning title="Audit it: inner_join() silently drops rows"}
+`inner_join()` keeps only rows that match in **both** tables.
+
+```{r}
+nrow(movies)
+movies |> inner_join(studios, by = "studio") |> nrow()
+```
+
+651 films became 402. There is no error and no warning. Use `inner_join()` only when dropping unmatched rows is exactly what you want, and say so in a comment.
+:::
+
+## Joining, then summarizing
+
+Once the key is cleaned, the grouped summary answers a different question than the raw column did.
+
+```{r}
+joined |>
+  filter(!is.na(studio_group)) |>
+  summarize(n = n(), avg_score = mean(audience_score), .by = studio_group) |>
+  arrange(desc(avg_score)) |>
+  head(6)
+```
+
+Compare with grouping by the raw `studio` column: Warner Bros. films were split across several spellings, and no single one of them showed the group's total.
+
+## Keys with different names, and more than one key
+
+When the key columns have different names, say so with `join_by()`:
+
+```{r}
+studios_renamed <- studios |> rename(studio_name = studio)
+
+movies |>
+  left_join(studios_renamed, by = join_by(studio == studio_name)) |>
+  nrow()
+```
+
+When the match needs **two or more** columns, list them all. A useful pattern is to **summarize, then join the summary back** to compare each row to a benchmark:
+
+```{r}
+benchmark <- movies |>
+  summarize(bench_score = mean(audience_score), .by = c(genre, mpaa_rating))
+
+movies |>
+  left_join(benchmark, by = c("genre", "mpaa_rating")) |>
+  mutate(vs_bench = audience_score - bench_score) |>
+  select(title, genre, mpaa_rating, audience_score, bench_score, vs_bench) |>
+  head(4)
+```
+
+::: {.callout-warning title="Audit it: same-named columns get .x and .y"}
+If both tables have a non-key column with the same name, dplyr keeps both and adds suffixes.
+
+```{r}
+studios_with_genre <- studios |> mutate(genre = "lookup genre")
+
+movies |>
+  left_join(studios_with_genre, by = "studio") |>
+  select(title, starts_with("genre")) |>
+  head(3)
+```
+
+Code written later that refers to `genre` will fail or, worse, pick up the wrong column. Join on every column that means the same thing, or rename one of them first.
+:::
+
+## Duplicate keys: how a join invents rows
+
+Suppose someone "updates" the lookup, and `Paramount Pictures` ends up listed twice with different group labels.
+
+```{r}
+studios_v2 <- bind_rows(
+  studios,
+  tibble(
+    studio = "Paramount Pictures",
+    studio_group = "Paramount Classics",
+    major = TRUE
+  )
+)
+
+nrow(movies)
+movies |> left_join(studios_v2, by = "studio") |> nrow()
+```
+
+651 became 688. Every `Paramount Pictures` film (there are 37) matched **two** rows of the lookup, so it appeared twice. Every later count or average now double counts those films.
+
+Find the duplicate key by counting keys in the lookup:
+
+```{r}
+studios_v2 |>
+  count(studio) |>
+  filter(n > 1)
+```
+
+::: {.callout-warning title="Audit it: an AI that reports 'joined successfully'"}
+This is the most important join bug, because nothing crashes. In recent dplyr versions you may see a warning about an "unexpected many-to-many relationship", but in a script, an R Markdown document, or a long log it is easy to miss. Never accept "no issues" without comparing the row counts.
+:::
+
+## Make R refuse bad joins
+
+The `relationship` argument states what you **expect**. If the data disagree, R stops with an error.
+
+```{r}
+#| error: true
+movies |>
+  left_join(studios_v2, by = "studio", relationship = "many-to-one") |>
+  nrow()
+```
+
+| `relationship =` | Meaning |
+|:--|:--|
+| `"one-to-one"` | each row on either side matches at most one row on the other |
+| `"many-to-one"` | each left row matches at most one right row (our lookup case) |
+| `"one-to-many"` | each right row matches at most one left row |
+| `"many-to-many"` | duplicates on both sides are expected |
+
+A second guard, `unmatched`, makes an `inner_join()` stop instead of silently dropping rows:
+
+```{r}
+#| error: true
+movies |>
+  inner_join(studios, by = "studio", unmatched = "error")
+```
+
+The error is informative: we already know 249 films have no lookup entry. (For `left_join()`, `unmatched = "error"` checks the other direction: it stops if some rows of the **lookup** would be dropped because no left row uses them.)
+
+## Join checklist
+
+::: {.callout-tip title="Before and after every join"}
+1. **Keys unique** on the lookup side? `count(key) |> filter(n > 1)` should return nothing.
+2. **Row count** as expected? Compare `nrow()` before and after.
+3. **New `NA`s?** `anti_join()` shows which keys failed to match.
+4. **Right join type?** `left` keeps all left rows, `inner` drops unmatched rows.
+5. **Keys really equal?** Extra spaces, capital letters, and spelling variants will not match (see the next box).
+:::
+
+::: {.callout-warning title="Audit it: keys that look equal but are not"}
+Joins compare keys **exactly**. A trailing space or a different case means no match.
+
+```{r}
+messy <- tibble(
+  studio = c("Paramount Pictures", "Paramount Pictures ", "paramount pictures")
+)
+
+messy |> left_join(studios, by = "studio")
+```
+
+Only the first row matched. Cleaning keys (trimming, lowercasing, standardizing spellings) is the subject of Sessions 5 and 6. Here is a preview:
+
+```{r}
+studios_clean <- studios |> mutate(key = str_to_lower(str_squish(studio)))
+
+messy |>
+  mutate(key = str_to_lower(str_squish(studio))) |>
+  left_join(select(studios_clean, key, studio_group), by = "key")
+```
+:::
+
+# Pivots: wide and long tables
+
+The **shape** of a table determines which questions are easy. In a **tidy** table, each variable is a column, each observation is a row, and each value is a cell.
+
+```{r}
+scores <- movies |> select(title, critics_score, audience_score)
+scores
+```
+
+This **wide** table has one column per score type. It reads well, but "average by score type" needs to treat `critics_score` and `audience_score` as *values of a variable*, not as column names.
+
+## `pivot_longer()`: columns into rows
+
+```{r}
+scores_long <- scores |>
+  pivot_longer(
+    cols = c(critics_score, audience_score), # which columns to stack
+    names_to = "source", # new column for the old column names
+    values_to = "score" # new column for the values
+  )
+scores_long
+```
+
+Now one `summarize()` handles both score types:
+
+```{r}
+movies |>
+  pivot_longer(
+    c(critics_score, audience_score),
+    names_to = "source",
+    values_to = "score"
+  ) |>
+  summarize(avg = mean(score), .by = c(genre, source)) |>
+  arrange(genre) |>
+  head(6)
+```
+
+Long tables are also what `ggplot2` expects (next session): one column to map to color, one to map to the y-axis.
+
+To select columns by pattern instead of listing them, use helpers such as `starts_with()`, `ends_with()`, and `contains()`:
+
+```{r}
+movies |>
+  pivot_longer(
+    starts_with("actor"),
+    names_to = "billing",
+    values_to = "actor"
+  ) |>
+  filter(!is.na(actor)) |>
+  count(actor, sort = TRUE) |>
+  head(5)
+```
+
+The `billing` column holds `actor1` to `actor5`. `names_prefix = "actor"` would strip the prefix and leave just the numbers.
+
+## `pivot_wider()`: rows into columns
+
+Use `pivot_wider()` to build a cross-table for reading, or to compare columns side by side.
+
+```{r}
+movies |>
+  count(title_type, mpaa_rating) |>
+  pivot_wider(names_from = mpaa_rating, values_from = n, values_fill = 0)
+```
+
+`names_from` supplies the new column names and `values_from` supplies the cells. Combinations that never occur would be `NA`. `values_fill = 0` replaces them with 0, which is correct for counts and misleading for averages.
+
+```{r}
+movies |>
+  pivot_longer(
+    c(critics_score, audience_score),
+    names_to = "source",
+    values_to = "score"
+  ) |>
+  summarize(avg = mean(score), .by = c(genre, source)) |>
+  pivot_wider(names_from = source, values_from = avg) |>
+  mutate(gap = critics_score - audience_score) |>
+  arrange(desc(gap)) |>
+  head(5)
+```
+
+Where do critics and audiences disagree most? A long-to-wide pivot makes the gap one subtraction.
+
+::: {.callout-warning title="Audit it: pivot_wider() on rows that are not unique"}
+`pivot_wider()` expects each combination of the other columns plus `names_from` to appear **once**. If not, you get list-columns instead of numbers.
+
+```{r}
+#| warning: true
+tibble(id = c(1, 1, 2), k = c("a", "a", "a"), v = c(10, 20, 30)) |>
+  pivot_wider(names_from = k, values_from = v)
+```
+
+A column of `<dbl [2]>` is a sign that rows were duplicated. Summarize first (for example, take the `mean()` per `id` and `k`), or fix the duplicate rows.
+:::
+
+::: {.callout-tip title="Audit a pivot by counting rows"}
+After `pivot_longer()`, rows = old rows x number of columns pivoted:
+
+```{r}
+nrow(scores)
+nrow(scores_long)
+```
+
+651 x 2 = 1,302. After `pivot_wider()`, check for new `NA`s and for list-columns.
+:::
+
+# Scaling up: arrow and Parquet
+
+::: {.callout-note title="About the code in this section"}
+The code in this section uses the `arrow` package and the file `views.parquet`. The printed results are what the same queries return on that data (they were verified with the equivalent dplyr code on the same rows). **Run each chunk yourself** once `arrow` is installed. The text blocks marked `#>` show the expected output.
+:::
+
+## When the data does not fit in memory
+
+R normally loads a whole table into memory. For a log with hundreds of millions of rows, that is impossible. Our simulated viewing log is small enough to practice on:
+
+| Format | Rows | Size on disk |
+|:--|--:|--:|
+| CSV | 4,000,000 | about 239 MB |
+| Parquet (zstd compression) | 4,000,000 | about 40 MB |
+
+Loading the same data with `read_csv()` takes about 229 MB of R memory. A real log may be 100 times bigger.
+
+## What is Parquet?
+
+**Parquet** is a file format built for analytics.
+
+- **Columnar**: values of one column are stored together, so R reads only the columns a query needs.
+- **Typed**: dates stay dates, integers stay integers. (A CSV is text, so every read re-guesses the types.)
+- **Compressed**: much smaller than CSV, so it is faster to move and store.
+- **Self-describing**: the schema is stored inside the file.
+
+**Apache Arrow** is the in-memory counterpart, and the `arrow` package lets you work with Parquet files from R using the dplyr verbs you already know.
+
+```{r}
+#| eval: false
+install.packages("arrow") # once
+library(arrow)
+library(tidyverse)
+```
+
+The columns of `views.parquet` are `view_id`, `title` (a movie from `movies.csv`), `user_id`, `country`, `device`, `view_date`, `minutes` (minutes watched), and `completed` (watched at least 90% of the runtime). All values are simulated.
+
+## `open_dataset()`: look without loading
+
+```{r}
+#| eval: false
+views <- open_dataset("data/views.parquet")
+```
+
+`open_dataset()` reads only the file's **metadata** (the schema), not the 4 million rows. You can check the shape without loading anything:
+
+```{r}
+#| eval: false
+nrow(views) # 4000000
+ncol(views) # 8
+names(views)
+```
+
+## Lazy evaluation: a query is a recipe
+
+With a Dataset, dplyr verbs do not run. They **record** what you asked for. Nothing is computed until you call `collect()`.
+
+```{r}
+#| eval: false
+q <- views |>
+  filter(country == "US") |>
+  count(device)
+# q is a query (a recipe), not a table of results
+```
+
+`collect()` runs the recipe **inside arrow** and brings only the result into R.
+
+```{r}
+#| eval: false
+q |>
+  collect() |>
+  arrange(desc(n))
+```
+
+```text
+#> # A tibble: 4 x 2
+#>   device      n
+#>   <chr>   <int>
+#> 1 TV     684180
+#> 2 Phone  380514
+#> 3 Laptop 334049
+#> 4 Tablet 121455
+```
+
+Arrow scanned 4 million rows. Only 4 rows came into R. Sorting the small result with `arrange()` **after** `collect()` is a good habit, because the row order that arrow returns is not guaranteed.
+
+## The same verbs from Section 2 and 3 work here
+
+```{r}
+#| eval: false
+views |>
+  filter(completed) |>
+  group_by(country) |>
+  summarize(n = n(), avg_min = mean(minutes)) |>
+  collect() |>
+  arrange(desc(n))
+```
+
+```text
+#> # A tibble: 8 x 3
+#>   country      n avg_min
+#>   <chr>    <int>   <dbl>
+#> 1 US      199841    107.
+#> 2 IN       63471    107.
+#> 3 UK       63450    107.
+#> 4 BR       52947    107.
+#> 5 DE       47760    107.
+#> # i 3 more rows
+```
+
+Counting distinct values and working with dates also happen inside arrow. Here we count users and titles, and views per month:
+
+```{r}
+#| eval: false
+views |>
+  summarize(
+    views = n(),
+    users = n_distinct(user_id),
+    titles = n_distinct(title)
+  ) |>
+  collect()
+```
+
+```text
+#> # A tibble: 1 x 3
+#>     views  users titles
+#>     <int>  <int>  <int>
+#> 1 4000000 250000    646
+```
+
+```{r}
+#| eval: false
+views |>
+  mutate(month = month(view_date)) |>
+  count(month) |>
+  collect() |>
+  arrange(month)
+```
+
+```text
+#> # A tibble: 12 x 2
+#>    month      n
+#>    <int>  <int>
+#>  1     1 338884
+#>  2     2 316616
+#>  3     3 338816
+#>  4     4 327417
+#>  5     5 337523
+#>  6     6 329013
+#>  7     7 338883
+#>  8     8 339398
+#>  9     9 327283
+#> 10    10 339938
+#> 11    11 328043
+#> 12    12 338186
+```
+
+(The type of `month` may print as `<int>` or `<dbl>` depending on your version of arrow; the values are the same.)
+
+## `collect()` last: the most important rule
+
+Compare these two pipelines. They give the **same answer**.
+
+```{r}
+#| eval: false
+# Pipeline A: collect first
+views |> collect() |> filter(country == "US") |> count(device)
+
+# Pipeline B: collect last
+views |> filter(country == "US") |> count(device) |> collect()
+```
+
+Pipeline A pulls **every row** into R (about 229 MB here, tens of gigabytes on a real log), and only then filters. Pipeline B lets arrow filter and count, and brings back 4 rows.
+
+::: {.callout-warning title="Audit it: an early collect()"}
+When an AI writes code for a large dataset, read the pipeline from the top and find the first of `collect()`, `as.data.frame()`, `as_tibble()`, or `compute()`. Everything **after** that line runs in R's memory. The goal is to put as many `filter()`, `select()`, and `summarize()` steps as possible **before** it.
+
+An AI also often "fixes" an error from an unsupported function by moving `collect()` to the top of the pipeline. That makes the error disappear and the memory problem appear. The correct fix is to shrink first, then collect, then use the function.
+:::
+
+## Shrink, collect, then join
+
+Arrow can join Datasets, but a simpler pattern is often enough: aggregate in arrow, `collect()` the small result, and join it to a small in-memory table.
+
+```{r}
+#| eval: false
+views |>
+  count(title) |>
+  collect() |>
+  left_join(distinct(movies, title, .keep_all = TRUE), by = "title") |>
+  summarize(views = sum(n), .by = genre) |>
+  arrange(desc(views))
+```
+
+```text
+#> # A tibble: 11 x 2
+#>    genre                       views
+#>    <chr>                       <int>
+#>  1 Drama                     1969777
+#>  2 Action & Adventure         552152
+#>  3 Comedy                     484538
+#>  4 Mystery & Suspense         463740
+#>  5 Other                      143936
+#>  6 Horror                      97385
+#>  7 Documentary                 71936
+#>  8 Science Fiction & Fantasy   70663
+#>  9 Animation                   64769
+#> 10 Musical & Performing Arts   47910
+#> 11 Art House & International   33194
+```
+
+Four million rows were reduced to one row per title (646) **before** the join. Notice `distinct(movies, title, .keep_all = TRUE)`: four titles appear twice in `movies.csv`. Without it, the join would have duplicated their view counts (see Section 3).
+
+## Not every R function runs in arrow
+
+Arrow translates many dplyr verbs and many common functions (arithmetic, comparisons, string functions, date functions, `n_distinct()`, `mean()`, and more). A function written by you, or from a package arrow does not know, cannot be translated. The error message names the problem.
+
+What to do:
+
+1. Run as much as possible in arrow (filter, select, group, summarize).
+2. `collect()` the **small** result.
+3. Use the full R function on the result.
+
+## `read_parquet()` vs `open_dataset()`, and writing Parquet
+
+```{r}
+#| eval: false
+write_parquet(movies, "data/movies.parquet") # write a tibble to Parquet
+movies_pq <- read_parquet("data/movies.parquet") # reads ALL rows into memory
+views <- open_dataset("data/views.parquet") # lazy: nothing loaded
+```
+
+Use `read_parquet()` when the file easily fits in memory and you want a tibble. Use `open_dataset()` when the data is large, or when it is split into many files.
+
+## A big-data checklist for AI-written code
+
+::: {.callout-tip title="Check these before running AI-written code on large data"}
+1. **Filter and select first.** Fewer rows, fewer columns.
+2. **`collect()` last.** After the data is small.
+3. **Check the shape.** How many rows came back? Is it what you expected?
+4. **Check the memory.** Watch the Environment pane, or use `object.size()` on the result.
+5. **Check the types.** Parquet keeps types; a CSV read guesses them.
+:::
+
+# Practice problems
+
+::: {.problem}
+**Problem 1: Grouped summary.** Among **feature films**, for each `mpaa_rating`, report the number of films, the mean `imdb_rating` (rounded to 2 decimals), and the median `runtime`. Sort by the mean rating, highest first. Does any group have very few films?
+:::
+
+::: {.callout-note collapse="true" title="Solution 1"}
+```{r}
+movies |>
+  filter(title_type == "Feature Film") |>
+  summarize(
+    n = n(),
+    mean_imdb = round(mean(imdb_rating), 2),
+    median_runtime = median(runtime, na.rm = TRUE),
+    .by = mpaa_rating
+  ) |>
+  arrange(desc(mean_imdb))
+```
+
+NC-17 has only 2 feature films, so its mean is not reliable. The runtime median uses `na.rm = TRUE` because one film has a missing runtime.
+:::
+
+::: {.problem}
+**Problem 2: Decades.** Create a `decade` column from `thtr_rel_year` (for example, 1994 becomes 1990). Find, for each decade, the number of films and the mean `audience_score`. Which decade has the highest mean among decades with at least 20 films?
+:::
+
+::: {.callout-note collapse="true" title="Solution 2"}
+```{r}
+movies |>
+  mutate(decade = thtr_rel_year %/% 10 * 10) |>
+  summarize(n = n(), mean_audience = mean(audience_score), .by = decade) |>
+  filter(n >= 20) |>
+  arrange(desc(mean_audience))
+```
+:::
+
+::: {.problem}
+**Problem 3: A join with a check.** Join `movies` to `studios`. (a) Confirm the row count did not change. (b) For films with a known `studio_group`, compare the mean `critics_score` of **major** studios (`major == TRUE`) and the others. (c) How many films were left out of (b), and why?
+:::
+
+::: {.callout-note collapse="true" title="Solution 3"}
+```{r}
+joined <- movies |> left_join(studios, by = "studio")
+nrow(joined) == nrow(movies) # (a)
+
+joined |> # (b)
+  filter(!is.na(studio_group)) |>
+  summarize(n = n(), mean_critics = mean(critics_score), .by = major)
+
+sum(is.na(joined$studio_group)) # (c)
+```
+
+(c) 249 films were excluded because their studio is not in the lookup (or is missing). The comparison describes only the films whose studio we could classify, so it should not be reported as "all films".
+:::
+
+::: {.problem}
+**Problem 4: Debug the join.** An AI produced this code and reported "no issues." The result has 688 rows. Find the cause with a count and fix it in two ways: by cleaning the lookup, and by making the join refuse the problem.
+
+```{r}
+#| eval: false
+movies |> left_join(studios_v2, by = "studio")
+```
+:::
+
+::: {.callout-note collapse="true" title="Solution 4"}
+```{r}
+# Find the duplicate key
+studios_v2 |> count(studio) |> filter(n > 1)
+
+# Fix 1: clean the lookup (decide which row is correct; here, keep the original)
+studios_fixed <- studios_v2 |> distinct(studio, .keep_all = TRUE)
+movies |> left_join(studios_fixed, by = "studio") |> nrow()
+```
+
+```{r}
+#| error: true
+# Fix 2: guard the join so it fails loudly if the key is ever duplicated again
+movies |> left_join(studios_v2, by = "studio", relationship = "many-to-one")
+```
+
+`distinct(studio, .keep_all = TRUE)` keeps the **first** row for each key, so check that the surviving row is the correct one rather than trusting that it is.
+:::
+
+::: {.problem}
+**Problem 5: Pivot.** For each `mpaa_rating`, find the mean `critics_score` and mean `audience_score`, and show them side by side in one row per rating with a `gap` column (critics minus audience). Do this with `pivot_longer()` and `pivot_wider()`. Which rating has the largest gap?
+:::
+
+::: {.callout-note collapse="true" title="Solution 5"}
+```{r}
+movies |>
+  pivot_longer(
+    c(critics_score, audience_score),
+    names_to = "source",
+    values_to = "score"
+  ) |>
+  summarize(avg = mean(score), .by = c(mpaa_rating, source)) |>
+  pivot_wider(names_from = source, values_from = avg) |>
+  mutate(gap = critics_score - audience_score) |>
+  arrange(desc(gap))
+```
+:::
+
+::: {.problem}
+**Problem 6: arrow (run it after installing arrow).** Using `views.parquet`, find the number of **completed** views and the mean minutes watched for each `device`, **only for US viewers**. Sort by the number of completed views. Your pipeline must contain exactly one `collect()`, and it must come before the final `arrange()`.
+:::
+
+::: {.callout-note collapse="true" title="Solution 6"}
+```{r}
+#| eval: false
+views <- open_dataset("data/views.parquet")
+
+views |>
+  filter(country == "US", completed) |>
+  group_by(device) |>
+  summarize(n = n(), avg_min = mean(minutes)) |>
+  collect() |>
+  arrange(desc(n))
+```
+
+```text
+#> # A tibble: 4 x 3
+#>   device     n avg_min
+#>   <chr>  <int>   <dbl>
+#> 1 TV     89786    107.
+#> 2 Phone  50058    107.
+#> 3 Laptop 43930    107.
+#> 4 Tablet 16067    107.
+```
+
+The filter and the summary run inside arrow, and only 4 rows are collected. The data are simulated, so the averages are nearly identical across devices.
+:::
+
+# Appendix A: The other joins
+
+| Join | Keeps |
+|:--|:--|
+| `left_join(x, y)` | all rows of `x`; adds columns from `y` |
+| `inner_join(x, y)` | only rows with a match in **both** |
+| `full_join(x, y)` | all rows of **both** |
+| `semi_join(x, y)` | rows of `x` that **have** a match in `y` (no columns added) |
+| `anti_join(x, y)` | rows of `x` that have **no** match in `y` (no columns added) |
+
+`left_join()`, `inner_join()`, and `full_join()` are **mutating** joins (they add columns). `semi_join()` and `anti_join()` are **filtering** joins (they only decide which rows to keep).
+
+```{r}
+nrow(movies)
+movies |> left_join(studios, by = "studio") |> nrow() # all movies
+movies |> inner_join(studios, by = "studio") |> nrow() # matched movies only
+movies |> full_join(studios, by = "studio") |> nrow() # movies + lookup rows never used
+movies |> semi_join(studios, by = "studio") |> nrow() # movies with a match
+movies |> anti_join(studios, by = "studio") |> nrow() # movies without a match
+```
+
+Here `full_join()` returns 651 rows, the same as `movies`, because every entry in the lookup is used by at least one film. If a lookup entry matched no film, it would appear as an extra row with `NA` in all the movie columns.
+
+## Many-to-many joins
+
+If a key repeats on **both** sides, every pair of matching rows is returned, and rows multiply. dplyr warns about an "unexpected many-to-many relationship". Only set `relationship = "many-to-many"` when that is exactly what you intend.
+
+# Appendix B: Window functions inside groups
+
+Grouped `mutate()` also works with **window functions**, which return one value per row based on the row's position in its group.
+
+```{r}
+movies |>
+  filter(genre == "Horror") |>
+  arrange(desc(imdb_rating)) |>
+  mutate(rank = row_number(), running_best = cummax(imdb_rating)) |>
+  select(rank, title, imdb_rating, running_best) |>
+  head(4)
+
+# rank within each genre without filtering first
+movies |>
+  mutate(rank_in_genre = min_rank(desc(imdb_rating)), .by = genre) |>
+  filter(rank_in_genre == 1) |>
+  select(genre, title, imdb_rating, rank_in_genre)
+```
+
+`min_rank()` gives ties the same rank, which is why Musical & Performing Arts shows two films at rank 1. Other useful window functions: `lag()`, `lead()`, `cumsum()`, `cummean()`, `dense_rank()`, and `ntile()`.
+
+## `reframe()`: a summary that returns several rows per group
+
+`summarize()` expects one row per group. When a function returns several values (such as quantiles), use `reframe()`.
+
+```{r}
+movies |>
+  reframe(
+    quantile = c(0.25, 0.5, 0.75),
+    runtime = quantile(runtime, quantile, na.rm = TRUE),
+    .by = title_type
+  )
+```
+
+# Appendix C: Splitting Parquet into many files
+
+For very large data, Parquet is often stored as a **folder of files** split by a column such as month. Arrow treats the folder as one Dataset, and queries that filter on the partition column read only the files they need.
+
+```{r}
+#| eval: false
+# Write views so that each month is its own folder of files
+views_df <- read_parquet("data/views.parquet") |>
+  mutate(month = month(view_date))
+write_dataset(views_df, "data/views_by_month", partitioning = "month")
+
+# Read the whole folder as one Dataset
+views_m <- open_dataset("data/views_by_month")
+
+# Only the month=3 folder is read
+views_m |> filter(month == 3) |> count(device) |> collect()
+```
+
+This is the "chunk and pull" idea from the earlier big-data notes, handled by the file layout instead of by hand.
+
+# Appendix D: How this connects to the earlier big-data notes
+
+The earlier course notes described four strategies for data that is too big for R:
+
+| Strategy | In today's tools |
+|:--|:--|
+| **Sample and model** | `slice_sample()` on a collected result, or `filter()` on a random key before `collect()` |
+| **Chunk and pull** | Partitioned Parquet files (Appendix C), or looping over groups |
+| **Push compute to data** | `open_dataset()` + dplyr verbs + `collect()` last (this session). Databases do the same with `dbplyr`, where `show_query()` reveals the translated SQL |
+| **Bigger computer** | Not required for the files in this course |
+
+The `data.table` package from the earlier notes is another fast, in-memory option. The AI-era rule is the same for all of them: **know what runs where, and check how much data you pulled into memory.**
+
+# Appendix E: Old and new syntax
+
+| Older code you may still see | Current equivalent |
+|:--|:--|
+| `inner_join(x, y, by = c("a" = "b"))` | `inner_join(x, y, by = join_by(a == b))` |
+| `group_by(g)`, `summarise(...)`, `ungroup()` | `summarize(..., .by = g)` |
+| `summarise_each()`, `summarise_all()`, `summarise_at()` | `summarize(across(...))` |
+| `mutate_at()`, `mutate_if()`, `mutate_all()` | `mutate(across(...))` |
+| `gather()` | `pivot_longer()` |
+| `spread()` | `pivot_wider()` |
+| `top_n()` | `slice_max()` / `slice_min()` |
+| `sample_n()`, `sample_frac()` | `slice_sample()` |
+| the `%>%` pipe | the native pipe operator (last session) |
+
+AI assistants trained on older code still produce the left column. It usually still runs, but it is deprecated, so use the right column in your own code.
+
+# Appendix F: Quick reference
+
+```{r}
+#| eval: false
+# One summary row
+df |> summarize(avg = mean(x))
+
+# Summary per group (two spellings)
+df |> summarize(avg = mean(x), .by = g)
+df |> group_by(g) |> summarize(avg = mean(x), .groups = "drop")
+
+# Count rows per group
+df |> count(g, sort = TRUE)
+
+# Group size, keeping every row
+df |> mutate(n = n(), .by = g)
+
+# Top row per group
+df |> slice_max(x, n = 1, by = g, with_ties = FALSE)
+
+# Join a lookup, and guard it
+df |> left_join(lookup, by = "key", relationship = "many-to-one")
+
+# Rows with no match
+df |> anti_join(lookup, by = "key")
+
+# Columns to rows, and back
+df |> pivot_longer(c(a, b), names_to = "name", values_to = "value")
+df |> pivot_wider(names_from = name, values_from = value)
+
+# Big data
+big <- open_dataset("file.parquet")
+big |> filter(...) |> group_by(...) |> summarize(...) |> collect() # collect last
+```

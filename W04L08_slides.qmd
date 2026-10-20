@@ -1,20 +1,755 @@
 ---
-title: "Session 2 Slides: Summarize, Combine, and Scale"
+title: "Summarize, Combine, and Scale"
+subtitle: "R basics for the AI era · Session 2"
+author: "DTR"
 description: "Grouped summaries, joins with row-count checks, pivots, and big data with arrow and Parquet"
 date: 2026-10-21
 categories: [Slides]
 format: revealjs
-draft: true
 ---
 
-## Planned outline
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = "#>", message = FALSE, warning = FALSE)
+library(tidyverse)
+options(tibble.print_max = 5, tibble.print_min = 5, width = 72,
+        pillar.max_footer_lines = 2, cli.unicode = FALSE)
+movies  <- read_csv("data/movies.csv", show_col_types = FALSE)
+studios <- read_csv("data/studios.csv", show_col_types = FALSE)
+scores_long <- movies |>
+  select(title, critics_score, audience_score) |>
+  pivot_longer(c(critics_score, audience_score), names_to = "source", values_to = "score")
+# The "AI-updated" lookup used in the join audit (a duplicate key sneaks in)
+studios_v2 <- bind_rows(
+  studios,
+  tibble(studio = "Paramount Pictures", studio_group = "Paramount Classics", major = TRUE)
+)
+```
 
-- Warm-up bug hunt (bring your best AI bug)
-- group_by / summarize / count and the .by argument
-- Joins with join_by(); checking row counts before and after; anti_join; many-to-many
-- pivot_longer / pivot_wider
-- arrow: why Parquet, open_dataset(), lazy filter/select, collect(), inspecting the query plan
-- Big-data demo dataset: Seattle library checkouts (R4DS arrow chapter)
-- Audit beat: silent failures (join row inflation, NA handling, what lazy evaluation hides)
+# Welcome {background-color="#f3f6ea"}
 
-*Draft: remove `draft: true` from the top of this file to publish it.*
+::: {.notes}
+TARGET CLOCK (assumes you skip FLEX slides if behind): Welcome 0:00-0:04 | Summaries 0:04-0:26 | Joins 0:26-0:46 | Pivots 0:46-0:56 | arrow and Parquet 0:56-0:70 | Wrap-up 0:70-0:75.
+
+This session has exactly THREE interaction moments (blue boxes): Interaction 1 in Summaries, Interaction 2 in Joins, Interaction 3 in arrow. Each is 3 to 4 minutes. Everything else is teaching. Answers are in the notes.
+
+FLEX slides, skip if behind: "Average of averages", "Top movie per group", "Different key names", "Who is in the cast?". Cut material is in the Appendix.
+
+Press S for speaker view.
+:::
+
+## Today's route
+
+- **Summaries**: `group_by` and `summarize`
+- **Joins**: combine two tables safely
+- **Pivots**: wide and long
+- **arrow**: data too big for memory
+
+Same pairs as last time. Three short moments to talk to your neighbor.
+
+::: {.notes}
+If students ask about the Movie Night AI round: it was assigned to do on their own. Keep their notes, because auditing AI output is the skill we use all session.
+:::
+
+## Where we left off
+
+Verbs from Session 1, all working on **rows** and **columns**:
+
+`select` picks columns · `filter` picks rows
+
+`arrange` sorts · `mutate` adds columns
+
+`slice_*` picks rows by position · `count` tallies
+
+Every one of them returns a table with the **same or fewer rows**. None of them can collapse a table into a summary.
+
+## Questions the verbs cannot answer
+
+Which **genre** do audiences like best?
+
+Which **studio's** films score highest?
+
+How many views per **device** in a log with 4 million rows?
+
+Each one needs a new move: **group**, **combine**, or **scale**.
+
+# Summaries {background-color="#f3f6ea"}
+
+::: {.notes}
+Target: 0:04 to 0:26. The most important section of the day. Do not rush it. If you are at 0:28 when this ends, skip the FLEX slides in Joins.
+:::
+
+## summarize squeezes many rows into one
+
+```{r}
+movies |>
+  summarize(avg_score = mean(audience_score))
+```
+
+651 rows in, **1 row out**.
+
+## Several summaries at once
+
+```{r}
+movies |>
+  summarize(
+    n          = n(),
+    avg_score  = mean(audience_score),
+    best_imdb  = max(imdb_rating)
+  )
+```
+
+`n()` counts rows. Name each result on the left of `=`.
+
+## group_by splits the table
+
+```{r}
+movies |>
+  group_by(genre)
+```
+
+Same rows. A hidden label: **Groups: genre [11]**
+
+## group_by + summarize
+
+```{r}
+movies |>
+  group_by(genre) |>
+  summarize(avg_score = mean(audience_score))
+```
+
+One row **per group**. Read it as: "for each genre, the average score."
+
+## Sort the result
+
+```{r}
+movies |>
+  group_by(genre) |>
+  summarize(n = n(), avg_score = mean(audience_score)) |>
+  arrange(desc(avg_score))
+```
+
+Always show `n` next to an average. A mean of 9 films is not a mean of 305.
+
+## Interaction 1: predict
+
+```{r}
+#| eval: false
+movies |>
+  group_by(genre) |>
+  summarize(avg_runtime = mean(runtime))
+```
+
+::: {.vote}
+Turn to your neighbor (2 min): how many rows? Will any value be `NA`?
+:::
+
+::: {.notes}
+INTERACTION 1 of 3. Take 2 minutes, then reveal on the next slide.
+Answer: 11 rows (one per genre). Documentary shows NA because one documentary, "The End of America", has a missing runtime, and mean() of anything containing NA is NA.
+:::
+
+## The answer: one NA spoils a group
+
+```{r}
+movies |>
+  group_by(genre) |>
+  summarize(avg_runtime = mean(runtime))
+```
+
+One missing runtime makes the whole Documentary average `NA`.
+
+## na.rm: decide on purpose
+
+```{r}
+movies |>
+  group_by(genre) |>
+  summarize(avg_runtime = mean(runtime, na.rm = TRUE)) |>
+  filter(genre == "Documentary")
+```
+
+`na.rm = TRUE` ignores missing values. Use it **knowingly**, and say how many were dropped.
+
+## Two grouping columns
+
+```{r}
+movies |>
+  group_by(genre, mpaa_rating) |>
+  summarize(n = n(), .groups = "drop") |>
+  arrange(desc(n))
+```
+
+`.groups = "drop"` hands back a plain table.
+
+## The shortcut: .by
+
+```{r}
+movies |>
+  summarize(avg_score = mean(audience_score), .by = genre)
+```
+
+Same result as `group_by` + `summarize`, and it **never leaves hidden groups behind**.
+
+## Grouped data stays grouped
+
+```{r}
+by_genre <- movies |> group_by(genre)
+by_genre |> mutate(rank = row_number(desc(imdb_rating))) |> select(title, genre, rank) |> head(3)
+```
+
+. . .
+
+::: {.bug}
+**Bug:** later verbs quietly work **per group**. Finish with `ungroup()`, or use `.by`.
+:::
+
+## summarize shrinks, mutate keeps
+
+```{r}
+movies |>
+  mutate(vs_genre = audience_score - mean(audience_score), .by = genre) |>
+  select(title, genre, audience_score, vs_genre) |>
+  arrange(desc(vs_genre))
+```
+
+"Which films beat their own genre's average?"
+
+## Top movie per group (FLEX)
+
+```{r}
+movies |> slice_max(imdb_rating, n = 1, by = genre) |> nrow()
+n_distinct(movies$genre)
+```
+
+. . .
+
+::: {.bug}
+**Bug:** 11 genres but 12 rows. Ties are kept. Add `with_ties = FALSE` for exactly one per genre.
+:::
+
+::: {.notes}
+FLEX: skip if behind (saves about 2 min). Musical & Performing Arts has a tie at 7.9.
+:::
+
+## Average of averages (FLEX)
+
+```{r}
+genre_means <- movies |> summarize(avg = mean(audience_score), .by = genre)
+
+mean(genre_means$avg)         # mean of the group means
+mean(movies$audience_score)   # the real overall mean
+```
+
+. . .
+
+::: {.bug}
+**Bug:** the mean of group means weights a 9-film genre like a 305-film genre.
+:::
+
+::: {.notes}
+FLEX: skip if behind (saves about 2 min). AI often does this when asked for "an overall average" after a grouped summary.
+:::
+
+## Read a whole pipeline aloud
+
+```{r}
+movies |>
+  filter(title_type == "Feature Film") |>
+  group_by(genre) |>
+  summarize(n = n(), avg_score = mean(audience_score)) |>
+  filter(n >= 20) |>
+  arrange(desc(avg_score))
+```
+
+::: {.notes}
+Say it out loud with the class: filter, group, summarize, filter the groups, sort.
+:::
+
+## Auditing an AI summary
+
+Before you trust a grouped result, ask:
+
+1. **What is a row?** One film, one genre, one person?
+2. **Grouped by what?** Right level, no hidden groups left?
+3. **What happened to `NA`?** Dropped, kept, or ignored?
+4. **How big is each group?** Is `n` shown?
+
+# Joins {background-color="#f3f6ea"}
+
+::: {.notes}
+Target: 0:26 to 0:46. Dataset: movies plus a hand-made lookup table, studios.csv, which maps messy raw studio names to a cleaned studio_group. The lookup is deliberately incomplete (36 studio names).
+:::
+
+## Information lives in many tables
+
+`movies` has the raw studio name. A second table cleans it up:
+
+```{r}
+studios
+```
+
+We want both in one table. The link is the **key**: `studio`.
+
+## Raw names are messy
+
+```{r}
+movies |>
+  count(studio, sort = TRUE) |>
+  filter(str_detect(studio, "(?i)warner")) |>
+  head(5)
+```
+
+Many spellings. The lookup maps four to **Warner Bros.**
+
+## left_join: keep every row on the left
+
+```{r}
+movies |>
+  left_join(studios, by = "studio") |>
+  select(title, studio, studio_group, major)
+```
+
+## The row-count rule
+
+```{r}
+nrow(movies)
+movies |> left_join(studios, by = "studio") |> nrow()
+```
+
+A `left_join` should return **exactly as many rows as the left table** (when the key is unique on the right).
+
+If the count changes, stop and find out why.
+
+## Unmatched rows become NA
+
+```{r}
+movies |>
+  left_join(studios, by = "studio") |>
+  count(studio_group, sort = TRUE) |>
+  head(4)
+```
+
+249 films have no group. The lookup does not know their studio.
+
+## anti_join: who did not match?
+
+```{r}
+movies |>
+  anti_join(studios, by = "studio") |>
+  count(studio, sort = TRUE) |>
+  head(5)
+```
+
+`anti_join` = left rows with **no** match.
+
+## inner_join silently drops rows
+
+```{r}
+movies |> inner_join(studios, by = "studio") |> nrow()
+```
+
+. . .
+
+::: {.bug}
+**Bug:** 651 became 402. No error, no warning. 249 films vanished.
+:::
+
+`inner_join` keeps **only matches**. Great when you mean it. Dangerous when you do not.
+
+## Different key names (FLEX)
+
+```{r}
+studios_renamed <- studios |> rename(studio_name = studio)
+
+movies |>
+  left_join(studios_renamed, by = join_by(studio == studio_name)) |>
+  nrow()
+```
+
+`join_by(left_col == right_col)` links columns with different names.
+
+::: {.notes}
+FLEX: skip if behind (saves about 1.5 min).
+:::
+
+## Join, then summarize
+
+```{r}
+movies |>
+  left_join(studios, by = "studio") |>
+  filter(!is.na(studio_group)) |>
+  summarize(n = n(), avg_score = mean(audience_score), .by = studio_group) |>
+  arrange(desc(avg_score)) |>
+  head(5)
+```
+
+## Interaction 2: audit this join
+
+An AI updated the lookup, then wrote:
+
+```{r}
+#| eval: false
+movies |>
+  left_join(studios_v2, by = "studio") |>
+  nrow()
+```
+
+"Joined successfully. No issues."
+
+::: {.vote}
+Turn to your neighbor (3 min): what do you check first? What would you expect to see?
+:::
+
+::: {.notes}
+INTERACTION 2 of 3. Give 3 minutes. Run it live on the next slide.
+Expected: students should say compare nrow before and after (651). The join returns 688. Cause: studios_v2 lists "Paramount Pictures" twice, so each of the 37 Paramount Pictures films matches two rows.
+:::
+
+## The answer: 651 became 688
+
+```{r}
+nrow(movies)
+movies |> left_join(studios_v2, by = "studio") |> nrow()
+```
+
+37 extra rows. No error, and the AI said "no issues."
+
+## Find the duplicate key
+
+```{r}
+studios_v2 |> count(studio) |> filter(n > 1)
+```
+
+::: {.bug}
+**Bug:** a duplicate key on the right copies left rows. All 37 Paramount Pictures films were counted twice.
+:::
+
+## Make R refuse bad joins
+
+```{r}
+#| error: true
+movies |>
+  left_join(studios_v2, by = "studio", relationship = "many-to-one") |>
+  nrow()
+```
+
+`relationship = "many-to-one"` says: each movie matches **at most one** studio row. Break that, and R stops.
+
+## Join checklist
+
+Before and after every join:
+
+1. **Keys unique** on the lookup side? `count(key) |> filter(n > 1)`
+2. **Row count** as expected?
+3. **New `NA`s**? `anti_join` shows which keys failed.
+4. **Right join type**: `left` keeps, `inner` drops.
+
+# Pivots {background-color="#f3f6ea"}
+
+::: {.notes}
+Target: 0:46 to 0:56. Keep this practical: pivot_longer is the one students need most. pivot_wider mostly for presenting a table.
+:::
+
+## Wide vs long
+
+Wide: one column per measurement.
+
+```{r}
+scores <- movies |> select(title, critics_score, audience_score)
+scores
+```
+
+Great for reading. Awkward for grouping and plotting.
+
+## pivot_longer: columns into rows
+
+```{r}
+scores |>
+  pivot_longer(c(critics_score, audience_score),
+               names_to = "source", values_to = "score")
+```
+
+## Why long helps
+
+```{r}
+movies |>
+  pivot_longer(c(critics_score, audience_score),
+               names_to = "source", values_to = "score") |>
+  summarize(avg = mean(score), .by = c(genre, source))
+```
+
+One `summarize` handles both score types.
+
+::: {.notes}
+Long tables also feed ggplot2 next session: one aesthetic can map to the "source" column.
+:::
+
+## pivot_wider: rows into columns
+
+```{r}
+movies |>
+  count(title_type, mpaa_rating) |>
+  pivot_wider(names_from = mpaa_rating, values_from = n, values_fill = 0)
+```
+
+A cross-table for reading. `values_fill = 0` replaces combinations that never occur (otherwise `NA`).
+
+## Audit a pivot
+
+```{r}
+nrow(scores)
+nrow(scores_long)
+```
+
+651 films × 2 score columns = **1,302 rows**.
+
+After `pivot_longer`, rows = old rows × columns pivoted. After `pivot_wider`, check for new `NA`s from missing combinations.
+
+## Who is in the cast? (FLEX)
+
+```{r}
+movies |>
+  pivot_longer(starts_with("actor"), names_to = "billing", values_to = "actor") |>
+  filter(!is.na(actor)) |>
+  count(actor, sort = TRUE) |>
+  head(5)
+```
+
+`starts_with("actor")` picks `actor1` to `actor5`.
+
+::: {.notes}
+FLEX: skip if behind (saves about 2 min).
+:::
+
+# arrow and Parquet {background-color="#f3f6ea"}
+
+::: {.notes}
+Target: 0:56 to 0:70. IMPORTANT: arrow code on these slides is shown but not executed when rendering the deck. The numbers on the slides were computed from the same data with dplyr, so they match what arrow returns. Before class, run each chunk once with arrow installed.
+Data: data/views.parquet (4 million simulated viewing events). If students do not have it, they can generate it in about 10 seconds with source("scripts/make-views.R") once arrow is installed, or you can share the file.
+:::
+
+## When the file is bigger than your memory
+
+A simulated log of **4 million** viewing events:
+
+| Format | Size on disk |
+|---|---|
+| CSV | 239 MB |
+| Parquet | **40 MB** |
+
+`read_csv()` would pull all 4 million rows into R's memory (about **229 MB** here). A real log could be 400 million.
+
+## What is Parquet?
+
+- **Columnar**: stores each column together, so R reads only the columns you ask for
+- **Typed**: dates stay dates, numbers stay numbers
+- **Compressed**: much smaller than CSV
+- **Self-describing**: the schema lives inside the file
+
+## Setup
+
+```{r}
+#| eval: false
+install.packages("arrow")   # once
+library(arrow)
+library(tidyverse)
+```
+
+Today's file: `data/views.parquet`. Columns: `view_id`, `title`, `user_id`, `country`, `device`, `view_date`, `minutes`, `completed`.
+
+## open_dataset: look without loading
+
+```{r}
+#| eval: false
+views <- open_dataset("data/views.parquet")
+```
+
+Nothing was loaded. R read only the file's **schema** (column names and types).
+
+The query you write next is a **recipe**. Work happens when you ask for the result.
+
+## Write dplyr, run it later
+
+```{r}
+#| eval: false
+views |>
+  filter(country == "US") |>
+  count(device)
+```
+
+Same verbs you already know. This returns a **query**, not a table.
+
+## collect(): run the recipe
+
+```{r}
+#| eval: false
+views |>
+  filter(country == "US") |>
+  count(device) |>
+  collect() |>
+  arrange(desc(n))
+```
+
+```text
+#> # A tibble: 4 x 2
+#>   device      n
+#>   <chr>   <int>
+#> 1 TV     684180
+#> 2 Phone  380514
+#> 3 Laptop 334049
+#> 4 Tablet 121455
+```
+
+Arrow filtered and counted 4 million rows. Only **4 rows** came into R.
+
+## Interaction 3: where does collect go?
+
+```{r}
+#| eval: false
+# Pipeline A
+views |> collect() |> filter(country == "US") |> count(device)
+
+# Pipeline B
+views |> filter(country == "US") |> count(device) |> collect()
+```
+
+::: {.vote}
+Turn to your neighbor (3 min): same answer? Which one would you let an AI run on 400 million rows?
+:::
+
+::: {.notes}
+INTERACTION 3 of 3. Give 3 minutes.
+Answer: both give the same answer. Pipeline A loads ALL rows into memory first (about 229 MB here, tens of GB on a real log), then filters. Pipeline B filters and counts inside arrow and brings back 4 rows. Rule: shrink first, collect last.
+:::
+
+## The answer
+
+Same result. Very different cost.
+
+**A** loads every row, then filters. **B** filters first, then collects 4 rows.
+
+. . .
+
+::: {.bug}
+**Bug to look for:** an early `collect()`, `as.data.frame()`, or `as_tibble()`. It silently pulls the whole dataset into memory.
+:::
+
+## Summarize big data
+
+```{r}
+#| eval: false
+views |>
+  filter(completed) |>
+  group_by(country) |>
+  summarize(n = n(), avg_min = mean(minutes)) |>
+  collect() |>
+  arrange(desc(n))
+```
+
+```text
+#> # A tibble: 8 x 3
+#>   country      n avg_min
+#>   <chr>    <int>   <dbl>
+#> 1 US      199841    107.
+#> 2 IN       63471    107.
+#> 3 UK       63450    107.
+#> # i 5 more rows
+```
+
+Everything from the Summaries section works here.
+
+## Shrink, collect, then join
+
+```{r}
+#| eval: false
+views |>
+  count(title) |>
+  collect() |>
+  left_join(distinct(movies, title, .keep_all = TRUE), by = "title") |>
+  summarize(views = sum(n), .by = genre) |>
+  arrange(desc(views))
+```
+
+```text
+#> # A tibble: 11 x 2
+#>   genre                views
+#>   <chr>                <int>
+#> 1 Drama              1969777
+#> 2 Action & Adventure  552152
+#> 3 Comedy              484538
+#> # i 8 more rows
+```
+
+Count 4 million views down to 646 titles **first**, then join in memory.
+
+## Not every R function runs in arrow
+
+arrow translates many dplyr verbs and functions. A few things it cannot run.
+
+When you see an error that mentions an **unsupported function**:
+
+1. `collect()` only after shrinking the data
+2. Then use the full R function on the small result
+
+Never fix it by moving `collect()` to the top.
+
+## Big-data checklist for AI code
+
+1. **Filter and select first**: fewer rows, fewer columns
+2. **`collect()` last**: after the data is small
+3. **Check the shape**: how many rows came back?
+4. **Check the memory**: Environment pane, or `object.size()`
+
+# Wrap-up {background-color="#f3f6ea"}
+
+::: {.notes}
+Target: 0:70 to 0:75.
+:::
+
+## Three things to remember
+
+1. **Summaries**: group on purpose, show `n`, decide what to do with `NA`.
+2. **Joins**: check keys, row counts, and new `NA`s every time.
+3. **Scale**: shrink in arrow, `collect()` last.
+
+## Next up
+
+Session 3 (Mon 10/26): **ggplot2** and storytelling with data.
+
+Lab 1 (Mon 11/02) uses everything from Sessions 1 and 2 on the WellSync data.
+
+The **handout** has the full explanations, extra practice problems, and the appendix material.
+
+# Appendix {background-color="#f3f6ea"}
+
+## Other joins
+
+```{r}
+movies |> full_join(studios, by = "studio") |> nrow()
+movies |> semi_join(studios, by = "studio") |> nrow()
+```
+
+- `full_join`: keep all rows from both tables (651 films + lookup rows never used)
+- `semi_join`: keep left rows that **have** a match (like `inner_join`, but adds no columns)
+
+## Many-to-many joins
+
+If a key repeats on **both** sides, every pair matches. Rows multiply.
+
+dplyr warns: "Detected an unexpected many-to-many relationship."
+
+```{r}
+#| eval: false
+left_join(movies, studios_v2, by = "studio", relationship = "many-to-many")
+```
+
+Only silence the warning when many-to-many is exactly what you intend.
+
+## Writing and reading Parquet
+
+```{r}
+#| eval: false
+write_parquet(movies, "data/movies.parquet")
+movies_pq <- read_parquet("data/movies.parquet")   # reads fully into memory
+```
+
+`open_dataset()` is lazy. `read_parquet()` loads everything. For a folder of many Parquet files, point `open_dataset()` at the folder.

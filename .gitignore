@@ -5,6 +5,7 @@
 .DS_Store
 *_files/
 *.knit.md
+data/views.parquet
 
 /.quarto/
 **/*.quarto_ipynb
