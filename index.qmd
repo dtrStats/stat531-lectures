@@ -31,8 +31,4 @@ New sessions appear in the table below as they are published. Slides are for cla
 ::: {#listing}
 :::
 
-Course datasets for in-class examples: 
-
-[movies.csv](data/movies.csv)
-[studios.csv](data/studios.csv)
-[movies.parquet](data/movies.parquet)
+Course datasets for in-class examples: [movies.csv](data/movies.csv), [studios.csv](data/studios.csv), [movies.parquet](data/movies.parquet)
