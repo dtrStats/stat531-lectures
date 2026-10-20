@@ -801,22 +801,22 @@
     "objectID": "W04L08_slides.html#todays-route",
     "href": "W04L08_slides.html#todays-route",
     "title": "Summarize, Combine, and Scale",
-    "section": "",
-    "text": "Summaries: group_by and summarize\nJoins: combine two tables safely\nPivots: wide and long\narrow: data too big for memory\n\nSame pairs as last time. Three short moments to talk to your neighbor.\n\nIf students ask about the Movie Night AI round: it was assigned to do on their own. Keep their notes, because auditing AI output is the skill we use all session."
+    "section": "Today’s route",
+    "text": "Today’s route\n\nSummaries: group_by and summarize\nJoins: combine two tables safely\nPivots: wide and long\narrow: data too big for memory\n\nSame pairs as last time. Three short moments to talk to your neighbor.\n\nIf students ask about the Movie Night AI round: it was assigned to do on their own. Keep their notes, because auditing AI output is the skill we use all session."
   },
   {
     "objectID": "W04L08_slides.html#where-we-left-off",
     "href": "W04L08_slides.html#where-we-left-off",
     "title": "Summarize, Combine, and Scale",
-    "section": "",
-    "text": "Verbs from Session 1, all working on rows and columns:\nselect picks columns · filter picks rows\narrange sorts · mutate adds columns\nslice_* picks rows by position · count tallies\nEvery one of them returns a table with the same or fewer rows. None of them can collapse a table into a summary."
+    "section": "Where we left off",
+    "text": "Where we left off\nVerbs from Session 1, all working on rows and columns:\nselect (picks columns) · filter (picks rows)\narrange (sorts) · mutate (adds columns)\nIn Session 1 handout:\ndistinct (distinct patterns) · slice_* (select rows)\n\nEvery one of them returns a table with the same or fewer rows. None of them can collapse a table into a summary."
   },
   {
     "objectID": "W04L08_slides.html#questions-the-verbs-cannot-answer",
     "href": "W04L08_slides.html#questions-the-verbs-cannot-answer",
     "title": "Summarize, Combine, and Scale",
-    "section": "",
-    "text": "Which genre do audiences like best?\nWhich studio’s films score highest?\nHow many views per device in a log with 4 million rows?\nEach one needs a new move: group, combine, or scale."
+    "section": "Questions the verbs cannot answer",
+    "text": "Questions the verbs cannot answer\nWhich genre do audiences like best?\nWhich studio’s films score highest?\nHow many views per device in a log with 4 million rows?\nEach one needs a new move: group, combine, or scale."
   },
   {
     "objectID": "W04L08_slides.html#summarize-squeezes-many-rows-into-one",
@@ -830,7 +830,7 @@
     "href": "W04L08_slides.html#several-summaries-at-once",
     "title": "Summarize, Combine, and Scale",
     "section": "Several summaries at once",
-    "text": "Several summaries at once\n\nmovies |&gt;\n  summarize(\n    n          = n(),\n    avg_score  = mean(audience_score),\n    best_imdb  = max(imdb_rating)\n  )\n\n#&gt; # A tibble: 1 x 3\n#&gt;       n avg_score best_imdb\n#&gt;   &lt;int&gt;     &lt;dbl&gt;     &lt;dbl&gt;\n#&gt; 1   651      62.4         9\n\n\nn() counts rows. Name each result on the left of =."
+    "text": "Several summaries at once\n\nmovies |&gt;\n  summarize(\n    n = n(),\n    avg_score = mean(audience_score),\n    best_imdb = max(imdb_rating)\n  )\n\n#&gt; # A tibble: 1 x 3\n#&gt;       n avg_score best_imdb\n#&gt;   &lt;int&gt;     &lt;dbl&gt;     &lt;dbl&gt;\n#&gt; 1   651      62.4         9\n\n\nn() counts rows. Name each result on the left of =."
   },
   {
     "objectID": "W04L08_slides.html#group_by-splits-the-table",
@@ -851,7 +851,7 @@
     "href": "W04L08_slides.html#sort-the-result",
     "title": "Summarize, Combine, and Scale",
     "section": "Sort the result",
-    "text": "Sort the result\n\nmovies |&gt;\n  group_by(genre) |&gt;\n  summarize(n = n(), avg_score = mean(audience_score)) |&gt;\n  arrange(desc(avg_score))\n\n#&gt; # A tibble: 11 x 3\n#&gt;   genre                         n avg_score\n#&gt;   &lt;chr&gt;                     &lt;int&gt;     &lt;dbl&gt;\n#&gt; 1 Documentary                  52      82.8\n#&gt; 2 Musical & Performing Arts    12      80.2\n#&gt; 3 Other                        16      66.7\n#&gt; 4 Drama                       305      65.3\n#&gt; 5 Art House & International    14      64  \n#&gt; # i 6 more rows\n\n\nAlways show n next to an average. A mean of 9 films is not a mean of 305."
+    "text": "Sort the result\n\nmovies |&gt;\n  group_by(genre) |&gt;\n  summarize(n = n(), avg_score = mean(audience_score)) |&gt;\n  arrange(desc(avg_score))\n\n#&gt; # A tibble: 11 x 3\n#&gt;   genre                         n avg_score\n#&gt;   &lt;chr&gt;                     &lt;int&gt;     &lt;dbl&gt;\n#&gt; 1 Documentary                  52      82.8\n#&gt; 2 Musical & Performing Arts    12      80.2\n#&gt; 3 Other                        16      66.7\n#&gt; 4 Drama                       305      65.3\n#&gt; 5 Art House & International    14      64  \n#&gt; # i 6 more rows\n\n\nAlways show n next to an average. A mean of 9 films is less reliable than a mean of 305."
   },
   {
     "objectID": "W04L08_slides.html#interaction-1-predict",
@@ -872,14 +872,14 @@
     "href": "W04L08_slides.html#na.rm-decide-on-purpose",
     "title": "Summarize, Combine, and Scale",
     "section": "na.rm: decide on purpose",
-    "text": "na.rm: decide on purpose\n\nmovies |&gt;\n  group_by(genre) |&gt;\n  summarize(avg_runtime = mean(runtime, na.rm = TRUE)) |&gt;\n  filter(genre == \"Documentary\")\n\n#&gt; # A tibble: 1 x 2\n#&gt;   genre       avg_runtime\n#&gt;   &lt;chr&gt;             &lt;dbl&gt;\n#&gt; 1 Documentary        96.5\n\n\nna.rm = TRUE ignores missing values. Use it knowingly, and say how many were dropped."
+    "text": "na.rm: decide on purpose\n\nmovies |&gt;\n  group_by(genre) |&gt;\n  summarize(\n    avg_runtime = mean(runtime, na.rm = TRUE),\n    na_dropped = sum(is.na(runtime))\n  ) |&gt;\n  filter(genre == \"Documentary\")\n\n#&gt; # A tibble: 1 x 3\n#&gt;   genre       avg_runtime na_dropped\n#&gt;   &lt;chr&gt;             &lt;dbl&gt;      &lt;int&gt;\n#&gt; 1 Documentary        96.5          1\n\n\nna.rm = TRUE ignores missing values. Use it knowingly, and say how many were dropped."
   },
   {
     "objectID": "W04L08_slides.html#two-grouping-columns",
     "href": "W04L08_slides.html#two-grouping-columns",
     "title": "Summarize, Combine, and Scale",
     "section": "Two grouping columns",
-    "text": "Two grouping columns\n\nmovies |&gt;\n  group_by(genre, mpaa_rating) |&gt;\n  summarize(n = n(), .groups = \"drop\") |&gt;\n  arrange(desc(n))\n\n#&gt; # A tibble: 44 x 3\n#&gt;   genre              mpaa_rating     n\n#&gt;   &lt;chr&gt;              &lt;chr&gt;       &lt;int&gt;\n#&gt; 1 Drama              R             179\n#&gt; 2 Drama              PG-13          67\n#&gt; 3 Drama              PG             45\n#&gt; 4 Mystery & Suspense R              44\n#&gt; 5 Comedy             R              33\n#&gt; # i 39 more rows\n\n\n.groups = \"drop\" hands back a plain table."
+    "text": "Two grouping columns\n\nmovies |&gt;\n  group_by(genre, mpaa_rating) |&gt;\n  summarize(n = n()) |&gt;\n  arrange(desc(n))\n\n#&gt; # A tibble: 44 x 3\n#&gt; # Groups:   genre [11]\n#&gt;   genre              mpaa_rating     n\n#&gt;   &lt;chr&gt;              &lt;chr&gt;       &lt;int&gt;\n#&gt; 1 Drama              R             179\n#&gt; 2 Drama              PG-13          67\n#&gt; 3 Drama              PG             45\n#&gt; 4 Mystery & Suspense R              44\n#&gt; 5 Comedy             R              33\n#&gt; # i 39 more rows\n\n\nNote the resulting table dropped only last grouping"
   },
   {
     "objectID": "W04L08_slides.html#the-shortcut-.by",
@@ -893,7 +893,7 @@
     "href": "W04L08_slides.html#grouped-data-stays-grouped",
     "title": "Summarize, Combine, and Scale",
     "section": "Grouped data stays grouped",
-    "text": "Grouped data stays grouped\n\nby_genre &lt;- movies |&gt; group_by(genre)\nby_genre |&gt; mutate(rank = row_number(desc(imdb_rating))) |&gt; select(title, genre, rank) |&gt; head(3)\n\n#&gt; # A tibble: 3 x 3\n#&gt; # Groups:   genre [2]\n#&gt;   title               genre   rank\n#&gt;   &lt;chr&gt;               &lt;chr&gt;  &lt;int&gt;\n#&gt; 1 Filly Brown         Drama    283\n#&gt; 2 The Dish            Drama     69\n#&gt; 3 Waiting for Guffman Comedy     5\n\n\n. . .\n\nBug: later verbs quietly work per group. Finish with ungroup(), or use .by."
+    "text": "Grouped data stays grouped\n\nby_genre &lt;- movies |&gt; group_by(genre)\nby_genre |&gt;\n  mutate(rank = row_number(desc(imdb_rating))) |&gt;\n  select(title, genre, rank) |&gt;\n  head(3)\n\n#&gt; # A tibble: 3 x 3\n#&gt; # Groups:   genre [2]\n#&gt;   title               genre   rank\n#&gt;   &lt;chr&gt;               &lt;chr&gt;  &lt;int&gt;\n#&gt; 1 Filly Brown         Drama    283\n#&gt; 2 The Dish            Drama     69\n#&gt; 3 Waiting for Guffman Comedy     5\n\n\n\n\nBug: later verbs quietly work per group. Finish with ungroup(), or use .by."
   },
   {
     "objectID": "W04L08_slides.html#summarize-shrinks-mutate-keeps",
@@ -907,14 +907,14 @@
     "href": "W04L08_slides.html#top-movie-per-group-flex",
     "title": "Summarize, Combine, and Scale",
     "section": "Top movie per group (FLEX)",
-    "text": "Top movie per group (FLEX)\n\nmovies |&gt; slice_max(imdb_rating, n = 1, by = genre) |&gt; nrow()\n\n#&gt; [1] 12\n\nn_distinct(movies$genre)\n\n#&gt; [1] 11\n\n\n. . .\n\nBug: 11 genres but 12 rows. Ties are kept. Add with_ties = FALSE for exactly one per genre.\n\n\nFLEX: skip if behind (saves about 2 min). Musical & Performing Arts has a tie at 7.9."
+    "text": "Top movie per group (FLEX)\n\nmovies |&gt; slice_max(imdb_rating, n = 1, by = genre) |&gt; nrow()\n\n#&gt; [1] 12\n\nn_distinct(movies$genre)\n\n#&gt; [1] 11\n\n\n\n\nBug: 11 genres but 12 rows. Ties are kept. Add with_ties = FALSE for exactly one per genre.\n\n\nFLEX: skip if behind (saves about 2 min). Musical & Performing Arts has a tie at 7.9."
   },
   {
     "objectID": "W04L08_slides.html#average-of-averages-flex",
     "href": "W04L08_slides.html#average-of-averages-flex",
     "title": "Summarize, Combine, and Scale",
     "section": "Average of averages (FLEX)",
-    "text": "Average of averages (FLEX)\n\ngenre_means &lt;- movies |&gt; summarize(avg = mean(audience_score), .by = genre)\n\nmean(genre_means$avg)         # mean of the group means\n\n#&gt; [1] 61.85006\n\nmean(movies$audience_score)   # the real overall mean\n\n#&gt; [1] 62.36252\n\n\n. . .\n\nBug: the mean of group means weights a 9-film genre like a 305-film genre.\n\n\nFLEX: skip if behind (saves about 2 min). AI often does this when asked for “an overall average” after a grouped summary."
+    "text": "Average of averages (FLEX)\n\ngenre_means &lt;- movies |&gt; summarize(avg = mean(audience_score), .by = genre)\n\nmean(genre_means$avg) # mean of the group means\n\n#&gt; [1] 61.85006\n\nmean(movies$audience_score) # the real overall mean\n\n#&gt; [1] 62.36252\n\n\n\n\nBug: the mean of group means weights a 9-film genre like a 305-film genre.\n\n\nFLEX: skip if behind (saves about 2 min). AI often does this when asked for “an overall average” after a grouped summary."
   },
   {
     "objectID": "W04L08_slides.html#read-a-whole-pipeline-aloud",
@@ -942,7 +942,7 @@
     "href": "W04L08_slides.html#raw-names-are-messy",
     "title": "Summarize, Combine, and Scale",
     "section": "Raw names are messy",
-    "text": "Raw names are messy\n\nmovies |&gt;\n  count(studio, sort = TRUE) |&gt;\n  filter(str_detect(studio, \"(?i)warner\")) |&gt;\n  head(5)\n\n#&gt; # A tibble: 5 x 2\n#&gt;   studio                          n\n#&gt;   &lt;chr&gt;                       &lt;int&gt;\n#&gt; 1 Warner Bros. Pictures          30\n#&gt; 2 Warner Home Video              19\n#&gt; 3 WARNER BROTHERS PICTURES        9\n#&gt; 4 Warner Bros.                    7\n#&gt; 5 Warner Independent Pictures     3\n\n\nMany spellings. The lookup maps four to Warner Bros."
+    "text": "Raw names are messy\n\nmovies |&gt;\n  count(studio) |&gt;\n  filter(str_detect(studio, \"(?i)warner\")) |&gt;\n  arrange(studio) |&gt;\n  head(5)\n\n#&gt; # A tibble: 5 x 2\n#&gt;   studio                       n\n#&gt;   &lt;chr&gt;                    &lt;int&gt;\n#&gt; 1 WARNER BROTHERS PICTURES     9\n#&gt; 2 Warner Bros Pictures         1\n#&gt; 3 Warner Bros.                 7\n#&gt; 4 Warner Bros. Pictures       30\n#&gt; 5 Warner Home Video           19\n\n\nMany spellings. The lookup maps four to Warner Bros."
   },
   {
     "objectID": "W04L08_slides.html#left_join-keep-every-row-on-the-left",
@@ -977,7 +977,7 @@
     "href": "W04L08_slides.html#inner_join-silently-drops-rows",
     "title": "Summarize, Combine, and Scale",
     "section": "inner_join silently drops rows",
-    "text": "inner_join silently drops rows\n\nmovies |&gt; inner_join(studios, by = \"studio\") |&gt; nrow()\n\n#&gt; [1] 402\n\n\n. . .\n\nBug: 651 became 402. No error, no warning. 249 films vanished.\n\ninner_join keeps only matches. Great when you mean it. Dangerous when you do not."
+    "text": "inner_join silently drops rows\n\nmovies |&gt; inner_join(studios, by = \"studio\") |&gt; nrow()\n\n#&gt; [1] 402\n\n\n\n\nBug: 651 became 402. No error, no warning. 249 films vanished.\n\ninner_join keeps only matches. Great when you mean it. Dangerous when you do not."
   },
   {
     "objectID": "W04L08_slides.html#different-key-names-flex",
@@ -1040,14 +1040,14 @@
     "href": "W04L08_slides.html#pivot_longer-columns-into-rows",
     "title": "Summarize, Combine, and Scale",
     "section": "pivot_longer: columns into rows",
-    "text": "pivot_longer: columns into rows\n\nscores |&gt;\n  pivot_longer(c(critics_score, audience_score),\n               names_to = \"source\", values_to = \"score\")\n\n#&gt; # A tibble: 1,302 x 3\n#&gt;   title               source         score\n#&gt;   &lt;chr&gt;               &lt;chr&gt;          &lt;dbl&gt;\n#&gt; 1 Filly Brown         critics_score     45\n#&gt; 2 Filly Brown         audience_score    73\n#&gt; 3 The Dish            critics_score     96\n#&gt; 4 The Dish            audience_score    81\n#&gt; 5 Waiting for Guffman critics_score     91\n#&gt; # i 1,297 more rows"
+    "text": "pivot_longer: columns into rows\n\nscores |&gt;\n  pivot_longer(\n    c(critics_score, audience_score),\n    names_to = \"source\",\n    values_to = \"score\"\n  )\n\n#&gt; # A tibble: 1,302 x 3\n#&gt;   title               source         score\n#&gt;   &lt;chr&gt;               &lt;chr&gt;          &lt;dbl&gt;\n#&gt; 1 Filly Brown         critics_score     45\n#&gt; 2 Filly Brown         audience_score    73\n#&gt; 3 The Dish            critics_score     96\n#&gt; 4 The Dish            audience_score    81\n#&gt; 5 Waiting for Guffman critics_score     91\n#&gt; # i 1,297 more rows"
   },
   {
     "objectID": "W04L08_slides.html#why-long-helps",
     "href": "W04L08_slides.html#why-long-helps",
     "title": "Summarize, Combine, and Scale",
     "section": "Why long helps",
-    "text": "Why long helps\n\nmovies |&gt;\n  pivot_longer(c(critics_score, audience_score),\n               names_to = \"source\", values_to = \"score\") |&gt;\n  summarize(avg = mean(score), .by = c(genre, source))\n\n#&gt; # A tibble: 22 x 3\n#&gt;   genre  source           avg\n#&gt;   &lt;chr&gt;  &lt;chr&gt;          &lt;dbl&gt;\n#&gt; 1 Drama  critics_score   62.2\n#&gt; 2 Drama  audience_score  65.3\n#&gt; 3 Comedy critics_score   40.9\n#&gt; 4 Comedy audience_score  52.5\n#&gt; 5 Horror critics_score   44.0\n#&gt; # i 17 more rows\n\n\nOne summarize handles both score types.\n\nLong tables also feed ggplot2 next session: one aesthetic can map to the “source” column."
+    "text": "Why long helps\n\nmovies |&gt;\n  pivot_longer(\n    c(critics_score, audience_score),\n    names_to = \"source\",\n    values_to = \"score\"\n  ) |&gt;\n  summarize(avg = mean(score), .by = c(genre, source))\n\n#&gt; # A tibble: 22 x 3\n#&gt;   genre  source           avg\n#&gt;   &lt;chr&gt;  &lt;chr&gt;          &lt;dbl&gt;\n#&gt; 1 Drama  critics_score   62.2\n#&gt; 2 Drama  audience_score  65.3\n#&gt; 3 Comedy critics_score   40.9\n#&gt; 4 Comedy audience_score  52.5\n#&gt; 5 Horror critics_score   44.0\n#&gt; # i 17 more rows\n\n\nOne summarize handles both score types.\n\nLong tables also feed ggplot2 next session: one aesthetic can map to the “source” column."
   },
   {
     "objectID": "W04L08_slides.html#pivot_wider-rows-into-columns",
@@ -1068,7 +1068,7 @@
     "href": "W04L08_slides.html#who-is-in-the-cast-flex",
     "title": "Summarize, Combine, and Scale",
     "section": "Who is in the cast? (FLEX)",
-    "text": "Who is in the cast? (FLEX)\n\nmovies |&gt;\n  pivot_longer(starts_with(\"actor\"), names_to = \"billing\", values_to = \"actor\") |&gt;\n  filter(!is.na(actor)) |&gt;\n  count(actor, sort = TRUE) |&gt;\n  head(5)\n\n#&gt; # A tibble: 5 x 2\n#&gt;   actor                 n\n#&gt;   &lt;chr&gt;             &lt;int&gt;\n#&gt; 1 Richard Gere          8\n#&gt; 2 Samuel L. Jackson     8\n#&gt; 3 Diane Keaton          7\n#&gt; 4 Helen Hunt            7\n#&gt; 5 Jamie Foxx            7\n\n\nstarts_with(\"actor\") picks actor1 to actor5.\n\nFLEX: skip if behind (saves about 2 min)."
+    "text": "Who is in the cast? (FLEX)\n\nmovies |&gt;\n  pivot_longer(\n    starts_with(\"actor\"),\n    names_to = \"billing\",\n    values_to = \"actor\"\n  ) |&gt;\n  filter(!is.na(actor)) |&gt;\n  count(actor, sort = TRUE) |&gt;\n  head(5)\n\n#&gt; # A tibble: 5 x 2\n#&gt;   actor                 n\n#&gt;   &lt;chr&gt;             &lt;int&gt;\n#&gt; 1 Richard Gere          8\n#&gt; 2 Samuel L. Jackson     8\n#&gt; 3 Diane Keaton          7\n#&gt; 4 Helen Hunt            7\n#&gt; 5 Jamie Foxx            7\n\n\nstarts_with(\"actor\") picks actor1 to actor5.\n\nFLEX: skip if behind (saves about 2 min)."
   },
   {
     "objectID": "W04L08_slides.html#when-the-file-is-bigger-than-your-memory",
@@ -1089,7 +1089,7 @@
     "href": "W04L08_slides.html#setup",
     "title": "Summarize, Combine, and Scale",
     "section": "Setup",
-    "text": "Setup\n\ninstall.packages(\"arrow\")   # once\nlibrary(arrow)\nlibrary(tidyverse)\n\nToday’s file: data/views.parquet. Columns: view_id, title, user_id, country, device, view_date, minutes, completed."
+    "text": "Setup\n\ninstall.packages(\"arrow\") # once\nlibrary(arrow)\nlibrary(tidyverse)\n\nToday’s file: data/views.parquet (download from Canvas). Columns: view_id, title, user_id, country, device, view_date, minutes, completed."
   },
   {
     "objectID": "W04L08_slides.html#open_dataset-look-without-loading",
@@ -1124,7 +1124,7 @@
     "href": "W04L08_slides.html#the-answer",
     "title": "Summarize, Combine, and Scale",
     "section": "The answer",
-    "text": "The answer\nSame result. Very different cost.\nA loads every row, then filters. B filters first, then collects 4 rows.\n. . .\n\nBug to look for: an early collect(), as.data.frame(), or as_tibble(). It silently pulls the whole dataset into memory."
+    "text": "The answer\nSame result. Very different cost.\nA loads every row, then filters. B filters first, then collects 4 rows.\n\n\nBug to look for: an early collect(), as.data.frame(), or as_tibble(). It silently pulls the whole dataset into memory."
   },
   {
     "objectID": "W04L08_slides.html#summarize-big-data",
@@ -1187,7 +1187,7 @@
     "href": "W04L08_slides.html#writing-and-reading-parquet",
     "title": "Summarize, Combine, and Scale",
     "section": "Writing and reading Parquet",
-    "text": "Writing and reading Parquet\n\nwrite_parquet(movies, \"data/movies.parquet\")\nmovies_pq &lt;- read_parquet(\"data/movies.parquet\")   # reads fully into memory\n\nopen_dataset() is lazy. read_parquet() loads everything. For a folder of many Parquet files, point open_dataset() at the folder."
+    "text": "Writing and reading Parquet\n\nwrite_parquet(movies, \"data/movies.parquet\")\nmovies_pq &lt;- read_parquet(\"data/movies.parquet\") # reads fully into memory\n\nopen_dataset() is lazy. read_parquet() loads everything. For a folder of many Parquet files, point open_dataset() at the folder."
   },
   {
     "objectID": "W04L08_handout.html#count-the-shortcut-for-group_by-summarizenn",
@@ -1202,5 +1202,12 @@
     "title": "Session 2 Handout: Summarize, Combine, and Scale",
     "section": "2.4 count(): the shortcut forgroup_by() + summarize(n=n())",
     "text": "2.4 count(): the shortcut forgroup_by() + summarize(n=n())\n\nmovies |&gt; count(genre, sort = TRUE)\n\n#&gt; # A tibble: 11 x 2\n#&gt;   genre                  n\n#&gt;   &lt;chr&gt;              &lt;int&gt;\n#&gt; 1 Drama                305\n#&gt; 2 Comedy                87\n#&gt; 3 Action & Adventure    65\n#&gt; 4 Mystery & Suspense    59\n#&gt; 5 Documentary           52\n#&gt; 6 Horror                23\n#&gt; # i 5 more rows\n\n# same thing, spelled out\nmovies |&gt; group_by(genre) |&gt; summarize(n = n()) |&gt; arrange(desc(n))\n\n#&gt; # A tibble: 11 x 2\n#&gt;   genre                  n\n#&gt;   &lt;chr&gt;              &lt;int&gt;\n#&gt; 1 Drama                305\n#&gt; 2 Comedy                87\n#&gt; 3 Action & Adventure    65\n#&gt; 4 Mystery & Suspense    59\n#&gt; 5 Documentary           52\n#&gt; 6 Horror                23\n#&gt; # i 5 more rows\n\n\ncount() accepts several columns, a custom name for the counts, and a weight.\n\nmovies |&gt; count(genre, mpaa_rating, name = \"films\", sort = TRUE)\n\n#&gt; # A tibble: 44 x 3\n#&gt;   genre              mpaa_rating films\n#&gt;   &lt;chr&gt;              &lt;chr&gt;       &lt;int&gt;\n#&gt; 1 Drama              R             179\n#&gt; 2 Drama              PG-13          67\n#&gt; 3 Drama              PG             45\n#&gt; 4 Mystery & Suspense R              44\n#&gt; 5 Comedy             R              33\n#&gt; 6 Comedy             PG-13          31\n#&gt; # i 38 more rows"
+  },
+  {
+    "objectID": "W04L08_slides.html#two-grouping-columns-1",
+    "href": "W04L08_slides.html#two-grouping-columns-1",
+    "title": "Summarize, Combine, and Scale",
+    "section": "Two grouping columns",
+    "text": "Two grouping columns\n\nmovies |&gt;\n  group_by(genre, mpaa_rating) |&gt;\n  summarize(n = n(), .groups = \"drop\") |&gt;\n  arrange(desc(n))\n\n#&gt; # A tibble: 44 x 3\n#&gt;   genre              mpaa_rating     n\n#&gt;   &lt;chr&gt;              &lt;chr&gt;       &lt;int&gt;\n#&gt; 1 Drama              R             179\n#&gt; 2 Drama              PG-13          67\n#&gt; 3 Drama              PG             45\n#&gt; 4 Mystery & Suspense R              44\n#&gt; 5 Comedy             R              33\n#&gt; # i 39 more rows\n\n\n.groups = \"drop\" hands back a plain table."
   }
 ]

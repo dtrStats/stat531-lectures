@@ -9,19 +9,37 @@ format: revealjs
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, comment = "#>", message = FALSE, warning = FALSE)
+knitr::opts_chunk$set(
+  echo = TRUE,
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE
+)
 library(tidyverse)
-options(tibble.print_max = 5, tibble.print_min = 5, width = 72,
-        pillar.max_footer_lines = 2, cli.unicode = FALSE)
-movies  <- read_csv("data/movies.csv", show_col_types = FALSE)
+options(
+  tibble.print_max = 5,
+  tibble.print_min = 5,
+  width = 72,
+  pillar.max_footer_lines = 2,
+  cli.unicode = FALSE
+)
+movies <- read_csv("data/movies.csv", show_col_types = FALSE)
 studios <- read_csv("data/studios.csv", show_col_types = FALSE)
 scores_long <- movies |>
   select(title, critics_score, audience_score) |>
-  pivot_longer(c(critics_score, audience_score), names_to = "source", values_to = "score")
+  pivot_longer(
+    c(critics_score, audience_score),
+    names_to = "source",
+    values_to = "score"
+  )
 # The "AI-updated" lookup used in the join audit (a duplicate key sneaks in)
 studios_v2 <- bind_rows(
   studios,
-  tibble(studio = "Paramount Pictures", studio_group = "Paramount Classics", major = TRUE)
+  tibble(
+    studio = "Paramount Pictures",
+    studio_group = "Paramount Classics",
+    major = TRUE
+  )
 )
 ```
 
@@ -54,11 +72,15 @@ If students ask about the Movie Night AI round: it was assigned to do on their o
 
 Verbs from Session 1, all working on **rows** and **columns**:
 
-`select` picks columns · `filter` picks rows
+`select` (picks columns) · `filter` (picks rows)
 
-`arrange` sorts · `mutate` adds columns
+`arrange` (sorts) · `mutate` (adds columns)
 
-`slice_*` picks rows by position · `count` tallies
+[In Session 1 handout:](https://dtrstats.github.io/stat531-lectures/W04L07_handout.html) 
+
+`distinct` (distinct patterns) · `slice_*` (select rows) 
+
+</br>
 
 Every one of them returns a table with the **same or fewer rows**. None of them can collapse a table into a summary.
 
@@ -78,7 +100,7 @@ Each one needs a new move: **group**, **combine**, or **scale**.
 Target: 0:04 to 0:26. The most important section of the day. Do not rush it. If you are at 0:28 when this ends, skip the FLEX slides in Joins.
 :::
 
-## summarize squeezes many rows into one
+## `summarize` squeezes many rows into one
 
 ```{r}
 movies |>
@@ -92,15 +114,15 @@ movies |>
 ```{r}
 movies |>
   summarize(
-    n          = n(),
-    avg_score  = mean(audience_score),
-    best_imdb  = max(imdb_rating)
+    n = n(),
+    avg_score = mean(audience_score),
+    best_imdb = max(imdb_rating)
   )
 ```
 
 `n()` counts rows. Name each result on the left of `=`.
 
-## group_by splits the table
+## `group_by` splits the table
 
 ```{r}
 movies |>
@@ -109,7 +131,7 @@ movies |>
 
 Same rows. A hidden label: **Groups: genre [11]**
 
-## group_by + summarize
+## `group_by` + `summarize`
 
 ```{r}
 movies |>
@@ -128,7 +150,7 @@ movies |>
   arrange(desc(avg_score))
 ```
 
-Always show `n` next to an average. A mean of 9 films is not a mean of 305.
+Always show `n` next to an average. A mean of 9 films is less reliable than a mean of 305.
 
 ## Interaction 1: predict
 
@@ -148,7 +170,7 @@ INTERACTION 1 of 3. Take 2 minutes, then reveal on the next slide.
 Answer: 11 rows (one per genre). Documentary shows NA because one documentary, "The End of America", has a missing runtime, and mean() of anything containing NA is NA.
 :::
 
-## The answer: one NA spoils a group
+## The answer: one `NA` spoils a group
 
 ```{r}
 movies |>
@@ -158,16 +180,31 @@ movies |>
 
 One missing runtime makes the whole Documentary average `NA`.
 
-## na.rm: decide on purpose
+## `na.rm`: decide on purpose
 
 ```{r}
 movies |>
   group_by(genre) |>
-  summarize(avg_runtime = mean(runtime, na.rm = TRUE)) |>
+  summarize(
+    avg_runtime = mean(runtime, na.rm = TRUE),
+    na_dropped = sum(is.na(runtime))
+  ) |>
   filter(genre == "Documentary")
 ```
 
 `na.rm = TRUE` ignores missing values. Use it **knowingly**, and say how many were dropped.
+
+## Two grouping columns
+
+```{r}
+movies |>
+  group_by(genre, mpaa_rating) |>
+  summarize(n = n()) |>
+  arrange(desc(n))
+```
+
+Note the resulting table dropped only last grouping
+
 
 ## Two grouping columns
 
@@ -193,7 +230,10 @@ Same result as `group_by` + `summarize`, and it **never leaves hidden groups beh
 
 ```{r}
 by_genre <- movies |> group_by(genre)
-by_genre |> mutate(rank = row_number(desc(imdb_rating))) |> select(title, genre, rank) |> head(3)
+by_genre |>
+  mutate(rank = row_number(desc(imdb_rating))) |>
+  select(title, genre, rank) |>
+  head(3)
 ```
 
 . . .
@@ -202,7 +242,7 @@ by_genre |> mutate(rank = row_number(desc(imdb_rating))) |> select(title, genre,
 **Bug:** later verbs quietly work **per group**. Finish with `ungroup()`, or use `.by`.
 :::
 
-## summarize shrinks, mutate keeps
+## `summarize` shrinks, `mutate` keeps
 
 ```{r}
 movies |>
@@ -235,8 +275,8 @@ FLEX: skip if behind (saves about 2 min). Musical & Performing Arts has a tie at
 ```{r}
 genre_means <- movies |> summarize(avg = mean(audience_score), .by = genre)
 
-mean(genre_means$avg)         # mean of the group means
-mean(movies$audience_score)   # the real overall mean
+mean(genre_means$avg) # mean of the group means
+mean(movies$audience_score) # the real overall mean
 ```
 
 . . .
@@ -293,8 +333,9 @@ We want both in one table. The link is the **key**: `studio`.
 
 ```{r}
 movies |>
-  count(studio, sort = TRUE) |>
+  count(studio) |>
   filter(str_detect(studio, "(?i)warner")) |>
+  arrange(studio) |>
   head(5)
 ```
 
@@ -464,16 +505,22 @@ Great for reading. Awkward for grouping and plotting.
 
 ```{r}
 scores |>
-  pivot_longer(c(critics_score, audience_score),
-               names_to = "source", values_to = "score")
+  pivot_longer(
+    c(critics_score, audience_score),
+    names_to = "source",
+    values_to = "score"
+  )
 ```
 
 ## Why long helps
 
 ```{r}
 movies |>
-  pivot_longer(c(critics_score, audience_score),
-               names_to = "source", values_to = "score") |>
+  pivot_longer(
+    c(critics_score, audience_score),
+    names_to = "source",
+    values_to = "score"
+  ) |>
   summarize(avg = mean(score), .by = c(genre, source))
 ```
 
@@ -508,7 +555,11 @@ After `pivot_longer`, rows = old rows × columns pivoted. After `pivot_wider`, c
 
 ```{r}
 movies |>
-  pivot_longer(starts_with("actor"), names_to = "billing", values_to = "actor") |>
+  pivot_longer(
+    starts_with("actor"),
+    names_to = "billing",
+    values_to = "actor"
+  ) |>
   filter(!is.na(actor)) |>
   count(actor, sort = TRUE) |>
   head(5)
@@ -549,14 +600,14 @@ A simulated log of **4 million** viewing events:
 
 ```{r}
 #| eval: false
-install.packages("arrow")   # once
+install.packages("arrow") # once
 library(arrow)
 library(tidyverse)
 ```
 
-Today's file: `data/views.parquet`. Columns: `view_id`, `title`, `user_id`, `country`, `device`, `view_date`, `minutes`, `completed`.
+Today's file: `data/views.parquet` (download from Canvas). Columns: `view_id`, `title`, `user_id`, `country`, `device`, `view_date`, `minutes`, `completed`.
 
-## open_dataset: look without loading
+## `open_dataset`: look without loading
 
 ```{r}
 #| eval: false
@@ -578,7 +629,7 @@ views |>
 
 Same verbs you already know. This returns a **query**, not a table.
 
-## collect(): run the recipe
+## `collect()`: run the recipe
 
 ```{r}
 #| eval: false
@@ -749,7 +800,7 @@ Only silence the warning when many-to-many is exactly what you intend.
 ```{r}
 #| eval: false
 write_parquet(movies, "data/movies.parquet")
-movies_pq <- read_parquet("data/movies.parquet")   # reads fully into memory
+movies_pq <- read_parquet("data/movies.parquet") # reads fully into memory
 ```
 
 `open_dataset()` is lazy. `read_parquet()` loads everything. For a folder of many Parquet files, point `open_dataset()` at the folder.
