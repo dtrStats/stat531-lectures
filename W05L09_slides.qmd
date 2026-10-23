@@ -64,11 +64,11 @@ Same pairs as before. Three short audits with your neighbor.
 
 ## Where we left off
 
-Sessions 1 and 2 gave us tables: filtered, grouped, summarized, joined, reshaped.
+We've learned how to work with tables: filtered, grouped, summarized, joined, reshaped.
 
 Today we make those tables **visible**.
 
-AI writes plotting code quickly. It does not check whether the plot is **honest**. That is your job as navigator.
+AI can write beautiful plotting code, quickly. It does not check if the plot is **honest**. That's your job.
 
 ## Same numbers, four datasets
 
@@ -83,9 +83,10 @@ Four sets with nearly identical summaries. Are they the same?
 ## Plot them
 
 ```{r}
-#| fig-height: 2.2
+#| fig-height: 3.6
 ggplot(anscombe_long, aes(x, y)) +
   geom_point(size = 2.5) +
+  geom_smooth(method = "lm", se = FALSE) +
   facet_wrap(~ set, nrow = 1)
 ```
 
@@ -173,7 +174,7 @@ Answer: the points are NOT blue. They are the default first palette color (a sal
 ## The answer
 
 ```{r}
-#| fig-height: 2.0
+#| fig-height: 3.5
 ggplot(movies, aes(x = imdb_rating, y = audience_score)) +
   geom_point(aes(color = "blue"))
 ```
@@ -221,7 +222,7 @@ ggplot(movies, aes(x = imdb_rating, fill = audience_rating)) +
 ## Compare groups with boxplots
 
 ```{r}
-#| fig-height: 3
+#| fig-height: 4.4
 ggplot(movies, aes(audience_score, fct_reorder(genre, audience_score))) +
   geom_boxplot() +
   labs(y = NULL)
@@ -234,7 +235,7 @@ fct_reorder() sorts the groups by their median (the default function). The defau
 ## Count categories
 
 ```{r}
-#| fig-height: 3
+#| fig-height: 4.4
 ggplot(movies, aes(y = fct_rev(fct_infreq(genre)))) +
   geom_bar() +
   labs(y = NULL)
@@ -269,19 +270,19 @@ Without `geom_jitter`, points at the same x would stack into lines. `alpha` show
 ## Change over time
 
 ```{r}
-#| fig-height: 2.5
+#| fig-height: 4.4
 movies |>
   count(thtr_rel_year) |>
   ggplot(aes(x = thtr_rel_year, y = n)) +
   geom_line()
 ```
 
-Summarize first (Session 2), then plot.
+Summarize first, then plot.
 
 ## Facets: small multiples
 
 ```{r}
-#| fig-height: 2.4
+#| fig-height: 4.4
 movies |>
   filter(genre %in% c("Drama", "Comedy", "Documentary", "Horror")) |>
   ggplot(aes(x = imdb_rating, y = audience_score)) +
@@ -296,7 +297,7 @@ One panel per group. Often clearer than 11 colors.
 ## Fractions with position = fill (FLEX)
 
 ```{r}
-#| fig-height: 3
+#| fig-height: 4.4
 ggplot(movies, aes(y = genre, fill = audience_rating)) +
   geom_bar(position = "fill") +
   labs(x = "proportion", y = NULL)
@@ -327,7 +328,8 @@ A plot is an **object**. Save it, then keep adding.
 ## Labels do the explaining
 
 ```{r}
-#| fig-height: 2.4
+#| fig-height: 4.4
+#| fig-width: 8
 p + labs(
   title = "Audience scores track IMDB ratings",
   subtitle = "651 movies released 1970 to 2014",
@@ -339,7 +341,8 @@ p + labs(
 ## Scales: log for skewed data
 
 ```{r}
-#| fig-height: 2.4
+#| fig-height: 4.4
+#| fig-width: 8
 ggplot(movies, aes(x = imdb_num_votes, y = audience_score)) +
   geom_point(alpha = 0.5, color = "#6d8d24") +
   scale_x_log10(labels = scales::label_comma())
@@ -350,7 +353,8 @@ Skewed? A log axis spreads out the crowd.
 ## Colors: choose on purpose
 
 ```{r}
-#| fig-height: 2.4
+#| fig-height: 4.4
+#| fig-width: 8
 ggplot(movies, aes(x = imdb_rating, y = audience_score, color = mpaa_rating)) +
   geom_point(alpha = 0.7) +
   scale_color_viridis_d()
@@ -361,7 +365,8 @@ ggplot(movies, aes(x = imdb_rating, y = audience_score, color = mpaa_rating)) +
 ## Themes: the polish
 
 ```{r}
-#| fig-height: 2.4
+#| fig-height: 4.4
+#| fig-width: 8
 p +
   theme_minimal() +
   theme(legend.position = "bottom")
@@ -397,7 +402,8 @@ An AI will happily:
 ## Interaction 2: audit this AI plot
 
 ```{r}
-#| fig-height: 2.2
+#| fig-height: 4.0
+#| fig-width: 8
 ggplot(by_rating, aes(x = mpaa_rating, y = avg)) +
   geom_col() +
   coord_cartesian(ylim = c(50, 80))
@@ -426,7 +432,8 @@ Not a coding error. A **communication** error.
 ## A more honest version
 
 ```{r}
-#| fig-height: 2.4
+#| fig-height: 4.4
+#| fig-width: 8
 ggplot(by_rating, aes(x = avg, y = fct_reorder(mpaa_rating, avg))) +
   geom_col(fill = "#6d8d24") +
   geom_text(aes(label = paste0("n = ", n)), hjust = -0.1) +
@@ -437,11 +444,13 @@ ggplot(by_rating, aes(x = avg, y = fct_reorder(mpaa_rating, avg))) +
 ## Bin width changes the story (FLEX)
 
 ```{r}
+#| fig-height: 4.4
+#| fig-width: 8
 ggplot(movies, aes(x = audience_score)) +
   geom_histogram(binwidth = 25, fill = "#6d8d24", color = "white")
 ```
 
-Same data as earlier. Wide bins hide the shape. Always try several bin widths.
+Wide bins hide the shape. Always try several bin widths.
 
 ::: {.notes}
 FLEX: skip if behind (saves about 1.5 min). Compare with the binwidth = 5 histogram in the grammar section.
@@ -455,6 +464,21 @@ ggplot(movies, aes(x = imdb_rating, y = audience_score, color = genre)) +
 ```
 
 Eleven colors make the reader match every dot to the legend. Use **facets**, or highlight one group and gray the rest.
+
+::: {.notes}
+FLEX: skip if behind (saves about 1.5 min).
+:::
+
+## Too many colors (FLEX)
+
+```{r}
+movies |> 
+  mutate(genre_drama = ifelse(genre=="Drama","Drama","Other")) |> 
+  ggplot(aes(x = imdb_rating, y = audience_score, color=genre_drama)) +
+  geom_point(alpha=0.8) +
+  scale_color_manual(values = c("#6d8d24", "#b4b2ac"))
+```
+
 
 ::: {.notes}
 FLEX: skip if behind (saves about 1.5 min).
@@ -479,7 +503,7 @@ Target: 0:62 to 0:72. First two plots are diagnostics (they find problems in the
 
 ```{r}
 ggplot(movies, aes(x = runtime)) +
-  geom_histogram(binwidth = 10, fill = "#6d8d24", color = "white")
+  geom_histogram(binwidth = 10, fill = "#6d8d24", color = "gray60")
 ```
 
 One bar far to the right: a 267-minute documentary. A plot **flags** it. You decide if it is real.
@@ -539,7 +563,7 @@ gap |>
   geom_segment(aes(x = critics, xend = audience, yend = genre, color = big),
                linewidth = 1.5) +
   geom_point(aes(x = critics), color = "grey40", size = 3) +
-  geom_point(aes(x = audience), color = "#213921", size = 3) +
+  geom_point(aes(x = audience), color = "#41b641", size = 3) +
   scale_color_manual(values = c("grey80", "#f68b1f"), guide = "none") +
   labs(title = "Critics score four genres about 12 points below audiences",
        subtitle = "Grey dot: critics. Dark green dot: audience.",
@@ -552,16 +576,17 @@ gap |>
 ```{r}
 #| echo: false
 #| fig-height: 4.6
+
 gap |>
   mutate(big = gap > 10) |>
   ggplot(aes(y = fct_reorder(genre, gap))) +
   geom_segment(aes(x = critics, xend = audience, yend = genre, color = big),
                linewidth = 1.5) +
-  geom_point(aes(x = critics), color = "grey40", size = 3) +
-  geom_point(aes(x = audience), color = "#213921", size = 3) +
+  geom_point(aes(x = critics), color = "#56B4E9", size = 3) +
+  geom_point(aes(x = audience), color = "#009E73", size = 3) +
   scale_color_manual(values = c("grey80", "#f68b1f"), guide = "none") +
   labs(title = "Critics score four genres about 12 points below audiences",
-       subtitle = "Grey dot: critics. Dark green dot: audience.",
+       subtitle = "Blue dot: critics. Green dot: audience.",
        x = "Average score", y = NULL) +
   theme_minimal(base_size = 15)
 ```
@@ -588,9 +613,9 @@ Target: 0:72 to 0:75.
 
 ## Next up
 
-Wed 10/28: guest talk. Notice how each plot you see is built.
+Wed 10/28: guest talk. 
 
-Session 4 (Mon 11/02): **Lab 1** kickoff on the WellSync data. Bring a laptop with R, `tidyverse`, and `arrow` working.
+Mon 11/02: **Lab 2** kickoff on the WellSync data analysis. Bring a laptop.
 
 The **handout** has the full explanations, extra practice, and the appendix material.
 
@@ -599,7 +624,9 @@ The **handout** has the full explanations, extra practice, and the appendix mate
 ## Label points directly with ggrepel
 
 ```{r}
-#| eval: false
+#| eval: true
+#| fig-height: 4.0
+#| fig-width: 8.0
 # install.packages("ggrepel")  # once
 library(ggrepel)
 
@@ -614,7 +641,9 @@ gap |>
 ## Combine plots with patchwork
 
 ```{r}
-#| eval: false
+#| eval: true
+#| fig-height: 4.4
+#| fig-width: 9
 # install.packages("patchwork")  # once
 library(patchwork)
 
@@ -622,6 +651,21 @@ p1 <- ggplot(movies, aes(audience_score)) + geom_histogram(binwidth = 5)
 p2 <- ggplot(movies, aes(critics_score)) + geom_histogram(binwidth = 5)
 
 p1 + p2          # side by side
+```
+
+
+## Combine plots with patchwork
+
+```{r}
+#| eval: true
+#| fig-height: 4
+#| fig-width: 8
+# install.packages("patchwork")  # once
+library(patchwork)
+
+p1 <- ggplot(movies, aes(audience_score)) + geom_histogram(binwidth = 5)
+p2 <- ggplot(movies, aes(critics_score)) + geom_histogram(binwidth = 5)
+
 p1 / p2          # stacked
 ```
 

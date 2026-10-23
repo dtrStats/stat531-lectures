@@ -1383,7 +1383,7 @@
     "href": "W05L09_slides.html#where-we-left-off",
     "title": "Plots That Tell the Truth",
     "section": "Where we left off",
-    "text": "Where we left off\nSessions 1 and 2 gave us tables: filtered, grouped, summarized, joined, reshaped.\nToday we make those tables visible.\nAI writes plotting code quickly. It does not check whether the plot is honest. That is your job as navigator."
+    "text": "Where we left off\nWe’ve learned how to work with tables: filtered, grouped, summarized, joined, reshaped.\nToday we make those tables visible.\nAI can write beautiful plotting code, quickly. It does not check if the plot is honest. That’s your job."
   },
   {
     "objectID": "W05L09_slides.html#same-numbers-four-datasets",
@@ -1397,7 +1397,7 @@
     "href": "W05L09_slides.html#plot-them",
     "title": "Plots That Tell the Truth",
     "section": "Plot them",
-    "text": "Plot them\n\nggplot(anscombe_long, aes(x, y)) +\n  geom_point(size = 2.5) +\n  facet_wrap(~ set, nrow = 1)\n\n\n\n\n\n\n\n\n\n\nBug: summaries can hide the shape. Plot first."
+    "text": "Plot them\n\nggplot(anscombe_long, aes(x, y)) +\n  geom_point(size = 2.5) +\n  geom_smooth(method = \"lm\", se = FALSE) +\n  facet_wrap(~ set, nrow = 1)\n\n\n\n\n\n\n\n\n\n\nBug: summaries can hide the shape. Plot first."
   },
   {
     "objectID": "W05L09_slides.html#a-plot-is-a-recipe",
@@ -1509,7 +1509,7 @@
     "href": "W05L09_slides.html#change-over-time",
     "title": "Plots That Tell the Truth",
     "section": "Change over time",
-    "text": "Change over time\n\nmovies |&gt;\n  count(thtr_rel_year) |&gt;\n  ggplot(aes(x = thtr_rel_year, y = n)) +\n  geom_line()\n\n\n\n\n\n\n\n\nSummarize first (Session 2), then plot."
+    "text": "Change over time\n\nmovies |&gt;\n  count(thtr_rel_year) |&gt;\n  ggplot(aes(x = thtr_rel_year, y = n)) +\n  geom_line()\n\n\n\n\n\n\n\n\nSummarize first, then plot."
   },
   {
     "objectID": "W05L09_slides.html#facets-small-multiples",
@@ -1600,7 +1600,7 @@
     "href": "W05L09_slides.html#bin-width-changes-the-story-flex",
     "title": "Plots That Tell the Truth",
     "section": "Bin width changes the story (FLEX)",
-    "text": "Bin width changes the story (FLEX)\n\nggplot(movies, aes(x = audience_score)) +\n  geom_histogram(binwidth = 25, fill = \"#6d8d24\", color = \"white\")\n\n\n\n\n\n\n\n\nSame data as earlier. Wide bins hide the shape. Always try several bin widths.\n\nFLEX: skip if behind (saves about 1.5 min). Compare with the binwidth = 5 histogram in the grammar section."
+    "text": "Bin width changes the story (FLEX)\n\nggplot(movies, aes(x = audience_score)) +\n  geom_histogram(binwidth = 25, fill = \"#6d8d24\", color = \"white\")\n\n\n\n\n\n\n\n\nWide bins hide the shape. Always try several bin widths.\n\nFLEX: skip if behind (saves about 1.5 min). Compare with the binwidth = 5 histogram in the grammar section."
   },
   {
     "objectID": "W05L09_slides.html#too-many-colors-flex",
@@ -1621,7 +1621,7 @@
     "href": "W05L09_slides.html#plots-find-problems",
     "title": "Plots That Tell the Truth",
     "section": "Plots find problems",
-    "text": "Plots find problems\n\nggplot(movies, aes(x = runtime)) +\n  geom_histogram(binwidth = 10, fill = \"#6d8d24\", color = \"white\")\n\n\n\n\n\n\n\n\nOne bar far to the right: a 267-minute documentary. A plot flags it. You decide if it is real."
+    "text": "Plots find problems\n\nggplot(movies, aes(x = runtime)) +\n  geom_histogram(binwidth = 10, fill = \"#6d8d24\", color = \"gray60\")\n\n\n\n\n\n\n\n\nOne bar far to the right: a 267-minute documentary. A plot flags it. You decide if it is real."
   },
   {
     "objectID": "W05L09_slides.html#where-is-the-missing-data",
@@ -1649,7 +1649,7 @@
     "href": "W05L09_slides.html#from-chart-to-message",
     "title": "Plots That Tell the Truth",
     "section": "From chart to message",
-    "text": "From chart to message\n\ngap |&gt;\n  mutate(big = gap &gt; 10) |&gt;\n  ggplot(aes(y = fct_reorder(genre, gap))) +\n  geom_segment(aes(x = critics, xend = audience, yend = genre, color = big),\n               linewidth = 1.5) +\n  geom_point(aes(x = critics), color = \"grey40\", size = 3) +\n  geom_point(aes(x = audience), color = \"#213921\", size = 3) +\n  scale_color_manual(values = c(\"grey80\", \"#f68b1f\"), guide = \"none\") +\n  labs(title = \"Critics score four genres about 12 points below audiences\",\n       subtitle = \"Grey dot: critics. Dark green dot: audience.\",\n       x = \"Average score\", y = NULL) +\n  theme_minimal()"
+    "text": "From chart to message\n\ngap |&gt;\n  mutate(big = gap &gt; 10) |&gt;\n  ggplot(aes(y = fct_reorder(genre, gap))) +\n  geom_segment(aes(x = critics, xend = audience, yend = genre, color = big),\n               linewidth = 1.5) +\n  geom_point(aes(x = critics), color = \"grey40\", size = 3) +\n  geom_point(aes(x = audience), color = \"#41b641\", size = 3) +\n  scale_color_manual(values = c(\"grey80\", \"#f68b1f\"), guide = \"none\") +\n  labs(title = \"Critics score four genres about 12 points below audiences\",\n       subtitle = \"Grey dot: critics. Dark green dot: audience.\",\n       x = \"Average score\", y = NULL) +\n  theme_minimal()"
   },
   {
     "objectID": "W05L09_slides.html#the-story-version",
@@ -1677,21 +1677,21 @@
     "href": "W05L09_slides.html#next-up",
     "title": "Plots That Tell the Truth",
     "section": "Next up",
-    "text": "Next up\nWed 10/28: guest talk. Notice how each plot you see is built.\nSession 4 (Mon 11/02): Lab 1 kickoff on the WellSync data. Bring a laptop with R, tidyverse, and arrow working.\nThe handout has the full explanations, extra practice, and the appendix material."
+    "text": "Next up\nWed 10/28: guest talk.\nMon 11/02: Lab 2 kickoff on the WellSync data analysis. Bring a laptop.\nThe handout has the full explanations, extra practice, and the appendix material."
   },
   {
     "objectID": "W05L09_slides.html#label-points-directly-with-ggrepel",
     "href": "W05L09_slides.html#label-points-directly-with-ggrepel",
     "title": "Plots That Tell the Truth",
     "section": "Label points directly with ggrepel",
-    "text": "Label points directly with ggrepel\n\n# install.packages(\"ggrepel\")  # once\nlibrary(ggrepel)\n\ngap |&gt;\n  ggplot(aes(x = critics, y = audience, label = genre)) +\n  geom_point() +\n  geom_text_repel()\n\ngeom_text_repel() places labels so they do not overlap."
+    "text": "Label points directly with ggrepel\n\n# install.packages(\"ggrepel\")  # once\nlibrary(ggrepel)\n\ngap |&gt;\n  ggplot(aes(x = critics, y = audience, label = genre)) +\n  geom_point() +\n  geom_text_repel()\n\n\n\n\n\n\n\n\ngeom_text_repel() places labels so they do not overlap."
   },
   {
     "objectID": "W05L09_slides.html#combine-plots-with-patchwork",
     "href": "W05L09_slides.html#combine-plots-with-patchwork",
     "title": "Plots That Tell the Truth",
     "section": "Combine plots with patchwork",
-    "text": "Combine plots with patchwork\n\n# install.packages(\"patchwork\")  # once\nlibrary(patchwork)\n\np1 &lt;- ggplot(movies, aes(audience_score)) + geom_histogram(binwidth = 5)\np2 &lt;- ggplot(movies, aes(critics_score)) + geom_histogram(binwidth = 5)\n\np1 + p2          # side by side\np1 / p2          # stacked"
+    "text": "Combine plots with patchwork\n\n# install.packages(\"patchwork\")  # once\nlibrary(patchwork)\n\np1 &lt;- ggplot(movies, aes(audience_score)) + geom_histogram(binwidth = 5)\np2 &lt;- ggplot(movies, aes(critics_score)) + geom_histogram(binwidth = 5)\n\np1 + p2          # side by side"
   },
   {
     "objectID": "W05L09_slides.html#missingness-plots-with-naniar",
@@ -2070,5 +2070,19 @@
     "title": "Plots That Tell the Truth",
     "section": "Axis labels that do not fit",
     "text": "Axis labels that do not fit\n\nggplot(movies, aes(x = genre)) +\n  geom_bar() +\n  theme(axis.text.x = element_text(angle = 45, hjust = 1))   # tilt the labels\n\nggplot(movies, aes(y = genre)) +\n  geom_bar()                                                  # or put the long names on y\n\nPutting the category on the y axis is usually the easier fix."
+  },
+  {
+    "objectID": "W05L09_slides.html#too-many-colors-flex-1",
+    "href": "W05L09_slides.html#too-many-colors-flex-1",
+    "title": "Plots That Tell the Truth",
+    "section": "Too many colors (FLEX)",
+    "text": "Too many colors (FLEX)\n\nmovies |&gt; \n  mutate(genre_drama = ifelse(genre==\"Drama\",\"Drama\",\"Other\")) |&gt; \n  ggplot(aes(x = imdb_rating, y = audience_score, color=genre_drama)) +\n  geom_point(alpha=0.8) +\n  scale_color_manual(values = c(\"#6d8d24\", \"#b4b2ac\"))\n\n\n\n\n\n\n\n\n\nFLEX: skip if behind (saves about 1.5 min)."
+  },
+  {
+    "objectID": "W05L09_slides.html#combine-plots-with-patchwork-1",
+    "href": "W05L09_slides.html#combine-plots-with-patchwork-1",
+    "title": "Plots That Tell the Truth",
+    "section": "Combine plots with patchwork",
+    "text": "Combine plots with patchwork\n\n# install.packages(\"patchwork\")  # once\nlibrary(patchwork)\n\np1 &lt;- ggplot(movies, aes(audience_score)) + geom_histogram(binwidth = 5)\np2 &lt;- ggplot(movies, aes(critics_score)) + geom_histogram(binwidth = 5)\n\np1 / p2          # stacked"
   }
 ]
