@@ -530,9 +530,6 @@ ggplot(by_rating, aes(x = avg, y = fct_reorder(mpaa_rating, avg))) +
        title = "Average audience score by MPAA rating")
 ```
 
-::: {.callout-note title="Points do not need a zero baseline"}
-The zero-baseline rule is for **bars**. A dot or line chart encodes value by **position**, so zooming to the range of the data is fine, as long as the axis labels make it visible.
-:::
 
 ## Averages without sizes
 

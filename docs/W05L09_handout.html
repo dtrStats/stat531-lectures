@@ -1177,19 +1177,6 @@ background: #213921;
 </div>
 </div>
 </div>
-<div class="callout callout-style-default callout-note callout-titled" title="Points do not need a zero baseline">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Points do not need a zero baseline
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>The zero-baseline rule is for <strong>bars</strong>. A dot or line chart encodes value by <strong>position</strong>, so zooming to the range of the data is fine, as long as the axis labels make it visible.</p>
-</div>
-</div>
 </section>
 <section id="averages-without-sizes" class="level2" data-number="6.2">
 <h2 data-number="6.2" class="anchored" data-anchor-id="averages-without-sizes"><span class="header-section-number">6.2</span> Averages without sizes</h2>
@@ -1559,7 +1546,7 @@ background: #213921;
 </div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled" title="Solution 1">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-15-contents" aria-controls="callout-15" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-14-contents" aria-controls="callout-14" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -1568,7 +1555,7 @@ background: #213921;
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-15" class="callout-15-contents callout-collapse collapse">
+<div id="callout-14" class="callout-14-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p><code>"darkgreen"</code> is inside <code>aes()</code>, so it is treated as a category label, not a color. The points get the default salmon color and a legend entry named <code>darkgreen</code>. Move the color outside <code>aes()</code>:</p>
 <div class="cell">
@@ -1589,7 +1576,7 @@ background: #213921;
 <p><strong>Problem 2: Pick the geom.</strong> Show how <code>imdb_rating</code> differs across <code>mpaa_rating</code>. Sort the categories by median rating, show every movie, and make it obvious that some ratings have very few movies.</p>
 </div>
 <div class="callout callout-style-default callout-note callout-titled" title="Solution 2">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-16-contents" aria-controls="callout-16" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-15-contents" aria-controls="callout-15" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -1598,7 +1585,7 @@ background: #213921;
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-16" class="callout-16-contents callout-collapse collapse">
+<div id="callout-15" class="callout-15-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(movies, <span class="fu">aes</span>(<span class="at">x =</span> imdb_rating, <span class="at">y =</span> <span class="fu">fct_reorder</span>(mpaa_rating, imdb_rating))) <span class="sc">+</span></span>
@@ -1627,7 +1614,7 @@ background: #213921;
 </div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled" title="Solution 3">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-17-contents" aria-controls="callout-17" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-16-contents" aria-controls="callout-16" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -1636,7 +1623,7 @@ background: #213921;
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-17" class="callout-17-contents callout-collapse collapse">
+<div id="callout-16" class="callout-16-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>Problems: the y axis starts at 35 (truncated bars), the genres are in alphabetical order, there is no <code>n</code> (Animation and Science Fiction &amp; Fantasy have only 9 movies each), long x labels will overlap, and the axis label is the column name <code>avg</code>.</p>
 <div class="cell">
@@ -1663,7 +1650,7 @@ background: #213921;
 <p><strong>Problem 4: Facets.</strong> For the four most common genres, show the relationship between <code>critics_score</code> (x) and <code>audience_score</code> (y) with a straight trend line in each panel. Is the relationship similar across genres?</p>
 </div>
 <div class="callout callout-style-default callout-note callout-titled" title="Solution 4">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-18-contents" aria-controls="callout-18" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-17-contents" aria-controls="callout-17" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -1672,7 +1659,7 @@ background: #213921;
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-18" class="callout-18-contents callout-collapse collapse">
+<div id="callout-17" class="callout-17-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>top4 <span class="ot">&lt;-</span> movies <span class="sc">|&gt;</span> <span class="fu">count</span>(genre, <span class="at">sort =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">4</span>) <span class="sc">|&gt;</span> <span class="fu">pull</span>(genre)</span>
@@ -1699,7 +1686,7 @@ background: #213921;
 <p><strong>Problem 5: Missingness.</strong> Make a bar chart of the <strong>percentage</strong> of missing values in each column that has any, sorted from largest to smallest, with percentage labels on the axis. In one sentence, which column is the worst, and how large is the problem?</p>
 </div>
 <div class="callout callout-style-default callout-note callout-titled" title="Solution 5">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-19-contents" aria-controls="callout-19" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-18-contents" aria-controls="callout-18" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -1708,7 +1695,7 @@ background: #213921;
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-19" class="callout-19-contents callout-collapse collapse">
+<div id="callout-18" class="callout-18-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
@@ -1735,7 +1722,7 @@ background: #213921;
 <p><strong>Problem 6: Make a point.</strong> Best Picture nominees (<code>best_pic_nom == "yes"</code>) are a small group. Make <strong>one</strong> plot that compares their audience scores with those of non-nominees, states a finding in its title, and makes the group sizes visible. Then say in a sentence what the plot does <strong>not</strong> show.</p>
 </div>
 <div class="callout callout-style-default callout-note callout-titled" title="Solution 6">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-20-contents" aria-controls="callout-20" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-19-contents" aria-controls="callout-19" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -1744,7 +1731,7 @@ background: #213921;
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-20" class="callout-20-contents callout-collapse collapse">
+<div id="callout-19" class="callout-19-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>

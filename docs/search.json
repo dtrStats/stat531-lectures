@@ -1299,7 +1299,7 @@
     "href": "W05L09_handout.html#truncated-bar-axes",
     "title": "Session 3 Handout: Plots That Tell the Truth",
     "section": "6.1 Truncated bar axes",
-    "text": "6.1 Truncated bar axes\nA bar encodes its value by its length, so the baseline must be zero. Zooming a bar chart makes small differences look large.\n\nggplot(by_rating, aes(x = mpaa_rating, y = avg)) +\n  geom_col() +\n  coord_cartesian(ylim = c(50, 80))\n\n\n\n\n\n\n\n\nHere “Unrated” looks several times taller than “PG-13”, although 78.5 versus 56.7 is a ratio of about 1.4. There are three more problems: the order is alphabetical, nothing shows that NC-17 is the average of only 2 movies, and the label avg means nothing to a reader.\nAn honest version starts at zero, sorts by value, shows n, and labels the axes:\n\nggplot(by_rating, aes(x = avg, y = fct_reorder(mpaa_rating, avg))) +\n  geom_col(fill = \"#6d8d24\") +\n  geom_text(aes(label = paste0(\"n = \", n)), hjust = -0.1) +\n  scale_x_continuous(limits = c(0, 100)) +\n  labs(x = \"Average audience score (0 to 100)\", y = NULL,\n       title = \"Average audience score by MPAA rating\")\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nNotePoints do not need a zero baseline\n\n\n\nThe zero-baseline rule is for bars. A dot or line chart encodes value by position, so zooming to the range of the data is fine, as long as the axis labels make it visible."
+    "text": "6.1 Truncated bar axes\nA bar encodes its value by its length, so the baseline must be zero. Zooming a bar chart makes small differences look large.\n\nggplot(by_rating, aes(x = mpaa_rating, y = avg)) +\n  geom_col() +\n  coord_cartesian(ylim = c(50, 80))\n\n\n\n\n\n\n\n\nHere “Unrated” looks several times taller than “PG-13”, although 78.5 versus 56.7 is a ratio of about 1.4. There are three more problems: the order is alphabetical, nothing shows that NC-17 is the average of only 2 movies, and the label avg means nothing to a reader.\nAn honest version starts at zero, sorts by value, shows n, and labels the axes:\n\nggplot(by_rating, aes(x = avg, y = fct_reorder(mpaa_rating, avg))) +\n  geom_col(fill = \"#6d8d24\") +\n  geom_text(aes(label = paste0(\"n = \", n)), hjust = -0.1) +\n  scale_x_continuous(limits = c(0, 100)) +\n  labs(x = \"Average audience score (0 to 100)\", y = NULL,\n       title = \"Average audience score by MPAA rating\")"
   },
   {
     "objectID": "W05L09_handout.html#averages-without-sizes",
@@ -1375,29 +1375,29 @@
     "objectID": "W05L09_slides.html#todays-route",
     "href": "W05L09_slides.html#todays-route",
     "title": "Plots That Tell the Truth",
-    "section": "",
-    "text": "Why plot: summaries can hide the shape\nThe grammar: how ggplot2 builds a plot\nChoose the geom: match the plot to the question\nScales, labels, themes: make it readable\nAudit: plots can mislead without a bug\nDiagnostics and stories: plots that find problems and make a point\n\nSame pairs as before. Three short moments to talk to your neighbor."
+    "section": "Today’s route",
+    "text": "Today’s route\n\nWhy plot: summaries can hide the shape\nThe grammar: how ggplot2 builds a plot\nChoose the geom: match the plot to the question\nScales, labels, themes: make it readable\nAudit: plots can mislead without a bug\nDiagnostics and stories: plots that find problems and make a point\n\nSame pairs as before. Three short moments to talk to your neighbor."
   },
   {
     "objectID": "W05L09_slides.html#where-we-left-off",
     "href": "W05L09_slides.html#where-we-left-off",
     "title": "Plots That Tell the Truth",
-    "section": "",
-    "text": "Sessions 1 and 2 gave us tables: filtered, grouped, summarized, joined, reshaped.\nToday we make those tables visible.\nAI writes plotting code quickly. It does not check whether the plot is honest. That is your job as navigator."
+    "section": "Where we left off",
+    "text": "Where we left off\nSessions 1 and 2 gave us tables: filtered, grouped, summarized, joined, reshaped.\nToday we make those tables visible.\nAI writes plotting code quickly. It does not check whether the plot is honest. That is your job as navigator."
   },
   {
     "objectID": "W05L09_slides.html#same-numbers-four-datasets",
     "href": "W05L09_slides.html#same-numbers-four-datasets",
     "title": "Plots That Tell the Truth",
-    "section": "",
-    "text": "anscombe_long |&gt;\n  summarize(mean_x = mean(x), mean_y = mean(y), sd_y = sd(y),\n            cor = cor(x, y), .by = set)\n\n#&gt; # A tibble: 4 x 5\n#&gt;   set   mean_x mean_y  sd_y   cor\n#&gt;   &lt;chr&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;\n#&gt; 1 1          9   7.50  2.03 0.816\n#&gt; 2 2          9   7.50  2.03 0.816\n#&gt; 3 3          9   7.5   2.03 0.816\n#&gt; 4 4          9   7.50  2.03 0.817\n\n\nFour sets with nearly identical summaries. Are they the same?"
+    "section": "Same numbers, four datasets",
+    "text": "Same numbers, four datasets\n\nanscombe_long |&gt;\n  summarize(mean_x = mean(x), mean_y = mean(y), sd_y = sd(y),\n            cor = cor(x, y), .by = set)\n\n#&gt; # A tibble: 4 x 5\n#&gt;   set   mean_x mean_y  sd_y   cor\n#&gt;   &lt;chr&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;\n#&gt; 1 1          9   7.50  2.03 0.816\n#&gt; 2 2          9   7.50  2.03 0.816\n#&gt; 3 3          9   7.5   2.03 0.816\n#&gt; 4 4          9   7.50  2.03 0.817\n\n\nFour sets with nearly identical summaries. Are they the same?"
   },
   {
     "objectID": "W05L09_slides.html#plot-them",
     "href": "W05L09_slides.html#plot-them",
     "title": "Plots That Tell the Truth",
-    "section": "",
-    "text": "ggplot(anscombe_long, aes(x, y)) +\n  geom_point(size = 2.5) +\n  facet_wrap(~ set, nrow = 1)\n\n\n\n\n\n\n\n\n. . .\n\nBug: summaries can hide the shape. Plot first."
+    "section": "Plot them",
+    "text": "Plot them\n\nggplot(anscombe_long, aes(x, y)) +\n  geom_point(size = 2.5) +\n  facet_wrap(~ set, nrow = 1)\n\n\n\n\n\n\n\n\n\n\nBug: summaries can hide the shape. Plot first."
   },
   {
     "objectID": "W05L09_slides.html#a-plot-is-a-recipe",
@@ -1453,7 +1453,7 @@
     "href": "W05L09_slides.html#the-answer",
     "title": "Plots That Tell the Truth",
     "section": "The answer",
-    "text": "The answer\n\nggplot(movies, aes(x = imdb_rating, y = audience_score)) +\n  geom_point(aes(color = \"blue\"))\n\n\n\n\n\n\n\n\n. . .\n\nBug: inside aes(), \"blue\" is a label. Fix: geom_point(color = \"blue\")."
+    "text": "The answer\n\nggplot(movies, aes(x = imdb_rating, y = audience_score)) +\n  geom_point(aes(color = \"blue\"))\n\n\n\n\n\n\n\n\n\n\nBug: inside aes(), \"blue\" is a label. Fix: geom_point(color = \"blue\")."
   },
   {
     "objectID": "W05L09_slides.html#start-from-the-question",
@@ -1586,7 +1586,7 @@
     "href": "W05L09_slides.html#the-problems",
     "title": "Plots That Tell the Truth",
     "section": "The problems",
-    "text": "The problems\n\nTruncated axis: bars start at 50, so the length no longer matches the value\nNo sample size: NC-17 has only 2 movies\nArbitrary order: alphabetical, not sorted\nNo labels: the axis just says avg\n\n. . .\nNot a coding error. A communication error."
+    "text": "The problems\n\nTruncated axis: bars start at 50, so the length no longer matches the value\nNo sample size: NC-17 has only 2 movies\nArbitrary order: alphabetical, not sorted\nNo labels: the axis just says avg\n\n\nNot a coding error. A communication error."
   },
   {
     "objectID": "W05L09_slides.html#a-more-honest-version",
