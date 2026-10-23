@@ -3,16 +3,8 @@ title: "R in the AI Era"
 subtitle: "STAT 531: Ethics and Practice of Data Science"
 format: html
 toc: false
-listing:
-  contents:
-    - "*_slides.qmd"
-    - "*_handout.qmd"
-  type: table
-  fields: [date, title, description, categories]
-  sort: ["date", "categories"]
-  sort-ui: false
-  filter-ui: false
-  categories: false
+execute:
+  freeze: false   # re-scan the session files on every render
 ---
 
 Course materials for learning R, data wrangling, visualization, and data cleaning in a world where AI writes much of the code and **you navigate and audit it**.
@@ -28,7 +20,40 @@ Course materials for learning R, data wrangling, visualization, and data cleanin
 
 New sessions appear in the table below as they are published. Slides are for class and handouts are the detailed reference. Lab's 2 and 3 instructions will be pushed into your team's repo when the time comes.
 
-::: {#listing}
-:::
+```{r}
+#| echo: false
+#| results: asis
+# One row per lecture. Finds every *_slides.qmd and *_handout.qmd, skips drafts,
+# and pairs them by file-name prefix (e.g., W04L07_slides + W04L07_handout).
+`%||%` <- function(a, b) if (is.null(a)) b else a
+files <- list.files(pattern = "_(slides|handout)\\.qmd$")
+meta <- lapply(files, function(f) {
+  fm <- rmarkdown::yaml_front_matter(f)
+  if (isTRUE(fm$draft)) return(NULL)
+  data.frame(
+    lecture = sub("_(slides|handout)\\.qmd$", "", f),
+    kind    = sub("^.*_(slides|handout)\\.qmd$", "\\1", f),
+    title   = fm$title %||% "",
+    desc    = fm$description %||% "",
+    date    = as.character(fm$date %||% ""),
+    html    = sub("\\.qmd$", ".html", f)
+  )
+})
+meta <- do.call(rbind, meta)
+esc <- function(x) htmltools::htmlEscape(x)
+if (!is.null(meta)) {
+  rows <- lapply(split(meta, meta$lecture), function(d) {
+    s <- d[d$kind == "slides", ]; h <- d[d$kind == "handout", ]
+    first <- if (nrow(s)) s else h
+    link <- function(x, label) if (nrow(x)) sprintf('<a href="%s">%s</a>', x$html, label) else "&ndash;"
+    list(date = first$date, lecture = d$lecture[1],
+         html = sprintf("<tr><td>%s</td><td><strong>%s</strong><br><span class='text-muted'>%s</span></td><td>%s</td><td>%s</td></tr>",
+                        esc(first$date), esc(first$title), esc(first$desc), link(s, "Slides"), link(h, "Handout")))
+  })
+  ord <- order(vapply(rows, `[[`, "", "date"), vapply(rows, `[[`, "", "lecture"))
+  cat('<table class="table table-hover">\n<thead><tr><th>Date</th><th>Session</th><th>Slides</th><th>Handout</th></tr></thead>\n<tbody>\n',
+      paste(vapply(rows[ord], `[[`, "", "html"), collapse = "\n"), '\n</tbody></table>\n', sep = "")
+}
+```
 
 Course datasets for in-class examples: [movies.csv](data/movies.csv), [studios.csv](data/studios.csv), [movies.parquet](data/movies.parquet)

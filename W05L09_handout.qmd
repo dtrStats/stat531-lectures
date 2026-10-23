@@ -267,7 +267,8 @@ If you **already have** the counts (or any summary) in a column, use `geom_col()
 #| fig-height: 4
 genre_counts <- movies |> count(genre)
 
-ggplot(genre_counts, aes(x = n, y = fct_reorder(genre, n))) +
+ggplot(genre_counts, 
+       aes(x = n, y = fct_reorder(genre, n))) +
   geom_col() +
   labs(y = NULL)
 ```
@@ -456,11 +457,12 @@ A manual palette is easiest to control. These eight colors (the Okabe-Ito palett
 okabe_ito <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442",
                "#0072B2", "#D55E00", "#CC79A7", "#000000")
 
-movies |>
+p2 <- movies |>
   filter(genre %in% c("Drama", "Comedy", "Documentary", "Horror")) |>
   ggplot(aes(x = imdb_rating, y = audience_score, color = genre)) +
   geom_point(alpha = 0.7) +
   scale_color_manual(values = okabe_ito)
+p2
 ```
 
 ::: {.callout-tip title="Fewer colors, used on purpose"}
@@ -483,7 +485,7 @@ Remove a legend that adds nothing with `legend.position = "none"`, for example w
 A **theme** controls everything that is not data: background, gridlines, fonts.
 
 ```{r}
-p +
+p2 +
   theme_minimal(base_size = 12) +
   theme(legend.position = "bottom")
 ```
