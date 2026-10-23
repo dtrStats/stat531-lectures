@@ -1376,7 +1376,7 @@
     "href": "W05L09_slides.html#todays-route",
     "title": "Plots That Tell the Truth",
     "section": "Today’s route",
-    "text": "Today’s route\n\nWhy plot: summaries can hide the shape\nThe grammar: how ggplot2 builds a plot\nChoose the geom: match the plot to the question\nScales, labels, themes: make it readable\nAudit: plots can mislead without a bug\nDiagnostics and stories: plots that find problems and make a point\n\nSame pairs as before. Three short moments to talk to your neighbor."
+    "text": "Today’s route\n\nWhy plot?\nThe grammar of graphs\nChoosing the type of plot: geom\nScales, labels, themes\nAudit: plots can mislead without a bug\nDiagnostics and telling stories\n\nSame pairs as before. Three short audits with your neighbor."
   },
   {
     "objectID": "W05L09_slides.html#where-we-left-off",

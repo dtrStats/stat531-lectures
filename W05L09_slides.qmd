@@ -53,14 +53,14 @@ Press S for speaker view.
 
 ## Today's route
 
-- **Why plot**: summaries can hide the shape
-- **The grammar**: how ggplot2 builds a plot
-- **Choose the geom**: match the plot to the question
-- **Scales, labels, themes**: make it readable
+- **Why plot?**
+- **The grammar of graphs**
+- **Choosing the type of plot**: geom
+- **Scales, labels, themes**
 - **Audit**: plots can mislead without a bug
-- **Diagnostics and stories**: plots that find problems and make a point
+- **Diagnostics and telling stories**
 
-Same pairs as before. Three short moments to talk to your neighbor.
+Same pairs as before. Three short audits with your neighbor.
 
 ## Where we left off
 
