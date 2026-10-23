@@ -3,9 +3,10 @@
 .RData
 .quarto/
 .DS_Store
-*_files/
+/*_files/
 *.knit.md
-data/views.parquet
 
 /.quarto/
 **/*.quarto_ipynb
+data/views.parquet
+views_tmp.csv
