@@ -1,0 +1,653 @@
+---
+title: "Plots That Tell the Truth"
+subtitle: "R basics for the AI era · Session 3"
+author: "DTR"
+description: "The grammar of graphics with ggplot2, choosing the right geom, auditing misleading plots, and plots as diagnostics and stories"
+date: 2026-10-26
+categories: [Slides]
+format:
+  revealjs:
+    fig-width: 10.5
+    fig-height: 2.8
+    fig-align: center
+    fig-dpi: 96
+    auto-stretch: false
+    include-in-header:
+      - text: |
+          <style>.reveal .slides img { display: block; margin-left: auto; margin-right: auto; }</style>
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = "#>", message = FALSE, warning = FALSE, fig.retina = 2)
+library(tidyverse)
+options(tibble.print_max = 5, tibble.print_min = 5, width = 72,
+        pillar.max_footer_lines = 2, cli.unicode = FALSE)
+theme_set(theme_grey(base_size = 15))   # default look, larger text for the room
+movies <- read_csv("data/movies.csv", show_col_types = FALSE)
+
+anscombe_long <- anscombe |>
+  pivot_longer(everything(), names_to = c(".value", "set"), names_pattern = "(.)(.)")
+
+p <- ggplot(movies, aes(x = imdb_rating, y = audience_score)) +
+  geom_point(alpha = 0.5, color = "#6d8d24")
+
+by_rating <- movies |>
+  summarize(avg = mean(audience_score), n = n(), .by = mpaa_rating)
+
+gap <- movies |>
+  summarize(critics = mean(critics_score), audience = mean(audience_score), .by = genre) |>
+  mutate(gap = audience - critics)
+```
+
+# Welcome {background-color="#f3f6ea"}
+
+::: {.notes}
+TARGET CLOCK (assumes you skip FLEX slides if behind): Welcome 0:00-0:05 | The grammar 0:05-0:20 | Choose the geom 0:20-0:40 | Scales, labels, themes 0:40-0:50 | Audit misleading plots 0:50-0:62 | Diagnostics and stories 0:62-0:72 | Wrap-up 0:72-0:75.
+
+Exactly THREE interaction moments (blue boxes): Interaction 1 in The grammar, Interaction 2 in Audit, Interaction 3 in Diagnostics and stories. Each is about 3 minutes. Everything else is teaching. Answers are in the notes.
+
+FLEX slides, skip if behind: "Fractions with position = fill", "Bin width changes the story", "Too many colors". Cut material is in the Appendix.
+
+Press S for speaker view.
+:::
+
+## Today's route
+
+- **Why plot**: summaries can hide the shape
+- **The grammar**: how ggplot2 builds a plot
+- **Choose the geom**: match the plot to the question
+- **Scales, labels, themes**: make it readable
+- **Audit**: plots can mislead without a bug
+- **Diagnostics and stories**: plots that find problems and make a point
+
+Same pairs as before. Three short moments to talk to your neighbor.
+
+## Where we left off
+
+Sessions 1 and 2 gave us tables: filtered, grouped, summarized, joined, reshaped.
+
+Today we make those tables **visible**.
+
+AI writes plotting code quickly. It does not check whether the plot is **honest**. That is your job as navigator.
+
+## Same numbers, four datasets
+
+```{r}
+anscombe_long |>
+  summarize(mean_x = mean(x), mean_y = mean(y), sd_y = sd(y),
+            cor = cor(x, y), .by = set)
+```
+
+Four sets with nearly identical summaries. Are they the same?
+
+## Plot them
+
+```{r}
+#| fig-height: 2.2
+ggplot(anscombe_long, aes(x, y)) +
+  geom_point(size = 2.5) +
+  facet_wrap(~ set, nrow = 1)
+```
+
+. . .
+
+::: {.bug}
+**Bug:** summaries can hide the shape. Plot first.
+:::
+
+# The grammar {background-color="#f3f6ea"}
+
+::: {.notes}
+Target: 0:05 to 0:20. Build one plot layer by layer. Interaction 1 is the mapping versus setting trap.
+:::
+
+## A plot is a recipe
+
+- **Data**: a table
+- **Aesthetics**: which columns go to x, y, color, size
+- **Geom**: the shape that is drawn (points, bars, lines)
+- Later: scales, facets, labels, themes
+
+Layers are joined with `+`.
+
+## Start with the canvas
+
+```{r}
+ggplot(movies, aes(x = imdb_rating, y = audience_score))
+```
+
+Data and aesthetics only. The axes exist. Nothing is drawn yet.
+
+## Add a geom
+
+```{r}
+ggplot(movies, aes(x = imdb_rating, y = audience_score)) +
+  geom_point()
+```
+
+## Add another layer
+
+```{r}
+ggplot(movies, aes(x = imdb_rating, y = audience_score)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+Both layers **inherit** `x` and `y` from the first line.
+
+## Map a column to color
+
+```{r}
+ggplot(movies, aes(x = imdb_rating, y = audience_score)) +
+  geom_point(aes(color = title_type))
+```
+
+Inside `aes()`: the color **depends on the data**, and a legend appears.
+
+## Set a fixed look
+
+```{r}
+ggplot(movies, aes(x = imdb_rating, y = audience_score)) +
+  geom_point(color = "#6d8d24", size = 2, alpha = 0.5)
+```
+
+Outside `aes()`: one fixed value for **every** point. No legend.
+
+## Interaction 1: predict
+
+```{r}
+#| eval: false
+ggplot(movies, aes(x = imdb_rating, y = audience_score)) +
+  geom_point(aes(color = "blue"))
+```
+
+::: {.vote}
+Turn to your neighbor (2 min): what color are the points? Will there be a legend?
+:::
+
+::: {.notes}
+INTERACTION 1 of 3. Take 2 minutes, then reveal on the next slide.
+Answer: the points are NOT blue. They are the default first palette color (a salmon red), and there is a legend entry labeled "blue". Inside aes(), "blue" is just the text of a category, so ggplot2 maps it to a color like any other label.
+:::
+
+## The answer
+
+```{r}
+#| fig-height: 2.0
+ggplot(movies, aes(x = imdb_rating, y = audience_score)) +
+  geom_point(aes(color = "blue"))
+```
+
+. . .
+
+::: {.bug}
+**Bug:** inside `aes()`, `"blue"` is a label. Fix: `geom_point(color = "blue")`.
+:::
+
+# Choose the geom {background-color="#f3f6ea"}
+
+::: {.notes}
+Target: 0:20 to 0:40. Start from the question, not the geom. Movie data throughout.
+:::
+
+## Start from the question
+
+| Question | Geom |
+|:--|:--|
+| One number: its **distribution** | `geom_histogram` |
+| A number across **groups** | `geom_boxplot` |
+| **Counts** per category | `geom_bar` |
+| **Two numbers** | `geom_point` |
+| A number over **time** | `geom_line` |
+
+## Distribution of one number
+
+```{r}
+ggplot(movies, aes(x = audience_score)) +
+  geom_histogram(binwidth = 5, fill = "#6d8d24", color = "white")
+```
+
+Each bar counts the movies in a 5-point bin.
+
+## Compare two distributions
+
+```{r}
+ggplot(movies, aes(x = imdb_rating, fill = audience_rating)) +
+  geom_density(alpha = 0.5)
+```
+
+`alpha` makes fills see-through so overlaps stay visible.
+
+## Compare groups with boxplots
+
+```{r}
+#| fig-height: 3
+ggplot(movies, aes(audience_score, fct_reorder(genre, audience_score))) +
+  geom_boxplot() +
+  labs(y = NULL)
+```
+
+::: {.notes}
+fct_reorder() sorts the groups by their median (the default function). The default order of a character column is alphabetical.
+:::
+
+## Count categories
+
+```{r}
+#| fig-height: 3
+ggplot(movies, aes(y = fct_rev(fct_infreq(genre)))) +
+  geom_bar() +
+  labs(y = NULL)
+```
+
+::: {.notes}
+geom_bar() counts rows for you. fct_infreq() orders by frequency and fct_rev() flips so the largest bar is on top.
+:::
+
+## geom_bar vs geom_col
+
+You already have the counts? Use `geom_col()`. An AI often mixes them up:
+
+```{r}
+#| error: true
+genre_counts <- movies |> count(genre)
+ggplot(genre_counts, aes(y = genre, x = n)) +
+  geom_bar()
+```
+
+`geom_bar` counts rows itself, so it refuses a count column. Use `geom_col()`.
+
+## Two numbers: overplotting
+
+```{r}
+ggplot(movies, aes(x = mpaa_rating, y = audience_score)) +
+  geom_jitter(width = 0.2, height = 0, alpha = 0.5)
+```
+
+Without `geom_jitter`, points at the same x would stack into lines. `alpha` shows density.
+
+## Change over time
+
+```{r}
+#| fig-height: 2.5
+movies |>
+  count(thtr_rel_year) |>
+  ggplot(aes(x = thtr_rel_year, y = n)) +
+  geom_line()
+```
+
+Summarize first (Session 2), then plot.
+
+## Facets: small multiples
+
+```{r}
+#| fig-height: 2.4
+movies |>
+  filter(genre %in% c("Drama", "Comedy", "Documentary", "Horror")) |>
+  ggplot(aes(x = imdb_rating, y = audience_score)) +
+  geom_point(alpha = 0.5) +
+  facet_wrap(~ genre, nrow = 1)
+```
+
+::: {.notes}
+One panel per group. Often clearer than 11 colors.
+:::
+
+## Fractions with position = fill (FLEX)
+
+```{r}
+#| fig-height: 3
+ggplot(movies, aes(y = genre, fill = audience_rating)) +
+  geom_bar(position = "fill") +
+  labs(x = "proportion", y = NULL)
+```
+
+::: {.notes}
+FLEX: skip if behind (saves about 2 min). position = "fill" rescales every bar to 100%. Great for shares, but it hides group sizes.
+:::
+
+# Scales, labels, themes {background-color="#f3f6ea"}
+
+::: {.notes}
+Target: 0:40 to 0:50. Store a plot in a name, then add layers. Keep it moving.
+:::
+
+## Store a plot, add layers
+
+```{r}
+#| eval: false
+p <- ggplot(movies, aes(x = imdb_rating, y = audience_score)) +
+  geom_point(alpha = 0.5, color = "#6d8d24")
+
+p + labs(title = "Audience scores track IMDB ratings")
+```
+
+A plot is an **object**. Save it, then keep adding.
+
+## Labels do the explaining
+
+```{r}
+#| fig-height: 2.4
+p + labs(
+  title = "Audience scores track IMDB ratings",
+  subtitle = "651 movies released 1970 to 2014",
+  x = "IMDB rating (0 to 10)", y = "Audience score (0 to 100)",
+  caption = "Source: movies.csv (IMDB and Rotten Tomatoes)"
+)
+```
+
+## Scales: log for skewed data
+
+```{r}
+#| fig-height: 2.4
+ggplot(movies, aes(x = imdb_num_votes, y = audience_score)) +
+  geom_point(alpha = 0.5, color = "#6d8d24") +
+  scale_x_log10(labels = scales::label_comma())
+```
+
+Skewed? A log axis spreads out the crowd.
+
+## Colors: choose on purpose
+
+```{r}
+#| fig-height: 2.4
+ggplot(movies, aes(x = imdb_rating, y = audience_score, color = mpaa_rating)) +
+  geom_point(alpha = 0.7) +
+  scale_color_viridis_d()
+```
+
+`viridis` works for most color-blind viewers.
+
+## Themes: the polish
+
+```{r}
+#| fig-height: 2.4
+p +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+`theme_*()` sets the look. `theme()` tweaks details.
+
+## Save it
+
+```{r}
+#| eval: false
+ggsave("audience_vs_imdb.png", p, width = 8, height = 4.5, dpi = 300)
+```
+
+Set the **size** and **dpi** yourself. The default is whatever your window happened to be.
+
+# Audit {background-color="#f3f6ea"}
+
+::: {.notes}
+Target: 0:50 to 0:62. Interaction 2 is the headline of this section. The AI optimizes for a plot that runs, not one that is honest.
+:::
+
+## A plot can lie without a bug
+
+Code that **runs** is not code that is **honest**.
+
+An AI will happily:
+
+- zoom the axis to make a small difference look huge
+- show an average without saying how many rows are behind it
+- sort categories alphabetically instead of meaningfully
+
+## Interaction 2: audit this AI plot
+
+```{r}
+#| fig-height: 2.2
+ggplot(by_rating, aes(x = mpaa_rating, y = avg)) +
+  geom_col() +
+  coord_cartesian(ylim = c(50, 80))
+```
+
+::: {.vote}
+Neighbor (3 min): list every problem you can find.
+:::
+
+::: {.notes}
+INTERACTION 2 of 3. The AI was asked: "Plot the average audience score by rating." Give 3 minutes. Answers on the next slide.
+Problems: (1) the y axis starts at 50, so bar heights are not proportional to the values (bars encode value by length); (2) NC-17 is the average of only 2 movies, and no n is shown; (3) categories are in alphabetical order, not sorted by the value; (4) no title or axis labels (y is "avg"); (5) a bar chart of averages hides the spread.
+:::
+
+## The problems
+
+1. **Truncated axis**: bars start at 50, so the length no longer matches the value
+2. **No sample size**: NC-17 has only **2** movies
+3. **Arbitrary order**: alphabetical, not sorted
+4. **No labels**: the axis just says `avg`
+
+. . .
+
+Not a coding error. A **communication** error.
+
+## A more honest version
+
+```{r}
+#| fig-height: 2.4
+ggplot(by_rating, aes(x = avg, y = fct_reorder(mpaa_rating, avg))) +
+  geom_col(fill = "#6d8d24") +
+  geom_text(aes(label = paste0("n = ", n)), hjust = -0.1) +
+  scale_x_continuous(limits = c(0, 100)) +
+  labs(x = "Average audience score", y = NULL)
+```
+
+## Bin width changes the story (FLEX)
+
+```{r}
+ggplot(movies, aes(x = audience_score)) +
+  geom_histogram(binwidth = 25, fill = "#6d8d24", color = "white")
+```
+
+Same data as earlier. Wide bins hide the shape. Always try several bin widths.
+
+::: {.notes}
+FLEX: skip if behind (saves about 1.5 min). Compare with the binwidth = 5 histogram in the grammar section.
+:::
+
+## Too many colors (FLEX)
+
+```{r}
+ggplot(movies, aes(x = imdb_rating, y = audience_score, color = genre)) +
+  geom_point()
+```
+
+Eleven colors make the reader match every dot to the legend. Use **facets**, or highlight one group and gray the rest.
+
+::: {.notes}
+FLEX: skip if behind (saves about 1.5 min).
+:::
+
+## Chart audit checklist
+
+1. **Axis**: do bars start at zero?
+2. **Size**: is `n` visible for averages?
+3. **Order**: is it meaningful, not alphabetical?
+4. **Color**: few colors, color-blind safe?
+5. **Labels**: units, a title that says something?
+6. **Scale**: log or zoom? Is it stated?
+
+# Diagnostics and stories {background-color="#f3f6ea"}
+
+::: {.notes}
+Target: 0:62 to 0:72. First two plots are diagnostics (they find problems in the data). The last three turn a chart into a message. Interaction 3 asks them to write a headline.
+:::
+
+## Plots find problems
+
+```{r}
+ggplot(movies, aes(x = runtime)) +
+  geom_histogram(binwidth = 10, fill = "#6d8d24", color = "white")
+```
+
+One bar far to the right: a 267-minute documentary. A plot **flags** it. You decide if it is real.
+
+## Where is the missing data?
+
+```{r}
+missing_by_col <- movies |>
+  summarize(across(everything(), ~ sum(is.na(.x)))) |>
+  pivot_longer(everything(), names_to = "column", values_to = "n_missing") |>
+  filter(n_missing > 0)
+missing_by_col
+```
+
+::: {.notes}
+These are Session 2 tools: summarize, across, pivot_longer.
+:::
+
+## Plot the missingness
+
+```{r}
+#| fig-height: 2.6
+ggplot(missing_by_col, aes(x = n_missing, y = fct_reorder(column, n_missing))) +
+  geom_col(fill = "#6d8d24") +
+  labs(x = "Missing values", y = NULL)
+```
+
+The `dvd_rel_*` columns are missing for the **same 8 films**.
+
+## Interaction 3: write the headline
+
+```{r}
+#| echo: false
+#| fig-height: 3.4
+gap |>
+  pivot_longer(c(critics, audience), names_to = "source", values_to = "score") |>
+  ggplot(aes(x = score, y = genre, color = source)) +
+  geom_point(size = 3)
+```
+
+::: {.vote}
+Neighbor (2 min): write a one-sentence title that states the **finding**.
+:::
+
+::: {.notes}
+INTERACTION 3 of 3. Give 2 minutes. Collect two or three headlines. A good one states the finding, for example: "Critics score four genres about 12 points lower than audiences do." Next slide shows our version.
+Genres with the biggest gaps (audience minus critics): Art House & International and Action & Adventure (12.4), Animation (12.2), Comedy (11.6).
+:::
+
+## From chart to message
+
+```{r}
+#| eval: false
+gap |>
+  mutate(big = gap > 10) |>
+  ggplot(aes(y = fct_reorder(genre, gap))) +
+  geom_segment(aes(x = critics, xend = audience, yend = genre, color = big),
+               linewidth = 1.5) +
+  geom_point(aes(x = critics), color = "grey40", size = 3) +
+  geom_point(aes(x = audience), color = "#213921", size = 3) +
+  scale_color_manual(values = c("grey80", "#f68b1f"), guide = "none") +
+  labs(title = "Critics score four genres about 12 points below audiences",
+       subtitle = "Grey dot: critics. Dark green dot: audience.",
+       x = "Average score", y = NULL) +
+  theme_minimal()
+```
+
+## The story version
+
+```{r}
+#| echo: false
+#| fig-height: 4.6
+gap |>
+  mutate(big = gap > 10) |>
+  ggplot(aes(y = fct_reorder(genre, gap))) +
+  geom_segment(aes(x = critics, xend = audience, yend = genre, color = big),
+               linewidth = 1.5) +
+  geom_point(aes(x = critics), color = "grey40", size = 3) +
+  geom_point(aes(x = audience), color = "#213921", size = 3) +
+  scale_color_manual(values = c("grey80", "#f68b1f"), guide = "none") +
+  labs(title = "Critics score four genres about 12 points below audiences",
+       subtitle = "Grey dot: critics. Dark green dot: audience.",
+       x = "Average score", y = NULL) +
+  theme_minimal(base_size = 15)
+```
+
+## What made it a story
+
+1. The **title** states the finding
+2. **One highlight** (orange), everything else muted
+3. **Sorted** by the thing that matters
+4. **Clean**: no clutter, no legend needed
+5. Colors still work for **color-blind** readers
+
+# Wrap-up {background-color="#f3f6ea"}
+
+::: {.notes}
+Target: 0:72 to 0:75.
+:::
+
+## Three things to remember
+
+1. **Grammar**: data, aesthetics, geoms, layered with `+`. Inside `aes()` means data, outside means fixed.
+2. **Choose** the geom from the question, then **audit** the plot: axis, `n`, order, color, labels.
+3. A plot is a **diagnostic** and a **message**: find the problem, then state the finding.
+
+## Next up
+
+Wed 10/28: guest talk. Notice how each plot you see is built.
+
+Session 4 (Mon 11/02): **Lab 1** kickoff on the WellSync data. Bring a laptop with R, `tidyverse`, and `arrow` working.
+
+The **handout** has the full explanations, extra practice, and the appendix material.
+
+# Appendix {background-color="#f3f6ea"}
+
+## Label points directly with ggrepel
+
+```{r}
+#| eval: false
+# install.packages("ggrepel")  # once
+library(ggrepel)
+
+gap |>
+  ggplot(aes(x = critics, y = audience, label = genre)) +
+  geom_point() +
+  geom_text_repel()
+```
+
+`geom_text_repel()` places labels so they do not overlap.
+
+## Combine plots with patchwork
+
+```{r}
+#| eval: false
+# install.packages("patchwork")  # once
+library(patchwork)
+
+p1 <- ggplot(movies, aes(audience_score)) + geom_histogram(binwidth = 5)
+p2 <- ggplot(movies, aes(critics_score)) + geom_histogram(binwidth = 5)
+
+p1 + p2          # side by side
+p1 / p2          # stacked
+```
+
+## Missingness plots with naniar
+
+```{r}
+#| eval: false
+# install.packages("naniar")  # once
+library(naniar)
+
+gg_miss_var(movies)         # bar chart of NAs per column
+vis_miss(movies)            # every cell: present or missing
+```
+
+These are ready-made versions of the plot built from scratch in this session.
+
+## Axis labels that do not fit
+
+```{r}
+#| eval: false
+ggplot(movies, aes(x = genre)) +
+  geom_bar() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))   # tilt the labels
+
+ggplot(movies, aes(y = genre)) +
+  geom_bar()                                                  # or put the long names on y
+```
+
+Putting the category on the **y axis** is usually the easier fix.

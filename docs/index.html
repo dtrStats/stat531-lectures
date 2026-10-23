@@ -2,17 +2,23 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.34">
+<meta name="generator" content="quarto-1.10.18">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
 <title>R in the AI Era – STAT 531: R in the AI Era</title>
 <style>
-code{white-space: pre-wrap;}
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -38,10 +44,10 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-c8ad9e5dbd60b7b70b38521ab19b7da4.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-d7294beede67a4f0c1d75a160eaed9e1.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-6a4c8a966d1042cf9c23855997bb8ab1.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -101,7 +107,7 @@ ul.task-list li input[type="checkbox"] {
 <style>html{ scroll-behavior: smooth; }</style>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 const typesetMath = (el) => {
@@ -114,7 +120,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -230,7 +236,7 @@ Categories
 </thead>
 <tbody class="list">
 
-<tr data-index="0" data-categories="SGFuZG91dA==" data-listing-date-sort="1792393200000" data-listing-file-modified-sort="1792275107497" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="20" data-listing-word-count-sort="3816" data-listing-title-sort="Session 1 Handout: R Basics and Data Manipulation" data-listing-filename-sort="W04L07_handout.qmd">
+<tr data-index="0" data-categories="SGFuZG91dA==" data-listing-date-sort="1792393200000" data-listing-file-modified-sort="1792274747000" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="20" data-listing-word-count-sort="3816" data-listing-title-sort="Session 1 Handout: R Basics and Data Manipulation" data-listing-filename-sort="W04L07_handout.qmd">
 <td>
 <span class="listing-date">Oct 19, 2026</span>
 </td>
@@ -246,7 +252,7 @@ Categories
 
 </tr>
 
-<tr data-index="1" data-categories="U2xpZGVz" data-listing-date-sort="1792393200000" data-listing-file-modified-sort="1792276482379" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="12" data-listing-word-count-sort="2303" data-listing-title-sort="You Navigate, AI Drives" data-listing-filename-sort="W04L07_slides.qmd">
+<tr data-index="1" data-categories="U2xpZGVz" data-listing-date-sort="1792393200000" data-listing-file-modified-sort="1792423254192" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="12" data-listing-word-count-sort="2303" data-listing-title-sort="You Navigate, AI Drives" data-listing-filename-sort="W04L07_slides.qmd">
 <td>
 <span class="listing-date">Oct 19, 2026</span>
 </td>
@@ -262,7 +268,7 @@ Categories
 
 </tr>
 
-<tr data-index="2" data-categories="SGFuZG91dA==" data-listing-date-sort="1792566000000" data-listing-file-modified-sort="1792520924011" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="31" data-listing-word-count-sort="6119" data-listing-title-sort="Session 2 Handout: Summarize, Combine, and Scale" data-listing-filename-sort="W04L08_handout.qmd">
+<tr data-index="2" data-categories="SGFuZG91dA==" data-listing-date-sort="1792566000000" data-listing-file-modified-sort="1792518691000" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="31" data-listing-word-count-sort="6119" data-listing-title-sort="Session 2 Handout: Summarize, Combine, and Scale" data-listing-filename-sort="W04L08_handout.qmd">
 <td>
 <span class="listing-date">Oct 21, 2026</span>
 </td>
@@ -278,7 +284,7 @@ Categories
 
 </tr>
 
-<tr data-index="3" data-categories="U2xpZGVz" data-listing-date-sort="1792566000000" data-listing-file-modified-sort="1792531501088" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14" data-listing-word-count-sort="2687" data-listing-title-sort="Summarize, Combine, and Scale" data-listing-filename-sort="W04L08_slides.qmd">
+<tr data-index="3" data-categories="U2xpZGVz" data-listing-date-sort="1792566000000" data-listing-file-modified-sort="1792597374000" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14" data-listing-word-count-sort="2723" data-listing-title-sort="Summarize, Combine, and Scale" data-listing-filename-sort="W04L08_slides.qmd">
 <td>
 <span class="listing-date">Oct 21, 2026</span>
 </td>
@@ -287,6 +293,102 @@ Categories
 </td>
 <td>
 <span class="listing-description">Grouped summaries, joins with row-count checks, pivots, and big data with arrow and Parquet</span>
+</td>
+<td>
+<span class="listing-categories">Slides</span>
+</td>
+
+</tr>
+
+<tr data-index="4" data-categories="SGFuZG91dA==" data-listing-date-sort="1792998000000" data-listing-file-modified-sort="1792770505711" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="29" data-listing-word-count-sort="5642" data-listing-title-sort="Session 3 Handout: Plots That Tell the Truth" data-listing-filename-sort="W05L09_handout.qmd">
+<td>
+<span class="listing-date">Oct 26, 2026</span>
+</td>
+<td>
+<a href="./W05L09_handout.html" class="title listing-title">Session 3 Handout: Plots That Tell the Truth</a>
+</td>
+<td>
+<span class="listing-description">Full reference for ggplot2: the grammar of graphics, choosing geoms, scales and themes, auditing misleading plots, diagnostic plots, and storytelling, with Audit it boxes and practice</span>
+</td>
+<td>
+<span class="listing-categories">Handout</span>
+</td>
+
+</tr>
+
+<tr data-index="5" data-categories="U2xpZGVz" data-listing-date-sort="1792998000000" data-listing-file-modified-sort="1792769663423" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-word-count-sort="2547" data-listing-title-sort="Plots That Tell the Truth" data-listing-filename-sort="W04L08v2_slides.qmd">
+<td>
+<span class="listing-date">Oct 26, 2026</span>
+</td>
+<td>
+<a href="./W04L08v2_slides.html" class="title listing-title">Plots That Tell the Truth</a>
+</td>
+<td>
+<span class="listing-description">The grammar of graphics with ggplot2, choosing the right geom, auditing misleading plots, and plots as diagnostics and stories</span>
+</td>
+<td>
+<span class="listing-categories">Slides</span>
+</td>
+
+</tr>
+
+<tr data-index="6" data-categories="SGFuZG91dA==" data-listing-date-sort="1794816000000" data-listing-file-modified-sort="1792255169000" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="59" data-listing-title-sort="Session 5 Handout: Data Cleaning 1: Strings and Categories" data-listing-filename-sort="W08L15_handout.qmd">
+<td>
+<span class="listing-date">Nov 16, 2026</span>
+</td>
+<td>
+<a href="./W08L15_handout.html" class="title listing-title">Session 5 Handout: Data Cleaning 1: Strings and Categories</a>
+</td>
+<td>
+<span class="listing-description">Regex, stringr, Unicode handling, forcats, and janitor</span>
+</td>
+<td>
+<span class="listing-categories">Handout</span>
+</td>
+
+</tr>
+
+<tr data-index="7" data-categories="U2xpZGVz" data-listing-date-sort="1794816000000" data-listing-file-modified-sort="1792255169000" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="59" data-listing-title-sort="Session 5 Slides: Data Cleaning 1: Strings and Categories" data-listing-filename-sort="W08L15_slides.qmd">
+<td>
+<span class="listing-date">Nov 16, 2026</span>
+</td>
+<td>
+<a href="./W08L15_slides.html" class="title listing-title">Session 5 Slides: Data Cleaning 1: Strings and Categories</a>
+</td>
+<td>
+<span class="listing-description">Regex, stringr, Unicode handling, forcats, and janitor</span>
+</td>
+<td>
+<span class="listing-categories">Slides</span>
+</td>
+
+</tr>
+
+<tr data-index="8" data-categories="SGFuZG91dA==" data-listing-date-sort="1794988800000" data-listing-file-modified-sort="1792255169000" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="57" data-listing-title-sort="Session 6 Handout: Data Cleaning 2: Types, Anomalies, and Missingness" data-listing-filename-sort="W08L16_handout.qmd">
+<td>
+<span class="listing-date">Nov 18, 2026</span>
+</td>
+<td>
+<a href="./W08L16_handout.html" class="title listing-title">Session 6 Handout: Data Cleaning 2: Types, Anomalies, and Missingness</a>
+</td>
+<td>
+<span class="listing-description">Dates, sentinels, outliers, missing-data mechanisms, and validation rules</span>
+</td>
+<td>
+<span class="listing-categories">Handout</span>
+</td>
+
+</tr>
+
+<tr data-index="9" data-categories="U2xpZGVz" data-listing-date-sort="1794988800000" data-listing-file-modified-sort="1792255169000" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="57" data-listing-title-sort="Session 6 Slides: Data Cleaning 2: Types, Anomalies, and Missingness" data-listing-filename-sort="W08L16_slides.qmd">
+<td>
+<span class="listing-date">Nov 18, 2026</span>
+</td>
+<td>
+<a href="./W08L16_slides.html" class="title listing-title">Session 6 Slides: Data Cleaning 2: Types, Anomalies, and Missingness</a>
+</td>
+<td>
+<span class="listing-description">Dates, sentinels, outliers, missing-data mechanisms, and validation rules</span>
 </td>
 <td>
 <span class="listing-categories">Slides</span>
@@ -356,13 +458,14 @@ Categories
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

@@ -1,0 +1,2296 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="DTR">
+<meta name="dcterms.date" content="2026-10-26">
+<meta name="description" content="Full reference for ggplot2: the grammar of graphics, choosing geoms, scales and themes, auditing misleading plots, diagnostic plots, and storytelling, with Audit it boxes and practice">
+
+<title>Session 3 Handout: Plots That Tell the Truth – STAT 531: R in the AI Era</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-6a4c8a966d1042cf9c23855997bb8ab1.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+<style>
+
+      .quarto-title-block .quarto-title-banner h1,
+      .quarto-title-block .quarto-title-banner h2,
+      .quarto-title-block .quarto-title-banner h3,
+      .quarto-title-block .quarto-title-banner h4,
+      .quarto-title-block .quarto-title-banner h5,
+      .quarto-title-block .quarto-title-banner h6
+      {
+        color: #ffffff;
+      }
+
+      .quarto-title-block .quarto-title-banner {
+        color: #ffffff;
+background: #213921;
+      }
+</style>
+
+
+</head>
+
+<body class="floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">STAT 531: R in the AI Era</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default toc-left page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Session 3 Handout: Plots That Tell the Truth</h1>
+            <p class="subtitle lead">Reference companion to the Data Vis Session slides</p>
+                  <div>
+        <div class="description">
+          Full reference for ggplot2: the grammar of graphics, choosing geoms, scales and themes, auditing misleading plots, diagnostic plots, and storytelling, with Audit it boxes and practice
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">Handout</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>DTR </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">October 26, 2026</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Contents</h2>
+   
+  <ul class="collapse">
+  <li><a href="#how-to-use-this-handout" id="toc-how-to-use-this-handout" class="nav-link active" data-scroll-target="#how-to-use-this-handout"><span class="header-section-number">1</span> How to use this handout</a></li>
+  <li><a href="#why-plot-at-all" id="toc-why-plot-at-all" class="nav-link" data-scroll-target="#why-plot-at-all"><span class="header-section-number">2</span> Why plot at all?</a></li>
+  <li><a href="#the-grammar-of-graphics" id="toc-the-grammar-of-graphics" class="nav-link" data-scroll-target="#the-grammar-of-graphics"><span class="header-section-number">3</span> The grammar of graphics</a>
+  <ul class="collapse">
+  <li><a href="#build-one-plot-layer-by-layer" id="toc-build-one-plot-layer-by-layer" class="nav-link" data-scroll-target="#build-one-plot-layer-by-layer"><span class="header-section-number">3.1</span> Build one plot, layer by layer</a></li>
+  <li><a href="#mapping-vs-setting" id="toc-mapping-vs-setting" class="nav-link" data-scroll-target="#mapping-vs-setting"><span class="header-section-number">3.2</span> Mapping vs setting</a></li>
+  <li><a href="#which-aesthetic-for-which-variable" id="toc-which-aesthetic-for-which-variable" class="nav-link" data-scroll-target="#which-aesthetic-for-which-variable"><span class="header-section-number">3.3</span> Which aesthetic for which variable?</a></li>
+  <li><a href="#plots-are-objects" id="toc-plots-are-objects" class="nav-link" data-scroll-target="#plots-are-objects"><span class="header-section-number">3.4</span> Plots are objects</a></li>
+  </ul></li>
+  <li><a href="#choosing-a-geom-from-the-question" id="toc-choosing-a-geom-from-the-question" class="nav-link" data-scroll-target="#choosing-a-geom-from-the-question"><span class="header-section-number">4</span> Choosing a geom from the question</a>
+  <ul class="collapse">
+  <li><a href="#one-number-histograms-and-densities" id="toc-one-number-histograms-and-densities" class="nav-link" data-scroll-target="#one-number-histograms-and-densities"><span class="header-section-number">4.1</span> One number: histograms and densities</a></li>
+  <li><a href="#a-number-across-groups-boxplots" id="toc-a-number-across-groups-boxplots" class="nav-link" data-scroll-target="#a-number-across-groups-boxplots"><span class="header-section-number">4.2</span> A number across groups: boxplots</a></li>
+  <li><a href="#counts-geom_bar-vs-geom_col" id="toc-counts-geom_bar-vs-geom_col" class="nav-link" data-scroll-target="#counts-geom_bar-vs-geom_col"><span class="header-section-number">4.3</span> Counts: <code>geom_bar()</code> vs <code>geom_col()</code></a></li>
+  <li><a href="#position-stacked-dodged-and-filled-bars" id="toc-position-stacked-dodged-and-filled-bars" class="nav-link" data-scroll-target="#position-stacked-dodged-and-filled-bars"><span class="header-section-number">4.4</span> Position: stacked, dodged, and filled bars</a></li>
+  <li><a href="#two-numbers-overplotting" id="toc-two-numbers-overplotting" class="nav-link" data-scroll-target="#two-numbers-overplotting"><span class="header-section-number">4.5</span> Two numbers: overplotting</a></li>
+  <li><a href="#change-over-time-lines" id="toc-change-over-time-lines" class="nav-link" data-scroll-target="#change-over-time-lines"><span class="header-section-number">4.6</span> Change over time: lines</a></li>
+  <li><a href="#facets-small-multiples" id="toc-facets-small-multiples" class="nav-link" data-scroll-target="#facets-small-multiples"><span class="header-section-number">4.7</span> Facets: small multiples</a></li>
+  </ul></li>
+  <li><a href="#scales-labels-and-themes" id="toc-scales-labels-and-themes" class="nav-link" data-scroll-target="#scales-labels-and-themes"><span class="header-section-number">5</span> Scales, labels, and themes</a>
+  <ul class="collapse">
+  <li><a href="#labels" id="toc-labels" class="nav-link" data-scroll-target="#labels"><span class="header-section-number">5.1</span> Labels</a></li>
+  <li><a href="#position-scales-breaks-limits-labels-logs" id="toc-position-scales-breaks-limits-labels-logs" class="nav-link" data-scroll-target="#position-scales-breaks-limits-labels-logs"><span class="header-section-number">5.2</span> Position scales: breaks, limits, labels, logs</a></li>
+  <li><a href="#color-scales" id="toc-color-scales" class="nav-link" data-scroll-target="#color-scales"><span class="header-section-number">5.3</span> Color scales</a></li>
+  <li><a href="#legends" id="toc-legends" class="nav-link" data-scroll-target="#legends"><span class="header-section-number">5.4</span> Legends</a></li>
+  <li><a href="#themes-and-saving" id="toc-themes-and-saving" class="nav-link" data-scroll-target="#themes-and-saving"><span class="header-section-number">5.5</span> Themes and saving</a></li>
+  </ul></li>
+  <li><a href="#auditing-plots-honest-by-design" id="toc-auditing-plots-honest-by-design" class="nav-link" data-scroll-target="#auditing-plots-honest-by-design"><span class="header-section-number">6</span> Auditing plots: honest by design</a>
+  <ul class="collapse">
+  <li><a href="#truncated-bar-axes" id="toc-truncated-bar-axes" class="nav-link" data-scroll-target="#truncated-bar-axes"><span class="header-section-number">6.1</span> Truncated bar axes</a></li>
+  <li><a href="#averages-without-sizes" id="toc-averages-without-sizes" class="nav-link" data-scroll-target="#averages-without-sizes"><span class="header-section-number">6.2</span> Averages without sizes</a></li>
+  <li><a href="#bin-width-changes-the-story" id="toc-bin-width-changes-the-story" class="nav-link" data-scroll-target="#bin-width-changes-the-story"><span class="header-section-number">6.3</span> Bin width changes the story</a></li>
+  <li><a href="#other-things-to-look-for" id="toc-other-things-to-look-for" class="nav-link" data-scroll-target="#other-things-to-look-for"><span class="header-section-number">6.4</span> Other things to look for</a></li>
+  </ul></li>
+  <li><a href="#plots-as-diagnostics" id="toc-plots-as-diagnostics" class="nav-link" data-scroll-target="#plots-as-diagnostics"><span class="header-section-number">7</span> Plots as diagnostics</a>
+  <ul class="collapse">
+  <li><a href="#distributions-outliers-and-impossible-values" id="toc-distributions-outliers-and-impossible-values" class="nav-link" data-scroll-target="#distributions-outliers-and-impossible-values"><span class="header-section-number">7.1</span> Distributions: outliers and impossible values</a></li>
+  <li><a href="#missing-data-how-much-and-where" id="toc-missing-data-how-much-and-where" class="nav-link" data-scroll-target="#missing-data-how-much-and-where"><span class="header-section-number">7.2</span> Missing data: how much, and where?</a></li>
+  <li><a href="#missing-for-whom-subgroup-comparison" id="toc-missing-for-whom-subgroup-comparison" class="nav-link" data-scroll-target="#missing-for-whom-subgroup-comparison"><span class="header-section-number">7.3</span> Missing for whom? Subgroup comparison</a></li>
+  <li><a href="#relationships-does-the-data-agree-with-itself" id="toc-relationships-does-the-data-agree-with-itself" class="nav-link" data-scroll-target="#relationships-does-the-data-agree-with-itself"><span class="header-section-number">7.4</span> Relationships: does the data agree with itself?</a></li>
+  </ul></li>
+  <li><a href="#from-chart-to-message" id="toc-from-chart-to-message" class="nav-link" data-scroll-target="#from-chart-to-message"><span class="header-section-number">8</span> From chart to message</a>
+  <ul class="collapse">
+  <li><a href="#an-example-step-by-step" id="toc-an-example-step-by-step" class="nav-link" data-scroll-target="#an-example-step-by-step"><span class="header-section-number">8.1</span> An example, step by step</a></li>
+  <li><a href="#annotations-and-direct-labels" id="toc-annotations-and-direct-labels" class="nav-link" data-scroll-target="#annotations-and-direct-labels"><span class="header-section-number">8.2</span> Annotations and direct labels</a></li>
+  </ul></li>
+  <li><a href="#practice-problems" id="toc-practice-problems" class="nav-link" data-scroll-target="#practice-problems"><span class="header-section-number">9</span> Practice problems</a></li>
+  <li><a href="#appendix-a-older-ggplot2-code-you-may-still-see" id="toc-appendix-a-older-ggplot2-code-you-may-still-see" class="nav-link" data-scroll-target="#appendix-a-older-ggplot2-code-you-may-still-see"><span class="header-section-number">10</span> Appendix A: Older ggplot2 code you may still see</a></li>
+  <li><a href="#appendix-b-helpful-add-on-packages" id="toc-appendix-b-helpful-add-on-packages" class="nav-link" data-scroll-target="#appendix-b-helpful-add-on-packages"><span class="header-section-number">11</span> Appendix B: Helpful add-on packages</a></li>
+  <li><a href="#appendix-c-quick-reference" id="toc-appendix-c-quick-reference" class="nav-link" data-scroll-target="#appendix-c-quick-reference"><span class="header-section-number">12</span> Appendix C: Quick reference</a></li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+<section id="how-to-use-this-handout" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> How to use this handout</h1>
+<p>The slides move fast. This handout is the slow, complete version: read it before class, and return to it when you audit a plot.</p>
+<p>As in the earlier sessions, <strong>Audit it</strong> boxes show mistakes that an AI assistant (or a human) could easily make. For plots there is a new kind of mistake: the code runs without error, and the picture is still misleading.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="The Audit Loop, for plots">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>The Audit Loop, for plots
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>Read</strong> the code.</li>
+<li><strong>Run</strong> it, and <strong>look</strong> at the plot with the data in mind.</li>
+<li><strong>Restate</strong> what the plot claims in plain English.</li>
+<li><strong>Refine</strong> it or <strong>Reject</strong> it: axis, sample sizes, order, color, labels.</li>
+</ol>
+</div>
+</div>
+<p><strong>Setup.</strong> Every example uses <code>movies.csv</code> (<a href="data/movies.csv">download</a>). The packages come with <code>tidyverse</code>: <code>ggplot2</code> (plots), <code>forcats</code> (ordering categories), and <code>scales</code> (axis labels).</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>movies <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/movies.csv"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="why-plot-at-all" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Why plot at all?</h1>
+<p>Summaries compress a dataset into a few numbers. Different datasets can share the same numbers.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># anscombe is a small dataset that ships with R</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>anscombe_long <span class="ot">&lt;-</span> anscombe <span class="sc">|&gt;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">everything</span>(), <span class="at">names_to =</span> <span class="fu">c</span>(<span class="st">".value"</span>, <span class="st">"set"</span>), <span class="at">names_pattern =</span> <span class="st">"(.)(.)"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>anscombe_long <span class="sc">|&gt;</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">mean_x =</span> <span class="fu">mean</span>(x), <span class="at">mean_y =</span> <span class="fu">mean</span>(y), <span class="at">sd_y =</span> <span class="fu">sd</span>(y), <span class="at">cor =</span> <span class="fu">cor</span>(x, y), <span class="at">.by =</span> set)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 4 x 5
+#&gt;   set   mean_x mean_y  sd_y   cor
+#&gt;   &lt;chr&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+#&gt; 1 1          9   7.50  2.03 0.816
+#&gt; 2 2          9   7.50  2.03 0.816
+#&gt; 3 3          9   7.5   2.03 0.816
+#&gt; 4 4          9   7.50  2.03 0.817</code></pre>
+</div>
+</div>
+<p>All four sets have the same means, nearly the same spread, and the same correlation (about 0.82). Now look:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(anscombe_long, <span class="fu">aes</span>(x, y)) <span class="sc">+</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> set, <span class="at">nrow =</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>One is a clean line, one is a curve, one has an outlier, and one is vertical stripes with a single leverage point. The same straight-line summary is the right description of only the first.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Key idea">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Key idea
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A plot is a <strong>test</strong> of a summary. Before you trust a mean, a correlation, or a model, plot the data it came from.</p>
+</div>
+</div>
+</section>
+<section id="the-grammar-of-graphics" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> The grammar of graphics</h1>
+<p><code>ggplot2</code> builds a plot from independent pieces, joined with <code>+</code>:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Piece</th>
+<th style="text-align: left;">Question it answers</th>
+<th style="text-align: left;">Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>Data</strong></td>
+<td style="text-align: left;">Which table?</td>
+<td style="text-align: left;"><code>movies</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Aesthetics</strong></td>
+<td style="text-align: left;">Which columns go where?</td>
+<td style="text-align: left;"><code>x</code>, <code>y</code>, <code>color</code>, <code>fill</code>, <code>size</code>, <code>shape</code>, <code>alpha</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Geom</strong></td>
+<td style="text-align: left;">What shape is drawn?</td>
+<td style="text-align: left;"><code>geom_point()</code>, <code>geom_bar()</code>, <code>geom_line()</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Scales</strong></td>
+<td style="text-align: left;">How do values map to positions and colors?</td>
+<td style="text-align: left;"><code>scale_x_log10()</code>, <code>scale_color_viridis_d()</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Facets</strong></td>
+<td style="text-align: left;">One panel or many?</td>
+<td style="text-align: left;"><code>facet_wrap()</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Labels and theme</strong></td>
+<td style="text-align: left;">How does it read?</td>
+<td style="text-align: left;"><code>labs()</code>, <code>theme_minimal()</code></td>
+</tr>
+</tbody>
+</table>
+<section id="build-one-plot-layer-by-layer" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="build-one-plot-layer-by-layer"><span class="header-section-number">3.1</span> Build one plot, layer by layer</h2>
+<p>Start with the canvas: data and aesthetics only.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(movies, <span class="fu">aes</span>(<span class="at">x =</span> imdb_rating, <span class="at">y =</span> audience_score))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The axes exist because <code>ggplot2</code> looked at the columns, but nothing is drawn. Add a geom:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(movies, <span class="fu">aes</span>(<span class="at">x =</span> imdb_rating, <span class="at">y =</span> audience_score)) <span class="sc">+</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Add a second layer. Both layers <strong>inherit</strong> <code>x</code> and <code>y</code> from the first line.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(movies, <span class="fu">aes</span>(<span class="at">x =</span> imdb_rating, <span class="at">y =</span> audience_score)) <span class="sc">+</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><code>geom_smooth()</code> fits a trend. <code>method = "lm"</code> is a straight line. The default (<code>method = "loess"</code>) is a flexible curve. <code>se = FALSE</code> hides the uncertainty band; leave it on when you want to show how sure the trend is.</p>
+<p>You can also write the data into the pipeline:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> imdb_rating, <span class="at">y =</span> audience_score)) <span class="sc">+</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Pipe, then plus">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Pipe, then plus
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Inside a pipeline, the <strong>pipe</strong> <code>|&gt;</code> passes data into <code>ggplot()</code>. After that, layers are joined with <strong><code>+</code></strong>. A common AI mistake is to use <code>|&gt;</code> between layers (or <code>+</code> between data steps).</p>
+</div>
+</div>
+</section>
+<section id="mapping-vs-setting" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="mapping-vs-setting"><span class="header-section-number">3.2</span> Mapping vs setting</h2>
+<p>This is the most important idea in the grammar.</p>
+<ul>
+<li><strong>Inside <code>aes()</code></strong>: the property <strong>depends on the data</strong>. A legend is created.</li>
+<li><strong>Outside <code>aes()</code></strong>: one <strong>fixed value</strong> for every element. No legend.</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Mapped: color depends on a column</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(movies, <span class="fu">aes</span>(<span class="at">x =</span> imdb_rating, <span class="at">y =</span> audience_score)) <span class="sc">+</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> title_type))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Set: every point is the same fixed color, size, and transparency</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(movies, <span class="fu">aes</span>(<span class="at">x =</span> imdb_rating, <span class="at">y =</span> audience_score)) <span class="sc">+</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color =</span> <span class="st">"#6d8d24"</span>, <span class="at">size =</span> <span class="dv">2</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled" title="Audit it: a color name inside aes()">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Audit it: a color name inside aes()
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(movies, <span class="fu">aes</span>(<span class="at">x =</span> imdb_rating, <span class="at">y =</span> audience_score)) <span class="sc">+</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> <span class="st">"blue"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The points are <strong>not</strong> blue, and there is a legend entry called “blue”. Inside <code>aes()</code>, <code>"blue"</code> is just a text label for a (single) category, so <code>ggplot2</code> assigns it the first default palette color. To get blue points, set the color <strong>outside</strong> <code>aes()</code>: <code>geom_point(color = "blue")</code>.</p>
+</div>
+</div>
+</section>
+<section id="which-aesthetic-for-which-variable" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="which-aesthetic-for-which-variable"><span class="header-section-number">3.3</span> Which aesthetic for which variable?</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Aesthetic</th>
+<th style="text-align: left;">Works well for</th>
+<th style="text-align: left;">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>x</code>, <code>y</code> (position)</td>
+<td style="text-align: left;">numbers, ordered categories</td>
+<td style="text-align: left;">The most accurate encoding. Use it for what matters most.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>color</code></td>
+<td style="text-align: left;">a few categories, or a continuous gradient</td>
+<td style="text-align: left;">Limit to about 5 categories</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>fill</code></td>
+<td style="text-align: left;">the inside of bars, boxes, densities</td>
+<td style="text-align: left;"><code>color</code> is the outline for these</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>shape</code></td>
+<td style="text-align: left;">2 to 4 categories</td>
+<td style="text-align: left;">Hard to read for more</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>size</code></td>
+<td style="text-align: left;">a number, roughly</td>
+<td style="text-align: left;">Readers compare sizes poorly</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>alpha</code></td>
+<td style="text-align: left;">overlap, or a number</td>
+<td style="text-align: left;">Transparency</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>linetype</code></td>
+<td style="text-align: left;">a few categories of lines</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>group</code></td>
+<td style="text-align: left;">which points belong to the same line</td>
+<td style="text-align: left;">Often needed with <code>geom_line()</code></td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-tip callout-titled" title="Key idea">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Key idea
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Put the variable that matters most on a <strong>position</strong> (x or y). Use color and size for secondary variables.</p>
+</div>
+</div>
+</section>
+<section id="plots-are-objects" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="plots-are-objects"><span class="header-section-number">3.4</span> Plots are objects</h2>
+<p>Save a plot in a name and keep adding layers.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(movies, <span class="fu">aes</span>(<span class="at">x =</span> imdb_rating, <span class="at">y =</span> audience_score)) <span class="sc">+</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">color =</span> <span class="st">"#6d8d24"</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>p <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Audience scores track IMDB ratings"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Nothing is displayed when you assign (<code>p &lt;- ...</code>). Type <code>p</code> or add layers to see it. This is the best way to try several versions of a plot.</p>
+</section>
+</section>
+<section id="choosing-a-geom-from-the-question" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Choosing a geom from the question</h1>
+<p>Start from the question you want the plot to answer.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Question</th>
+<th style="text-align: left;">Geom</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">How is one number <strong>distributed</strong>?</td>
+<td style="text-align: left;"><code>geom_histogram()</code>, <code>geom_density()</code>, <code>geom_boxplot()</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">How does a number <strong>differ across groups</strong>?</td>
+<td style="text-align: left;"><code>geom_boxplot()</code>, <code>geom_jitter()</code>, <code>geom_col()</code> of a summary</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">How <strong>many</strong> in each category?</td>
+<td style="text-align: left;"><code>geom_bar()</code> (counts rows), <code>geom_col()</code> (uses a column)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">How do <strong>two numbers</strong> relate?</td>
+<td style="text-align: left;"><code>geom_point()</code>, <code>geom_smooth()</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">How does a number <strong>change over time</strong>?</td>
+<td style="text-align: left;"><code>geom_line()</code></td>
+</tr>
+</tbody>
+</table>
+<section id="one-number-histograms-and-densities" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="one-number-histograms-and-densities"><span class="header-section-number">4.1</span> One number: histograms and densities</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(movies, <span class="fu">aes</span>(<span class="at">x =</span> audience_score)) <span class="sc">+</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">5</span>, <span class="at">fill =</span> <span class="st">"#6d8d24"</span>, <span class="at">color =</span> <span class="st">"white"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Each bar counts the movies in a bin. <code>binwidth = 5</code> means a bin spans 5 points. The bin width is a <strong>choice</strong> that changes the look (see Section 6.3).</p>
+<p>A density plot is a smoothed version, and it works well for comparing groups, as long as the fills are see-through:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(movies, <span class="fu">aes</span>(<span class="at">x =</span> imdb_rating, <span class="at">fill =</span> audience_rating)) <span class="sc">+</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><code>audience_rating</code> is “Upright” (audience score at least 60) or “Spilled” (below 60).</p>
+</section>
+<section id="a-number-across-groups-boxplots" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="a-number-across-groups-boxplots"><span class="header-section-number">4.2</span> A number across groups: boxplots</h2>
+<p>A boxplot shows the median (the line), the middle half of the data (the box), and the range with outliers (whiskers and dots).</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(movies, <span class="fu">aes</span>(<span class="at">x =</span> audience_score, <span class="at">y =</span> genre)) <span class="sc">+</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The categories are in alphabetical order, which carries no meaning. <code>fct_reorder()</code> sorts them by a summary of the number (the median, by default):</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(movies, <span class="fu">aes</span>(<span class="at">x =</span> audience_score, <span class="at">y =</span> <span class="fu">fct_reorder</span>(genre, audience_score))) <span class="sc">+</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="cn">NULL</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Putting the long category names on the <strong>y axis</strong> avoids the overlapping labels you get on a crowded x axis.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Show the points too">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Show the points too
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A boxplot hides group sizes. Adding <code>geom_jitter()</code> on top shows every observation, so a group with 9 movies cannot masquerade as one with 300.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(movies, <span class="fu">aes</span>(<span class="at">x =</span> audience_score, <span class="at">y =</span> <span class="fu">fct_reorder</span>(genre, audience_score))) <span class="sc">+</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">outlier.shape =</span> <span class="cn">NA</span>) <span class="sc">+</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_jitter</span>(<span class="at">height =</span> <span class="fl">0.2</span>, <span class="at">alpha =</span> <span class="fl">0.3</span>) <span class="sc">+</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="cn">NULL</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><code>outlier.shape = NA</code> hides the boxplot’s own outlier dots, because the jittered points already show them.</p>
+</div>
+</div>
+</section>
+<section id="counts-geom_bar-vs-geom_col" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="counts-geom_bar-vs-geom_col"><span class="header-section-number">4.3</span> Counts: <code>geom_bar()</code> vs <code>geom_col()</code></h2>
+<p><code>geom_bar()</code> <strong>counts rows</strong> for you:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(movies, <span class="fu">aes</span>(<span class="at">y =</span> <span class="fu">fct_rev</span>(<span class="fu">fct_infreq</span>(genre)))) <span class="sc">+</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>() <span class="sc">+</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="cn">NULL</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><code>fct_infreq()</code> orders categories by how often they occur, and <code>fct_rev()</code> flips the order so the biggest bar is on top.</p>
+<p>If you <strong>already have</strong> the counts (or any summary) in a column, use <code>geom_col()</code>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>genre_counts <span class="ot">&lt;-</span> movies <span class="sc">|&gt;</span> <span class="fu">count</span>(genre)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(genre_counts, <span class="fu">aes</span>(<span class="at">x =</span> n, <span class="at">y =</span> <span class="fu">fct_reorder</span>(genre, n))) <span class="sc">+</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>() <span class="sc">+</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="cn">NULL</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled" title="Audit it: geom_bar() with a count column">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Audit it: geom_bar() with a count column
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(genre_counts, <span class="fu">aes</span>(<span class="at">x =</span> n, <span class="at">y =</span> genre)) <span class="sc">+</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-error">
+<pre><code>#&gt; Error in `geom_bar()`:
+#&gt; ! Problem while computing stat.
+#&gt; i Error occurred in the 1st layer.
+#&gt; Caused by error in `setup_params()`:
+#&gt; ! `stat_count()` must only have an x or y aesthetic.</code></pre>
+</div>
+</div>
+<p><code>geom_bar()</code> counts rows itself, so it refuses a variable already on the count axis. The fix is <code>geom_col()</code> (or <code>geom_bar(stat = "identity")</code>, the older spelling). The wording of the error message varies between versions of <code>ggplot2</code>.</p>
+</div>
+</div>
+</section>
+<section id="position-stacked-dodged-and-filled-bars" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="position-stacked-dodged-and-filled-bars"><span class="header-section-number">4.4</span> Position: stacked, dodged, and filled bars</h2>
+<p>When bars are split by a second variable, <code>position</code> decides how:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(movies, <span class="fu">aes</span>(<span class="at">y =</span> genre, <span class="at">fill =</span> audience_rating)) <span class="sc">+</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">position =</span> <span class="st">"stack"</span>) <span class="sc">+</span>      <span class="co"># the default: totals plus parts</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="cn">NULL</span>, <span class="at">title =</span> <span class="st">"stack"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(movies, <span class="fu">aes</span>(<span class="at">y =</span> genre, <span class="at">fill =</span> audience_rating)) <span class="sc">+</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">position =</span> <span class="st">"dodge"</span>) <span class="sc">+</span>      <span class="co"># side by side</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="cn">NULL</span>, <span class="at">title =</span> <span class="st">"dodge"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(movies, <span class="fu">aes</span>(<span class="at">y =</span> genre, <span class="at">fill =</span> audience_rating)) <span class="sc">+</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">position =</span> <span class="st">"fill"</span>) <span class="sc">+</span>       <span class="co"># every bar rescaled to 100%</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"proportion"</span>, <span class="at">y =</span> <span class="cn">NULL</span>, <span class="at">title =</span> <span class="st">"fill"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Use <strong>stack</strong> for totals, <strong>dodge</strong> to compare parts directly, and <strong>fill</strong> to compare shares. <code>fill</code> hides how big each group is, so say so or show <code>n</code>.</p>
+</section>
+<section id="two-numbers-overplotting" class="level2" data-number="4.5">
+<h2 data-number="4.5" class="anchored" data-anchor-id="two-numbers-overplotting"><span class="header-section-number">4.5</span> Two numbers: overplotting</h2>
+<p>When many points land on top of each other, density is hidden. Three fixes: transparency (<code>alpha</code>), jitter, or smaller points.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(movies, <span class="fu">aes</span>(<span class="at">x =</span> mpaa_rating, <span class="at">y =</span> audience_score)) <span class="sc">+</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Points at the same rating stack in a single line. <code>geom_jitter()</code> adds a small random shift so they spread out:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(movies, <span class="fu">aes</span>(<span class="at">x =</span> mpaa_rating, <span class="at">y =</span> audience_score)) <span class="sc">+</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_jitter</span>(<span class="at">width =</span> <span class="fl">0.2</span>, <span class="at">height =</span> <span class="dv">0</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Jitter changes only the <strong>drawing</strong>, not the data. Keep <code>height = 0</code> when the vertical value must stay exact.</p>
+</section>
+<section id="change-over-time-lines" class="level2" data-number="4.6">
+<h2 data-number="4.6" class="anchored" data-anchor-id="change-over-time-lines"><span class="header-section-number">4.6</span> Change over time: lines</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(thtr_rel_year) <span class="sc">|&gt;</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> thtr_rel_year, <span class="at">y =</span> n)) <span class="sc">+</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Summarize first, then plot the small table. With several lines in one plot, you need a <code>group</code> (or a <code>color</code>) so <code>ggplot2</code> knows which points to connect:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(genre <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Drama"</span>, <span class="st">"Comedy"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(thtr_rel_year, genre) <span class="sc">|&gt;</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> thtr_rel_year, <span class="at">y =</span> n, <span class="at">color =</span> genre)) <span class="sc">+</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled" title="Audit it: a line with no group">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Audit it: a line with no group
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Without <code>color</code> or <code>group</code>, <code>geom_line()</code> would try to connect <strong>all</strong> points in x order into one zigzag line across both genres. If a line chart looks like a saw blade, the grouping is missing.</p>
+</div>
+</div>
+</section>
+<section id="facets-small-multiples" class="level2" data-number="4.7">
+<h2 data-number="4.7" class="anchored" data-anchor-id="facets-small-multiples"><span class="header-section-number">4.7</span> Facets: small multiples</h2>
+<p>Facets draw one panel per group, on the same scales. They are usually clearer than 11 colors.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(genre <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Drama"</span>, <span class="st">"Comedy"</span>, <span class="st">"Documentary"</span>, <span class="st">"Horror"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> imdb_rating, <span class="at">y =</span> audience_score)) <span class="sc">+</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> genre)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-27-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li><code>facet_wrap(~ genre)</code> wraps panels into a grid.</li>
+<li><code>facet_grid(rows = vars(a), cols = vars(b))</code> makes a grid from two variables.</li>
+<li><code>scales = "free"</code> lets each panel have its own axes. That helps with different ranges, but it makes <strong>panels harder to compare</strong>, so use it knowingly.</li>
+</ul>
+</section>
+</section>
+<section id="scales-labels-and-themes" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Scales, labels, and themes</h1>
+<section id="labels" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="labels"><span class="header-section-number">5.1</span> Labels</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>p <span class="sc">+</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Audience scores track IMDB ratings"</span>,</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"651 movies released 1970 to 2014"</span>,</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"IMDB rating (0 to 10)"</span>,</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Audience score (0 to 100)"</span>,</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">"Source: movies.csv (IMDB and Rotten Tomatoes)"</span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-28-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Good labels name the <strong>units</strong> and the <strong>source</strong>. Defaults such as <code>imdb_num_votes</code> are for you, not for your reader.</p>
+</section>
+<section id="position-scales-breaks-limits-labels-logs" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="position-scales-breaks-limits-labels-logs"><span class="header-section-number">5.2</span> Position scales: breaks, limits, labels, logs</h2>
+<p>Position scales are named <code>scale_x_*()</code> and <code>scale_y_*()</code>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(movies, <span class="fu">aes</span>(<span class="at">x =</span> imdb_num_votes, <span class="at">y =</span> audience_score)) <span class="sc">+</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">color =</span> <span class="st">"#6d8d24"</span>) <span class="sc">+</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_log10</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_comma</span>()) <span class="sc">+</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"IMDB votes (log scale)"</span>, <span class="at">y =</span> <span class="st">"Audience score"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-29-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><code>imdb_num_votes</code> is heavily skewed: a few movies have hundreds of thousands of votes. On a log scale equal distances mean equal <strong>ratios</strong>, which spreads out the crowd. <strong>Always say when an axis is logged.</strong></p>
+<p>Useful label helpers from the <code>scales</code> package:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Helper</th>
+<th style="text-align: left;">Example result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>scales::label_comma()</code></td>
+<td style="text-align: left;">1,000,000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>scales::label_percent()</code></td>
+<td style="text-align: left;">25% (for a proportion such as 0.25)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>scales::label_dollar()</code></td>
+<td style="text-align: left;">$1,500</td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(genre) <span class="sc">|&gt;</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">share =</span> n <span class="sc">/</span> <span class="fu">sum</span>(n)) <span class="sc">|&gt;</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> share, <span class="at">y =</span> <span class="fu">fct_reorder</span>(genre, share))) <span class="sc">+</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">fill =</span> <span class="st">"#6d8d24"</span>) <span class="sc">+</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_percent</span>()) <span class="sc">+</span></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Share of movies"</span>, <span class="at">y =</span> <span class="cn">NULL</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-30-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled" title="Audit it: zooming with limits deletes data">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Audit it: zooming with limits deletes data
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>ylim()</code>, <code>xlim()</code>, and <code>scale_*_continuous(limits = ...)</code> <strong>remove</strong> data outside the range before anything is computed. <code>coord_cartesian(xlim = , ylim = )</code> only <strong>zooms</strong> the view.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>by_rating <span class="ot">&lt;-</span> movies <span class="sc">|&gt;</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">avg =</span> <span class="fu">mean</span>(audience_score), <span class="at">n =</span> <span class="fu">n</span>(), <span class="at">.by =</span> mpaa_rating)</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(by_rating, <span class="fu">aes</span>(<span class="at">x =</span> mpaa_rating, <span class="at">y =</span> avg)) <span class="sc">+</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>() <span class="sc">+</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylim</span>(<span class="dv">60</span>, <span class="dv">80</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>#&gt; Warning: Removed 6 rows containing missing values or values outside the scale range
+#&gt; (`geom_col()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-31-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The warning says rows were removed. Bars below the limit vanish, and the rest are cut off. Reading a warning like this is part of the audit. If you really need to zoom, use <code>coord_cartesian()</code>, and even then think twice for bars (see Section 6.1).</p>
+</div>
+</div>
+</section>
+<section id="color-scales" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="color-scales"><span class="header-section-number">5.3</span> Color scales</h2>
+<p>The default palette is fine for exploration, but it is not always readable for everyone. About 1 in 12 men and 1 in 200 women have some form of color vision deficiency, and red versus green is the most common confusion.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(movies, <span class="fu">aes</span>(<span class="at">x =</span> imdb_rating, <span class="at">y =</span> audience_score, <span class="at">color =</span> mpaa_rating)) <span class="sc">+</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_viridis_d</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-32-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Scale</th>
+<th style="text-align: left;">Use for</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>scale_color_viridis_d()</code> / <code>scale_fill_viridis_d()</code></td>
+<td style="text-align: left;">discrete categories; readable in grayscale and for most color-blind viewers</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>scale_color_viridis_c()</code></td>
+<td style="text-align: left;">a continuous variable</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>scale_color_brewer(palette = "Set2")</code></td>
+<td style="text-align: left;">discrete categories (ColorBrewer palettes)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>scale_color_manual(values = c(...))</code></td>
+<td style="text-align: left;">colors you choose yourself</td>
+</tr>
+</tbody>
+</table>
+<p>A manual palette is easiest to control. These eight colors (the Okabe-Ito palette) were designed to be distinguishable by color-blind readers:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>okabe_ito <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"#E69F00"</span>, <span class="st">"#56B4E9"</span>, <span class="st">"#009E73"</span>, <span class="st">"#F0E442"</span>,</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>               <span class="st">"#0072B2"</span>, <span class="st">"#D55E00"</span>, <span class="st">"#CC79A7"</span>, <span class="st">"#000000"</span>)</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(genre <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Drama"</span>, <span class="st">"Comedy"</span>, <span class="st">"Documentary"</span>, <span class="st">"Horror"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> imdb_rating, <span class="at">y =</span> audience_score, <span class="at">color =</span> genre)) <span class="sc">+</span></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> okabe_ito)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-33-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Fewer colors, used on purpose">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Fewer colors, used on purpose
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The strongest color design is often <strong>gray plus one accent</strong>: mute everything except the group you want the reader to see (see Section 8).</p>
+</div>
+</div>
+</section>
+<section id="legends" class="level2" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="legends"><span class="header-section-number">5.4</span> Legends</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>p2 <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)   <span class="co"># "top", "bottom", "left", "right", "none"</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>p2 <span class="sc">+</span> <span class="fu">guides</span>(<span class="at">color =</span> <span class="fu">guide_legend</span>(<span class="at">title =</span> <span class="st">"MPAA rating"</span>))</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>p2 <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">color =</span> <span class="st">"MPAA rating"</span>)          <span class="co"># the simplest way to rename a legend</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Remove a legend that adds nothing with <code>legend.position = "none"</code>, for example when you have labeled the groups directly or in facet titles.</p>
+</section>
+<section id="themes-and-saving" class="level2" data-number="5.5">
+<h2 data-number="5.5" class="anchored" data-anchor-id="themes-and-saving"><span class="header-section-number">5.5</span> Themes and saving</h2>
+<p>A <strong>theme</strong> controls everything that is not data: background, gridlines, fonts.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>p <span class="sc">+</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">12</span>) <span class="sc">+</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-35-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><code>theme_minimal()</code>, <code>theme_bw()</code>, and <code>theme_classic()</code> change the whole look. <code>theme()</code> adjusts individual details, for example <code>theme(axis.text.x = element_text(angle = 45, hjust = 1))</code> for tilted labels. Use <code>base_size</code> to scale all text at once.</p>
+<p>Save a plot with <code>ggsave()</code>. Set the size and resolution yourself:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="st">"audience_vs_imdb.png"</span>, p, <span class="at">width =</span> <span class="dv">8</span>, <span class="at">height =</span> <span class="fl">4.5</span>, <span class="at">dpi =</span> <span class="dv">300</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>In a Quarto document, set figure size per chunk with <code>#| fig-width: 8</code> and <code>#| fig-height: 4</code>, and describe the figure for screen readers with <code>#| fig-alt: "Scatter plot of ..."</code>.</p>
+</section>
+</section>
+<section id="auditing-plots-honest-by-design" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Auditing plots: honest by design</h1>
+<p>An AI assistant optimizes for plotting code that <strong>runs</strong>. It does not know what you want to claim. The checks below catch the ways a correct plot can still mislead.</p>
+<section id="truncated-bar-axes" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="truncated-bar-axes"><span class="header-section-number">6.1</span> Truncated bar axes</h2>
+<p>A bar encodes its value by its <strong>length</strong>, so the baseline must be zero. Zooming a bar chart makes small differences look large.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(by_rating, <span class="fu">aes</span>(<span class="at">x =</span> mpaa_rating, <span class="at">y =</span> avg)) <span class="sc">+</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>() <span class="sc">+</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">50</span>, <span class="dv">80</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-37-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Here “Unrated” looks several times taller than “PG-13”, although 78.5 versus 56.7 is a ratio of about 1.4. There are three more problems: the order is alphabetical, nothing shows that NC-17 is the average of only <strong>2</strong> movies, and the label <code>avg</code> means nothing to a reader.</p>
+<p>An honest version starts at zero, sorts by value, shows <code>n</code>, and labels the axes:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(by_rating, <span class="fu">aes</span>(<span class="at">x =</span> avg, <span class="at">y =</span> <span class="fu">fct_reorder</span>(mpaa_rating, avg))) <span class="sc">+</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">fill =</span> <span class="st">"#6d8d24"</span>) <span class="sc">+</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"n = "</span>, n)), <span class="at">hjust =</span> <span class="sc">-</span><span class="fl">0.1</span>) <span class="sc">+</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">100</span>)) <span class="sc">+</span></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Average audience score (0 to 100)"</span>, <span class="at">y =</span> <span class="cn">NULL</span>,</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Average audience score by MPAA rating"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-38-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Points do not need a zero baseline">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Points do not need a zero baseline
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The zero-baseline rule is for <strong>bars</strong>. A dot or line chart encodes value by <strong>position</strong>, so zooming to the range of the data is fine, as long as the axis labels make it visible.</p>
+</div>
+</div>
+</section>
+<section id="averages-without-sizes" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="averages-without-sizes"><span class="header-section-number">6.2</span> Averages without sizes</h2>
+<p>A mean of 2 values and a mean of 300 values look identical in a bar. Always show or mention <code>n</code>, as above. For skewed data, a boxplot or the individual points (Section 4.2) say more than a mean.</p>
+</section>
+<section id="bin-width-changes-the-story" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="bin-width-changes-the-story"><span class="header-section-number">6.3</span> Bin width changes the story</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(movies, <span class="fu">aes</span>(<span class="at">x =</span> audience_score)) <span class="sc">+</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">25</span>, <span class="at">fill =</span> <span class="st">"#6d8d24"</span>, <span class="at">color =</span> <span class="st">"white"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-39-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(movies, <span class="fu">aes</span>(<span class="at">x =</span> audience_score)) <span class="sc">+</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">2</span>, <span class="at">fill =</span> <span class="st">"#6d8d24"</span>, <span class="at">color =</span> <span class="st">"white"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-40-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Wide bins hide the shape; very narrow bins add noise. Try several widths (or a density plot) before choosing one, and never choose a width because it makes your claim look better.</p>
+</section>
+<section id="other-things-to-look-for" class="level2" data-number="6.4">
+<h2 data-number="6.4" class="anchored" data-anchor-id="other-things-to-look-for"><span class="header-section-number">6.4</span> Other things to look for</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Problem</th>
+<th style="text-align: left;">What to check</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>Dual y axes</strong></td>
+<td style="text-align: left;">Two series on separate axes can be made to look correlated by choosing the scales. <code>ggplot2</code> makes this hard on purpose (<code>sec.axis</code> only supports a transformation of one axis). Be suspicious when an AI produces one.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Too many colors</strong></td>
+<td style="text-align: left;">More than about 5 categories force the reader to match dots to a legend. Facet, or highlight one group.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>3D and pie charts</strong></td>
+<td style="text-align: left;">Angles and areas are read poorly. A sorted bar chart is almost always better.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Area and size encodings</strong></td>
+<td style="text-align: left;">Doubling a radius quadruples the area. Prefer position.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Log axes</strong></td>
+<td style="text-align: left;">Is it labeled? Can your reader read it?</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Cherry-picked range</strong></td>
+<td style="text-align: left;">Does the x range exclude inconvenient years?</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Missing context</strong></td>
+<td style="text-align: left;">Units, date range, source, and sample size</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-tip callout-titled" title="Chart audit checklist">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Chart audit checklist
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>Axis</strong>: do bars start at zero? Is a zoom or log scale stated?</li>
+<li><strong>Size</strong>: is <code>n</code> visible for averages and proportions?</li>
+<li><strong>Order</strong>: is the order meaningful, not alphabetical?</li>
+<li><strong>Color</strong>: few colors, color-blind safe, used for a reason?</li>
+<li><strong>Labels</strong>: title says something, units, source?</li>
+<li><strong>Warnings</strong>: did R remove rows or drop values? Read every warning.</li>
+</ol>
+</div>
+</div>
+</section>
+</section>
+<section id="plots-as-diagnostics" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Plots as diagnostics</h1>
+<p>Before modeling or reporting, plots can find problems in the data. These plots are for <strong>you</strong>, not your reader, so they do not need to be pretty. They need to be fast, and they need to show something unexpected.</p>
+<section id="distributions-outliers-and-impossible-values" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="distributions-outliers-and-impossible-values"><span class="header-section-number">7.1</span> Distributions: outliers and impossible values</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(movies, <span class="fu">aes</span>(<span class="at">x =</span> runtime)) <span class="sc">+</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">10</span>, <span class="at">fill =</span> <span class="st">"#6d8d24"</span>, <span class="at">color =</span> <span class="st">"white"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-41-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>A single bar sits far to the right. Find it:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_max</span>(runtime, <span class="at">n =</span> <span class="dv">3</span>) <span class="sc">|&gt;</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(title, runtime, genre)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 3 x 3
+#&gt;   title                                              runtime genre             
+#&gt;   &lt;chr&gt;                                                &lt;dbl&gt; &lt;chr&gt;             
+#&gt; 1 Hotel Terminus: The Life and Times of Klaus Barbie     267 Documentary       
+#&gt; 2 The Godfather, Part II                                 202 Mystery &amp; Suspense
+#&gt; 3 Titanic                                                194 Drama</code></pre>
+</div>
+</div>
+<p>A 267-minute documentary (the 1988 film Hotel Terminus) is unusual but <strong>real</strong>. A plot <strong>flags</strong> a value; you decide whether it is an error, an outlier worth keeping, or a different kind of observation. Deleting it just because the plot looks better would be its own kind of dishonesty.</p>
+</section>
+<section id="missing-data-how-much-and-where" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="missing-data-how-much-and-where"><span class="header-section-number">7.2</span> Missing data: how much, and where?</h2>
+<p>Count the missing values per column (Session 2 tools), then plot the counts:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>missing_by_col <span class="ot">&lt;-</span> movies <span class="sc">|&gt;</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="fu">across</span>(<span class="fu">everything</span>(), <span class="sc">~</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(.x)))) <span class="sc">|&gt;</span></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">everything</span>(), <span class="at">names_to =</span> <span class="st">"column"</span>, <span class="at">values_to =</span> <span class="st">"n_missing"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(n_missing <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(missing_by_col, <span class="fu">aes</span>(<span class="at">x =</span> n_missing, <span class="at">y =</span> <span class="fu">fct_reorder</span>(column, n_missing))) <span class="sc">+</span></span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">fill =</span> <span class="st">"#6d8d24"</span>) <span class="sc">+</span></span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Missing values"</span>, <span class="at">y =</span> <span class="cn">NULL</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-43-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The three <code>dvd_rel_*</code> columns have the same count (8). That suggests they are missing for the <strong>same films</strong>. A <strong>tile plot</strong> of where the missing values are confirms it:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">row =</span> <span class="fu">row_number</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(row, studio, dvd_rel_year, dvd_rel_month, dvd_rel_day, actor5) <span class="sc">|&gt;</span></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="sc">-</span>row, is.na)) <span class="sc">|&gt;</span></span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="sc">-</span>row, <span class="at">names_to =</span> <span class="st">"column"</span>, <span class="at">values_to =</span> <span class="st">"is_missing"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> column, <span class="at">y =</span> row, <span class="at">fill =</span> is_missing)) <span class="sc">+</span></span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>() <span class="sc">+</span></span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"grey90"</span>, <span class="st">"#f68b1f"</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"present"</span>, <span class="st">"missing"</span>)) <span class="sc">+</span></span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="st">"Row number"</span>, <span class="at">fill =</span> <span class="cn">NULL</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-44-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The orange stripes in the three <code>dvd_rel_*</code> columns line up. Missingness that lines up usually has one <strong>cause</strong> (here, perhaps films never released on DVD). Missingness is a clue to understand, not just a nuisance to fix. The packages <code>naniar</code> and <code>visdat</code> produce ready-made versions of these plots (Appendix B).</p>
+</section>
+<section id="missing-for-whom-subgroup-comparison" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="missing-for-whom-subgroup-comparison"><span class="header-section-number">7.3</span> Missing for whom? Subgroup comparison</h2>
+<p>Is missingness spread evenly across groups?</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">n =</span> <span class="fu">n</span>(), <span class="at">n_no_dvd =</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(dvd_rel_year)),</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">pct_no_dvd =</span> <span class="fu">mean</span>(<span class="fu">is.na</span>(dvd_rel_year)), <span class="at">.by =</span> title_type)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 3 x 4
+#&gt;   title_type       n n_no_dvd pct_no_dvd
+#&gt;   &lt;chr&gt;        &lt;int&gt;    &lt;int&gt;      &lt;dbl&gt;
+#&gt; 1 Feature Film   591        6     0.0102
+#&gt; 2 Documentary     55        2     0.0364
+#&gt; 3 TV Movie         5        0     0</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">pct_no_dvd =</span> <span class="fu">mean</span>(<span class="fu">is.na</span>(dvd_rel_year)), <span class="at">n =</span> <span class="fu">n</span>(), <span class="at">.by =</span> title_type) <span class="sc">|&gt;</span></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> pct_no_dvd, <span class="at">y =</span> title_type)) <span class="sc">+</span></span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">fill =</span> <span class="st">"#6d8d24"</span>) <span class="sc">+</span></span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"n = "</span>, n)), <span class="at">hjust =</span> <span class="sc">-</span><span class="fl">0.1</span>) <span class="sc">+</span></span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_percent</span>(), <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.2</span>)) <span class="sc">+</span></span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Share with no DVD release year"</span>, <span class="at">y =</span> <span class="cn">NULL</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-46-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>With only 5 TV movies (and none missing), 55 documentaries (2 missing), and 591 feature films (6 missing), the percentages are small and based on very few cases. Always read a percentage together with its <code>n</code>.</p>
+</section>
+<section id="relationships-does-the-data-agree-with-itself" class="level2" data-number="7.4">
+<h2 data-number="7.4" class="anchored" data-anchor-id="relationships-does-the-data-agree-with-itself"><span class="header-section-number">7.4</span> Relationships: does the data agree with itself?</h2>
+<p>Two columns that should agree can be checked with a scatter plot and a reference line:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(movies, <span class="fu">aes</span>(<span class="at">x =</span> critics_score, <span class="at">y =</span> audience_score)) <span class="sc">+</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">slope =</span> <span class="dv">1</span>, <span class="at">intercept =</span> <span class="dv">0</span>, <span class="at">color =</span> <span class="st">"#f68b1f"</span>) <span class="sc">+</span></span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Critics score"</span>, <span class="at">y =</span> <span class="st">"Audience score"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-47-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Points above the orange line are movies audiences rated higher than critics did. Most of the cloud sits above or near it, so audiences are on average a little more generous. Unexpected structure, such as a hard edge or a vertical stripe, would suggest a data entry or coding issue.</p>
+</section>
+</section>
+<section id="from-chart-to-message" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> From chart to message</h1>
+<p>An <strong>exploratory</strong> plot helps you find something. An <strong>explanatory</strong> plot tells someone else what you found. The same data can be both, and the difference is design.</p>
+<section id="an-example-step-by-step" class="level2" data-number="8.1">
+<h2 data-number="8.1" class="anchored" data-anchor-id="an-example-step-by-step"><span class="header-section-number">8.1</span> An example, step by step</h2>
+<p>The question: do critics and audiences rate genres differently? First the numbers:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>gap <span class="ot">&lt;-</span> movies <span class="sc">|&gt;</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">critics =</span> <span class="fu">mean</span>(critics_score), <span class="at">audience =</span> <span class="fu">mean</span>(audience_score), <span class="at">.by =</span> genre) <span class="sc">|&gt;</span></span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">gap =</span> audience <span class="sc">-</span> critics)</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>gap <span class="sc">|&gt;</span> <span class="fu">arrange</span>(<span class="fu">desc</span>(gap))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 11 x 4
+#&gt;   genre                     critics audience   gap
+#&gt;   &lt;chr&gt;                       &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;
+#&gt; 1 Art House &amp; International    51.6     64   12.4 
+#&gt; 2 Action &amp; Adventure           41.4     53.8 12.4 
+#&gt; 3 Animation                    50.2     62.4 12.2 
+#&gt; 4 Comedy                       40.9     52.5 11.6 
+#&gt; 5 Musical &amp; Performing Arts    76.7     80.2  3.5 
+#&gt; 6 Drama                        62.2     65.3  3.13
+#&gt; # i 5 more rows</code></pre>
+</div>
+</div>
+<p><strong>Version 1: the default.</strong> It shows the data, but the reader has to do all the work.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>gap <span class="sc">|&gt;</span></span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">c</span>(critics, audience), <span class="at">names_to =</span> <span class="st">"source"</span>, <span class="at">values_to =</span> <span class="st">"score"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> score, <span class="at">y =</span> genre, <span class="at">color =</span> source)) <span class="sc">+</span></span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-49-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Version 2: sort by the finding.</strong> Connect each pair with a segment so the <strong>gap</strong> is the visible object.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(gap, <span class="fu">aes</span>(<span class="at">y =</span> <span class="fu">fct_reorder</span>(genre, gap))) <span class="sc">+</span></span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x =</span> critics, <span class="at">xend =</span> audience, <span class="at">yend =</span> genre), <span class="at">color =</span> <span class="st">"grey75"</span>, <span class="at">linewidth =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> critics), <span class="at">color =</span> <span class="st">"grey40"</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> audience), <span class="at">color =</span> <span class="st">"#213921"</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Average score"</span>, <span class="at">y =</span> <span class="cn">NULL</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-50-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Version 3: highlight the finding and say it in the title.</strong></p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>gap <span class="sc">|&gt;</span></span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">big =</span> gap <span class="sc">&gt;</span> <span class="dv">10</span>) <span class="sc">|&gt;</span></span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">y =</span> <span class="fu">fct_reorder</span>(genre, gap))) <span class="sc">+</span></span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x =</span> critics, <span class="at">xend =</span> audience, <span class="at">yend =</span> genre, <span class="at">color =</span> big),</span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>               <span class="at">linewidth =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> critics), <span class="at">color =</span> <span class="st">"grey40"</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb57-7"><a href="#cb57-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> audience), <span class="at">color =</span> <span class="st">"#213921"</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb57-8"><a href="#cb57-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"grey80"</span>, <span class="st">"#f68b1f"</span>), <span class="at">guide =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb57-9"><a href="#cb57-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Critics score four genres about 12 points below audiences"</span>,</span>
+<span id="cb57-10"><a href="#cb57-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"Grey dot: critics. Dark green dot: audience. Gaps over 10 points in orange."</span>,</span>
+<span id="cb57-11"><a href="#cb57-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Average score (0 to 100)"</span>, <span class="at">y =</span> <span class="cn">NULL</span>,</span>
+<span id="cb57-12"><a href="#cb57-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">caption =</span> <span class="st">"Source: movies.csv, 651 movies (IMDB and Rotten Tomatoes)"</span>) <span class="sc">+</span></span>
+<span id="cb57-13"><a href="#cb57-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">12</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-51-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>What changed: the <strong>title states the finding</strong>, <strong>one color</strong> carries the message, the order follows the gap, and the legend became a one-line subtitle. No data was altered.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Checklist for a plot that makes a point">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Checklist for a plot that makes a point
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>Title = finding</strong>, in a sentence (not “Critics vs audience by genre”).</li>
+<li><strong>One highlight</strong>; mute everything else.</li>
+<li><strong>Sort</strong> by what matters.</li>
+<li><strong>Label directly</strong> when you can, instead of using a legend.</li>
+<li><strong>Remove</strong> clutter: extra gridlines, borders, redundant legends.</li>
+<li><strong>Context</strong>: units, source, and the sample size.</li>
+<li><strong>Accessibility</strong>: color-blind safe, large enough text, alt text.</li>
+</ol>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled" title="Audit it: a headline the data cannot support">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Audit it: a headline the data cannot support
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>An AI may write a confident title such as “Critics hate comedies.” The plot shows an <strong>average</strong> difference of about 12 points across 87 comedies. It does not show that critics “hate” anything, or why they differ. Check that your title claims no more than the plot shows. Be careful with causal words (<em>because</em>, <em>drives</em>, <em>leads to</em>) in a title.</p>
+</div>
+</div>
+</section>
+<section id="annotations-and-direct-labels" class="level2" data-number="8.2">
+<h2 data-number="8.2" class="anchored" data-anchor-id="annotations-and-direct-labels"><span class="header-section-number">8.2</span> Annotations and direct labels</h2>
+<p><code>annotate()</code> adds a note at a position in data coordinates. <code>geom_text()</code> labels points from a column.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(thtr_rel_year) <span class="sc">|&gt;</span></span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> thtr_rel_year, <span class="at">y =</span> n)) <span class="sc">+</span></span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">color =</span> <span class="st">"grey50"</span>) <span class="sc">+</span></span>
+<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> <span class="sc">~</span> <span class="fu">slice_max</span>(.x, n, <span class="at">n =</span> <span class="dv">1</span>, <span class="at">with_ties =</span> <span class="cn">FALSE</span>), <span class="at">color =</span> <span class="st">"#f68b1f"</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="dv">2006</span>, <span class="at">y =</span> <span class="fl">35.5</span>, <span class="at">label =</span> <span class="st">"Peak: 33 movies in 2006 (and 2007)"</span>, <span class="at">hjust =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb58-7"><a href="#cb58-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Movies in the sample per release year"</span>, <span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="st">"Movies"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-52-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The highlighted point uses a <strong>function as the data</strong> for one layer (<code>data = ~ slice_max(.x, n, n = 1)</code>), so the label stays correct if the data changes. For many labels that would overlap, the <code>ggrepel</code> package (Appendix B) places them for you.</p>
+</section>
+</section>
+<section id="practice-problems" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> Practice problems</h1>
+<div class="problem">
+<p><strong>Problem 1: Mapping or setting?</strong> An AI wrote the code below to make “dark green” points. What is wrong, and how do you fix it?</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(movies, <span class="fu">aes</span>(<span class="at">x =</span> critics_score, <span class="at">y =</span> audience_score)) <span class="sc">+</span></span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> <span class="st">"darkgreen"</span>), <span class="at">alpha =</span> <span class="fl">0.5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Solution 1">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-15-contents" aria-controls="callout-15" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution 1
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-15" class="callout-15-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p><code>"darkgreen"</code> is inside <code>aes()</code>, so it is treated as a category label, not a color. The points get the default salmon color and a legend entry named <code>darkgreen</code>. Move the color outside <code>aes()</code>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(movies, <span class="fu">aes</span>(<span class="at">x =</span> critics_score, <span class="at">y =</span> audience_score)) <span class="sc">+</span></span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color =</span> <span class="st">"darkgreen"</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-54-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="problem">
+<p><strong>Problem 2: Pick the geom.</strong> Show how <code>imdb_rating</code> differs across <code>mpaa_rating</code>. Sort the categories by median rating, show every movie, and make it obvious that some ratings have very few movies.</p>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Solution 2">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-16-contents" aria-controls="callout-16" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution 2
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-16" class="callout-16-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(movies, <span class="fu">aes</span>(<span class="at">x =</span> imdb_rating, <span class="at">y =</span> <span class="fu">fct_reorder</span>(mpaa_rating, imdb_rating))) <span class="sc">+</span></span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">outlier.shape =</span> <span class="cn">NA</span>) <span class="sc">+</span></span>
+<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_jitter</span>(<span class="at">height =</span> <span class="fl">0.2</span>, <span class="at">alpha =</span> <span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb61-4"><a href="#cb61-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"IMDB rating"</span>, <span class="at">y =</span> <span class="cn">NULL</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-55-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The jittered points make the tiny NC-17 group (2 movies) and the small G group (19) visible. You could add <code>n</code> to the axis labels as a further step.</p>
+</div>
+</div>
+</div>
+<div class="problem">
+<p><strong>Problem 3: Fix the lying plot.</strong> An AI produced this plot of average <code>critics_score</code> by <code>genre</code>. List at least three problems, then rebuild it honestly.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>by_genre <span class="ot">&lt;-</span> movies <span class="sc">|&gt;</span> <span class="fu">summarize</span>(<span class="at">avg =</span> <span class="fu">mean</span>(critics_score), <span class="at">.by =</span> genre)</span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(by_genre, <span class="fu">aes</span>(genre, avg)) <span class="sc">+</span></span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>() <span class="sc">+</span></span>
+<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">35</span>, <span class="dv">90</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Solution 3">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-17-contents" aria-controls="callout-17" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution 3
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-17" class="callout-17-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Problems: the y axis starts at 35 (truncated bars), the genres are in alphabetical order, there is no <code>n</code> (Animation and Science Fiction &amp; Fantasy have only 9 movies each), long x labels will overlap, and the axis label is the column name <code>avg</code>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>by_genre <span class="ot">&lt;-</span> movies <span class="sc">|&gt;</span></span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">avg =</span> <span class="fu">mean</span>(critics_score), <span class="at">n =</span> <span class="fu">n</span>(), <span class="at">.by =</span> genre)</span>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(by_genre, <span class="fu">aes</span>(<span class="at">x =</span> avg, <span class="at">y =</span> <span class="fu">fct_reorder</span>(genre, avg))) <span class="sc">+</span></span>
+<span id="cb63-5"><a href="#cb63-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">fill =</span> <span class="st">"#6d8d24"</span>) <span class="sc">+</span></span>
+<span id="cb63-6"><a href="#cb63-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"n = "</span>, n)), <span class="at">hjust =</span> <span class="sc">-</span><span class="fl">0.1</span>) <span class="sc">+</span></span>
+<span id="cb63-7"><a href="#cb63-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">100</span>)) <span class="sc">+</span></span>
+<span id="cb63-8"><a href="#cb63-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Average critics score (0 to 100)"</span>, <span class="at">y =</span> <span class="cn">NULL</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-57-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="problem">
+<p><strong>Problem 4: Facets.</strong> For the four most common genres, show the relationship between <code>critics_score</code> (x) and <code>audience_score</code> (y) with a straight trend line in each panel. Is the relationship similar across genres?</p>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Solution 4">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-18-contents" aria-controls="callout-18" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution 4
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-18" class="callout-18-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>top4 <span class="ot">&lt;-</span> movies <span class="sc">|&gt;</span> <span class="fu">count</span>(genre, <span class="at">sort =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">4</span>) <span class="sc">|&gt;</span> <span class="fu">pull</span>(genre)</span>
+<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb64-4"><a href="#cb64-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(genre <span class="sc">%in%</span> top4) <span class="sc">|&gt;</span></span>
+<span id="cb64-5"><a href="#cb64-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> critics_score, <span class="at">y =</span> audience_score)) <span class="sc">+</span></span>
+<span id="cb64-6"><a href="#cb64-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb64-7"><a href="#cb64-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>, <span class="at">color =</span> <span class="st">"#f68b1f"</span>) <span class="sc">+</span></span>
+<span id="cb64-8"><a href="#cb64-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> genre)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-58-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The slopes look broadly similar: a higher critics score goes with a higher audience score in every genre. The plot shows association in these 651 movies, nothing about cause.</p>
+</div>
+</div>
+</div>
+<div class="problem">
+<p><strong>Problem 5: Missingness.</strong> Make a bar chart of the <strong>percentage</strong> of missing values in each column that has any, sorted from largest to smallest, with percentage labels on the axis. In one sentence, which column is the worst, and how large is the problem?</p>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Solution 5">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-19-contents" aria-controls="callout-19" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution 5
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-19" class="callout-19-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="fu">across</span>(<span class="fu">everything</span>(), <span class="sc">~</span> <span class="fu">mean</span>(<span class="fu">is.na</span>(.x)))) <span class="sc">|&gt;</span></span>
+<span id="cb65-3"><a href="#cb65-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">everything</span>(), <span class="at">names_to =</span> <span class="st">"column"</span>, <span class="at">values_to =</span> <span class="st">"pct_missing"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb65-4"><a href="#cb65-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(pct_missing <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb65-5"><a href="#cb65-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> pct_missing, <span class="at">y =</span> <span class="fu">fct_reorder</span>(column, pct_missing))) <span class="sc">+</span></span>
+<span id="cb65-6"><a href="#cb65-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">fill =</span> <span class="st">"#6d8d24"</span>) <span class="sc">+</span></span>
+<span id="cb65-7"><a href="#cb65-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_percent</span>(<span class="at">accuracy =</span> <span class="fl">0.1</span>)) <span class="sc">+</span></span>
+<span id="cb65-8"><a href="#cb65-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Missing"</span>, <span class="at">y =</span> <span class="cn">NULL</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-59-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><code>actor5</code> is the worst, but only about 2.3% of its values (15 of 651) are missing, so none of these columns has a large missing-data problem.</p>
+</div>
+</div>
+</div>
+<div class="problem">
+<p><strong>Problem 6: Make a point.</strong> Best Picture nominees (<code>best_pic_nom == "yes"</code>) are a small group. Make <strong>one</strong> plot that compares their audience scores with those of non-nominees, states a finding in its title, and makes the group sizes visible. Then say in a sentence what the plot does <strong>not</strong> show.</p>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Solution 6">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-20-contents" aria-controls="callout-20" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Solution 6
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-20" class="callout-20-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a>movies <span class="sc">|&gt;</span></span>
+<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">group =</span> <span class="fu">if_else</span>(best_pic_nom <span class="sc">==</span> <span class="st">"yes"</span>, <span class="st">"Best Picture nominees"</span>, <span class="st">"All other movies"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">group =</span> <span class="fu">paste0</span>(group, <span class="st">" (n = "</span>, <span class="fu">n</span>(), <span class="st">")"</span>), <span class="at">.by =</span> group) <span class="sc">|&gt;</span></span>
+<span id="cb66-4"><a href="#cb66-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> audience_score, <span class="at">y =</span> group)) <span class="sc">+</span></span>
+<span id="cb66-5"><a href="#cb66-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">outlier.shape =</span> <span class="cn">NA</span>, <span class="at">fill =</span> <span class="st">"grey90"</span>) <span class="sc">+</span></span>
+<span id="cb66-6"><a href="#cb66-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_jitter</span>(<span class="fu">aes</span>(<span class="at">color =</span> group), <span class="at">height =</span> <span class="fl">0.15</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb66-7"><a href="#cb66-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"grey50"</span>, <span class="st">"#f68b1f"</span>)) <span class="sc">+</span></span>
+<span id="cb66-8"><a href="#cb66-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Best Picture nominees have much higher audience scores"</span>,</span>
+<span id="cb66-9"><a href="#cb66-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Audience score (0 to 100)"</span>, <span class="at">y =</span> <span class="cn">NULL</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W05L09_handout_files/figure-html/unnamed-chunk-60-1.png" class="img-fluid figure-img" width="880"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The plot shows that nominees score higher on average (about 85 versus about 62) in this sample of 22 versus 629 movies. It does <strong>not</strong> show why: nominees may differ in budget, genre, or marketing, and audiences may have been influenced by the nomination itself.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="appendix-a-older-ggplot2-code-you-may-still-see" class="level1" data-number="10">
+<h1 data-number="10"><span class="header-section-number">10</span> Appendix A: Older ggplot2 code you may still see</h1>
+<p>AI assistants trained on older code still produce these. Many still run but print a deprecation message. Version details differ, so read the message that <strong>your</strong> version prints.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Older code</th>
+<th style="text-align: left;">Current approach</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>qplot(x, y, data = df)</code></td>
+<td style="text-align: left;"><code>ggplot(df, aes(x, y)) + geom_point()</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>aes_string("col")</code></td>
+<td style="text-align: left;"><code>aes(.data[["col"]])</code> or <code>aes(x = {{ var }})</code> in functions</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>geom_line(size = 1)</code></td>
+<td style="text-align: left;"><code>geom_line(linewidth = 1)</code> (<code>size</code> is for points and text)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>aes(y = ..count..)</code></td>
+<td style="text-align: left;"><code>aes(y = after_stat(count))</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>geom_bar(stat = "identity")</code></td>
+<td style="text-align: left;"><code>geom_col()</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>theme(legend.position = c(0.9, 0.2))</code></td>
+<td style="text-align: left;"><code>theme(legend.position = "inside", legend.position.inside = c(0.9, 0.2))</code> in recent versions</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>scale_x_continuous(trans = "log10")</code></td>
+<td style="text-align: left;"><code>scale_x_continuous(transform = "log10")</code> in recent versions, or <code>scale_x_log10()</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>gather()</code>, <code>spread()</code> before plotting</td>
+<td style="text-align: left;"><code>pivot_longer()</code>, <code>pivot_wider()</code></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="appendix-b-helpful-add-on-packages" class="level1" data-number="11">
+<h1 data-number="11"><span class="header-section-number">11</span> Appendix B: Helpful add-on packages</h1>
+<p>These are <strong>optional</strong> and are not installed with <code>tidyverse</code>. Install once with <code>install.packages("name")</code>. The code below is shown but not run in this handout.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ggrepel: labels that do not overlap</span></span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggrepel)</span>
+<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(gap, <span class="fu">aes</span>(<span class="at">x =</span> critics, <span class="at">y =</span> audience, <span class="at">label =</span> genre)) <span class="sc">+</span></span>
+<span id="cb67-4"><a href="#cb67-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb67-5"><a href="#cb67-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text_repel</span>()</span>
+<span id="cb67-6"><a href="#cb67-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-7"><a href="#cb67-7" aria-hidden="true" tabindex="-1"></a><span class="co"># patchwork: combine plots</span></span>
+<span id="cb67-8"><a href="#cb67-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb67-9"><a href="#cb67-9" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(movies, <span class="fu">aes</span>(audience_score)) <span class="sc">+</span> <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">5</span>)</span>
+<span id="cb67-10"><a href="#cb67-10" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(movies, <span class="fu">aes</span>(critics_score)) <span class="sc">+</span> <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">5</span>)</span>
+<span id="cb67-11"><a href="#cb67-11" aria-hidden="true" tabindex="-1"></a>p1 <span class="sc">+</span> p2        <span class="co"># side by side</span></span>
+<span id="cb67-12"><a href="#cb67-12" aria-hidden="true" tabindex="-1"></a>p1 <span class="sc">/</span> p2        <span class="co"># stacked</span></span>
+<span id="cb67-13"><a href="#cb67-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-14"><a href="#cb67-14" aria-hidden="true" tabindex="-1"></a><span class="co"># naniar and visdat: ready-made missing-data plots</span></span>
+<span id="cb67-15"><a href="#cb67-15" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(naniar)</span>
+<span id="cb67-16"><a href="#cb67-16" aria-hidden="true" tabindex="-1"></a><span class="fu">gg_miss_var</span>(movies)        <span class="co"># missing values per column</span></span>
+<span id="cb67-17"><a href="#cb67-17" aria-hidden="true" tabindex="-1"></a><span class="fu">vis_miss</span>(movies)           <span class="co"># every cell: present or missing</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="appendix-c-quick-reference" class="level1" data-number="12">
+<h1 data-number="12"><span class="header-section-number">12</span> Appendix C: Quick reference</h1>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The template</span></span>
+<span id="cb68-2"><a href="#cb68-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(data, <span class="fu">aes</span>(<span class="at">x =</span> xvar, <span class="at">y =</span> yvar, <span class="at">color =</span> groupvar)) <span class="sc">+</span>   <span class="co"># data and mappings</span></span>
+<span id="cb68-3"><a href="#cb68-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span>                        <span class="co"># geom; fixed settings OUTSIDE aes()</span></span>
+<span id="cb68-4"><a href="#cb68-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> panelvar) <span class="sc">+</span>                                   <span class="co"># small multiples</span></span>
+<span id="cb68-5"><a href="#cb68-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_log10</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_comma</span>()) <span class="sc">+</span>            <span class="co"># scales</span></span>
+<span id="cb68-6"><a href="#cb68-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_viridis_d</span>() <span class="sc">+</span></span>
+<span id="cb68-7"><a href="#cb68-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"State the finding"</span>, <span class="at">x =</span> <span class="st">"..."</span>, <span class="at">y =</span> <span class="st">"..."</span>,    <span class="co"># labels</span></span>
+<span id="cb68-8"><a href="#cb68-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">caption =</span> <span class="st">"Source: ..."</span>) <span class="sc">+</span></span>
+<span id="cb68-9"><a href="#cb68-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()                                            <span class="co"># theme</span></span>
+<span id="cb68-10"><a href="#cb68-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb68-11"><a href="#cb68-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Order categories</span></span>
+<span id="cb68-12"><a href="#cb68-12" aria-hidden="true" tabindex="-1"></a><span class="fu">fct_reorder</span>(genre, value)      <span class="co"># by another variable (median by default)</span></span>
+<span id="cb68-13"><a href="#cb68-13" aria-hidden="true" tabindex="-1"></a><span class="fu">fct_infreq</span>(genre)              <span class="co"># by frequency</span></span>
+<span id="cb68-14"><a href="#cb68-14" aria-hidden="true" tabindex="-1"></a><span class="fu">fct_rev</span>(genre)                 <span class="co"># reverse the order</span></span>
+<span id="cb68-15"><a href="#cb68-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb68-16"><a href="#cb68-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Bars</span></span>
+<span id="cb68-17"><a href="#cb68-17" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_bar</span>()                     <span class="co"># counts rows</span></span>
+<span id="cb68-18"><a href="#cb68-18" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_col</span>()                     <span class="co"># uses a column of heights</span></span>
+<span id="cb68-19"><a href="#cb68-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb68-20"><a href="#cb68-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Zoom vs delete</span></span>
+<span id="cb68-21"><a href="#cb68-21" aria-hidden="true" tabindex="-1"></a><span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(a, b))   <span class="co"># zoom only</span></span>
+<span id="cb68-22"><a href="#cb68-22" aria-hidden="true" tabindex="-1"></a><span class="fu">ylim</span>(a, b)                        <span class="co"># removes data outside the range</span></span>
+<span id="cb68-23"><a href="#cb68-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb68-24"><a href="#cb68-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Save</span></span>
+<span id="cb68-25"><a href="#cb68-25" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="st">"name.png"</span>, plot, <span class="at">width =</span> <span class="dv">8</span>, <span class="at">height =</span> <span class="fl">4.5</span>, <span class="at">dpi =</span> <span class="dv">300</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>STAT 531: Ethics and Practice of Data Science</p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

@@ -18,7 +18,7 @@
     "href": "index.html#sessions",
     "title": "R in the AI Era",
     "section": "Sessions",
-    "text": "Sessions\nNew sessions appear in the table below as they are published. Slides are for class and handouts are the detailed reference. Lab’s 2 and 3 instructions will be pushed into your team’s repo when the time comes.\n\n\n\n\n\n\nDate\n\n\n\nTitle\n\n\n\nDescription\n\n\n\nCategories\n\n\n\n\n\n\n\n\nOct 19, 2026\n\n\nSession 1 Handout: R Basics and Data Manipulation\n\n\nFull reference for R basics and the core dplyr verbs, with Audit it boxes and practice\n\n\nHandout\n\n\n\n\n\n\nOct 19, 2026\n\n\nYou Navigate, AI Drives\n\n\nDriver-navigator mindset, the Audit Loop, R essentials, and the first dplyr verbs\n\n\nSlides\n\n\n\n\n\n\nOct 21, 2026\n\n\nSession 2 Handout: Summarize, Combine, and Scale\n\n\nFull reference for grouped summaries, joins, pivots, and big data with arrow and Parquet, with Audit it boxes and practice\n\n\nHandout\n\n\n\n\n\n\nOct 21, 2026\n\n\nSummarize, Combine, and Scale\n\n\nGrouped summaries, joins with row-count checks, pivots, and big data with arrow and Parquet\n\n\nSlides\n\n\n\n\n\n\nNo matching items\n\nCourse datasets for in-class examples: movies.csv, studios.csv, movies.parquet"
+    "text": "Sessions\nNew sessions appear in the table below as they are published. Slides are for class and handouts are the detailed reference. Lab’s 2 and 3 instructions will be pushed into your team’s repo when the time comes.\n\n\n\n\n\n\nDate\n\n\n\nTitle\n\n\n\nDescription\n\n\n\nCategories\n\n\n\n\n\n\n\n\nOct 19, 2026\n\n\nSession 1 Handout: R Basics and Data Manipulation\n\n\nFull reference for R basics and the core dplyr verbs, with Audit it boxes and practice\n\n\nHandout\n\n\n\n\n\n\nOct 19, 2026\n\n\nYou Navigate, AI Drives\n\n\nDriver-navigator mindset, the Audit Loop, R essentials, and the first dplyr verbs\n\n\nSlides\n\n\n\n\n\n\nOct 21, 2026\n\n\nSession 2 Handout: Summarize, Combine, and Scale\n\n\nFull reference for grouped summaries, joins, pivots, and big data with arrow and Parquet, with Audit it boxes and practice\n\n\nHandout\n\n\n\n\n\n\nOct 21, 2026\n\n\nSummarize, Combine, and Scale\n\n\nGrouped summaries, joins with row-count checks, pivots, and big data with arrow and Parquet\n\n\nSlides\n\n\n\n\n\n\nOct 26, 2026\n\n\nSession 3 Handout: Plots That Tell the Truth\n\n\nFull reference for ggplot2: the grammar of graphics, choosing geoms, scales and themes, auditing misleading plots, diagnostic plots, and storytelling, with Audit it boxes and practice\n\n\nHandout\n\n\n\n\n\n\nOct 26, 2026\n\n\nPlots That Tell the Truth\n\n\nThe grammar of graphics with ggplot2, choosing the right geom, auditing misleading plots, and plots as diagnostics and stories\n\n\nSlides\n\n\n\n\n\n\nNov 16, 2026\n\n\nSession 5 Handout: Data Cleaning 1: Strings and Categories\n\n\nRegex, stringr, Unicode handling, forcats, and janitor\n\n\nHandout\n\n\n\n\n\n\nNov 16, 2026\n\n\nSession 5 Slides: Data Cleaning 1: Strings and Categories\n\n\nRegex, stringr, Unicode handling, forcats, and janitor\n\n\nSlides\n\n\n\n\n\n\nNov 18, 2026\n\n\nSession 6 Handout: Data Cleaning 2: Types, Anomalies, and Missingness\n\n\nDates, sentinels, outliers, missing-data mechanisms, and validation rules\n\n\nHandout\n\n\n\n\n\n\nNov 18, 2026\n\n\nSession 6 Slides: Data Cleaning 2: Types, Anomalies, and Missingness\n\n\nDates, sentinels, outliers, missing-data mechanisms, and validation rules\n\n\nSlides\n\n\n\n\n\n\nNo matching items\n\nCourse datasets for in-class examples: movies.csv, studios.csv, movies.parquet"
   },
   {
     "objectID": "W04L08_handout.html",
@@ -893,14 +893,14 @@
     "href": "W04L08_slides.html#top-movie-per-group-flex",
     "title": "Summarize, Combine, and Scale",
     "section": "Top movie per group (FLEX)",
-    "text": "Top movie per group (FLEX)\n\nmovies |&gt; slice_max(imdb_rating, n = 1, by = genre) |&gt; nrow()\n\n#&gt; [1] 12\n\nn_distinct(movies$genre)\n\n#&gt; [1] 11\n\n\n\n\nBug: 11 genres but 12 rows. Ties are kept. Add with_ties = FALSE for exactly one per genre.\n\n\nFLEX: skip if behind (saves about 2 min). Musical & Performing Arts has a tie at 7.9."
+    "text": "Top movie per group (FLEX)\n\nmovies |&gt; slice_max(imdb_rating, n = 1, by = genre) |&gt; nrow()\n\n#&gt; [1] 12\n\nn_distinct(movies$genre)\n\n#&gt; [1] 11\n\n\n\n\nBug: 11 genres but 12 rows. Ties are kept. Add with_ties = FALSE for exactly one per genre.\n\n\nFLEX: should get here at 00:21. Skip if behind (saves about 2 min). Musical & Performing Arts has a tie at 7.9."
   },
   {
     "objectID": "W04L08_slides.html#average-of-averages-flex",
     "href": "W04L08_slides.html#average-of-averages-flex",
     "title": "Summarize, Combine, and Scale",
     "section": "Average of averages (FLEX)",
-    "text": "Average of averages (FLEX)\n\ngenre_means &lt;- movies |&gt; summarize(avg = mean(audience_score), .by = genre)\n\nmean(genre_means$avg) # mean of the group means\n\n#&gt; [1] 61.85006\n\nmean(movies$audience_score) # the real overall mean\n\n#&gt; [1] 62.36252\n\n\n\n\nBug: the mean of group means weights a 9-film genre like a 305-film genre.\n\n\nFLEX: skip if behind (saves about 2 min). AI often does this when asked for “an overall average” after a grouped summary."
+    "text": "Average of averages (FLEX)\n\ngenre_means &lt;- movies |&gt; summarize(avg = mean(audience_score), .by = genre)\n\nmean(genre_means$avg) # mean of the group means\n\n#&gt; [1] 61.85006\n\nmean(movies$audience_score) # the real overall mean\n\n#&gt; [1] 62.36252\n\n\n\n\nBug: the mean of group means weights a 9-film genre like a 305-film genre.\n\n\nFLEX: should get here at 00:23. skip if behind (saves about 2 min). AI often does this when asked for “an overall average” after a grouped summary."
   },
   {
     "objectID": "W04L08_slides.html#read-a-whole-pipeline-aloud",
@@ -970,7 +970,7 @@
     "href": "W04L08_slides.html#different-key-names-flex",
     "title": "Summarize, Combine, and Scale",
     "section": "Different key names (FLEX)",
-    "text": "Different key names (FLEX)\n\nstudios_renamed &lt;- studios |&gt; rename(studio_name = studio)\n\nmovies |&gt;\n  left_join(studios_renamed, by = join_by(studio == studio_name)) |&gt;\n  nrow()\n\n#&gt; [1] 651\n\n\njoin_by(left_col == right_col) links columns with different names.\n\nFLEX: skip if behind (saves about 1.5 min)."
+    "text": "Different key names (FLEX)\n\nstudios_renamed &lt;- studios |&gt; rename(studio_name = studio)\n\nmovies |&gt;\n  left_join(studios_renamed, by = join_by(studio == studio_name)) |&gt;\n  nrow()\n\n#&gt; [1] 651\n\n\njoin_by(left_col == right_col) links columns with different names.\n\nFLEX: skip if later than 00:40 behind (saves about 1.5 min)."
   },
   {
     "objectID": "W04L08_slides.html#join-then-summarize",
@@ -1054,7 +1054,7 @@
     "href": "W04L08_slides.html#who-is-in-the-cast-flex",
     "title": "Summarize, Combine, and Scale",
     "section": "Who is in the cast? (FLEX)",
-    "text": "Who is in the cast? (FLEX)\n\nmovies |&gt;\n  pivot_longer(\n    starts_with(\"actor\"),\n    names_to = \"billing\",\n    values_to = \"actor\"\n  ) |&gt;\n  filter(!is.na(actor)) |&gt;\n  count(actor, sort = TRUE) |&gt;\n  head(5)\n\n#&gt; # A tibble: 5 x 2\n#&gt;   actor                 n\n#&gt;   &lt;chr&gt;             &lt;int&gt;\n#&gt; 1 Richard Gere          8\n#&gt; 2 Samuel L. Jackson     8\n#&gt; 3 Diane Keaton          7\n#&gt; 4 Helen Hunt            7\n#&gt; 5 Jamie Foxx            7\n\n\nstarts_with(\"actor\") picks actor1 to actor5.\n\nFLEX: skip if behind (saves about 2 min)."
+    "text": "Who is in the cast? (FLEX)\n\nmovies |&gt;\n  pivot_longer(\n    starts_with(\"actor\"),\n    names_to = \"billing\",\n    values_to = \"actor\"\n  ) |&gt;\n  filter(!is.na(actor)) |&gt;\n  count(actor, sort = TRUE) |&gt;\n  head(5)\n\n#&gt; # A tibble: 5 x 2\n#&gt;   actor                 n\n#&gt;   &lt;chr&gt;             &lt;int&gt;\n#&gt; 1 Richard Gere          8\n#&gt; 2 Samuel L. Jackson     8\n#&gt; 3 Diane Keaton          7\n#&gt; 4 Helen Hunt            7\n#&gt; 5 Jamie Foxx            7\n\n\nstarts_with(\"actor\") picks actor1 to actor5.\n\nFLEX: should get here at 00:22. skip if behind (saves about 2 min)."
   },
   {
     "objectID": "W04L08_slides.html#when-the-file-is-bigger-than-your-memory",
@@ -1174,5 +1174,537 @@
     "title": "Summarize, Combine, and Scale",
     "section": "Writing and reading Parquet",
     "text": "Writing and reading Parquet\n\nwrite_parquet(movies, \"data/movies.parquet\")\nmovies_pq &lt;- read_parquet(\"data/movies.parquet\") # reads fully into memory\n\nopen_dataset() is lazy. read_parquet() loads everything. For a folder of many Parquet files, point open_dataset() at the folder."
+  },
+  {
+    "objectID": "W05L09_handout.html",
+    "href": "W05L09_handout.html",
+    "title": "Session 3 Handout: Plots That Tell the Truth",
+    "section": "",
+    "text": "The slides move fast. This handout is the slow, complete version: read it before class, and return to it when you audit a plot.\nAs in the earlier sessions, Audit it boxes show mistakes that an AI assistant (or a human) could easily make. For plots there is a new kind of mistake: the code runs without error, and the picture is still misleading.\n\n\n\n\n\n\nNoteThe Audit Loop, for plots\n\n\n\n\nRead the code.\nRun it, and look at the plot with the data in mind.\nRestate what the plot claims in plain English.\nRefine it or Reject it: axis, sample sizes, order, color, labels.\n\n\n\nSetup. Every example uses movies.csv (download). The packages come with tidyverse: ggplot2 (plots), forcats (ordering categories), and scales (axis labels).\n\nlibrary(tidyverse)\nmovies &lt;- read_csv(\"data/movies.csv\")"
+  },
+  {
+    "objectID": "W05L09_handout.html#build-one-plot-layer-by-layer",
+    "href": "W05L09_handout.html#build-one-plot-layer-by-layer",
+    "title": "Session 3 Handout: Plots That Tell the Truth",
+    "section": "3.1 Build one plot, layer by layer",
+    "text": "3.1 Build one plot, layer by layer\nStart with the canvas: data and aesthetics only.\n\nggplot(movies, aes(x = imdb_rating, y = audience_score))\n\n\n\n\n\n\n\n\nThe axes exist because ggplot2 looked at the columns, but nothing is drawn. Add a geom:\n\nggplot(movies, aes(x = imdb_rating, y = audience_score)) +\n  geom_point()\n\n\n\n\n\n\n\n\nAdd a second layer. Both layers inherit x and y from the first line.\n\nggplot(movies, aes(x = imdb_rating, y = audience_score)) +\n  geom_point(alpha = 0.5) +\n  geom_smooth(method = \"lm\", se = FALSE)\n\n\n\n\n\n\n\n\ngeom_smooth() fits a trend. method = \"lm\" is a straight line. The default (method = \"loess\") is a flexible curve. se = FALSE hides the uncertainty band; leave it on when you want to show how sure the trend is.\nYou can also write the data into the pipeline:\n\nmovies |&gt;\n  ggplot(aes(x = imdb_rating, y = audience_score)) +\n  geom_point()\n\n\n\n\n\n\n\nNotePipe, then plus\n\n\n\nInside a pipeline, the pipe |&gt; passes data into ggplot(). After that, layers are joined with +. A common AI mistake is to use |&gt; between layers (or + between data steps)."
+  },
+  {
+    "objectID": "W05L09_handout.html#mapping-vs-setting",
+    "href": "W05L09_handout.html#mapping-vs-setting",
+    "title": "Session 3 Handout: Plots That Tell the Truth",
+    "section": "3.2 Mapping vs setting",
+    "text": "3.2 Mapping vs setting\nThis is the most important idea in the grammar.\n\nInside aes(): the property depends on the data. A legend is created.\nOutside aes(): one fixed value for every element. No legend.\n\n\n# Mapped: color depends on a column\nggplot(movies, aes(x = imdb_rating, y = audience_score)) +\n  geom_point(aes(color = title_type))\n\n\n\n\n\n\n\n\n\n# Set: every point is the same fixed color, size, and transparency\nggplot(movies, aes(x = imdb_rating, y = audience_score)) +\n  geom_point(color = \"#6d8d24\", size = 2, alpha = 0.5)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nWarningAudit it: a color name inside aes()\n\n\n\n\nggplot(movies, aes(x = imdb_rating, y = audience_score)) +\n  geom_point(aes(color = \"blue\"))\n\n\n\n\n\n\n\n\nThe points are not blue, and there is a legend entry called “blue”. Inside aes(), \"blue\" is just a text label for a (single) category, so ggplot2 assigns it the first default palette color. To get blue points, set the color outside aes(): geom_point(color = \"blue\")."
+  },
+  {
+    "objectID": "W05L09_handout.html#which-aesthetic-for-which-variable",
+    "href": "W05L09_handout.html#which-aesthetic-for-which-variable",
+    "title": "Session 3 Handout: Plots That Tell the Truth",
+    "section": "3.3 Which aesthetic for which variable?",
+    "text": "3.3 Which aesthetic for which variable?\n\n\n\n\n\n\n\n\nAesthetic\nWorks well for\nNotes\n\n\n\n\nx, y (position)\nnumbers, ordered categories\nThe most accurate encoding. Use it for what matters most.\n\n\ncolor\na few categories, or a continuous gradient\nLimit to about 5 categories\n\n\nfill\nthe inside of bars, boxes, densities\ncolor is the outline for these\n\n\nshape\n2 to 4 categories\nHard to read for more\n\n\nsize\na number, roughly\nReaders compare sizes poorly\n\n\nalpha\noverlap, or a number\nTransparency\n\n\nlinetype\na few categories of lines\n\n\n\ngroup\nwhich points belong to the same line\nOften needed with geom_line()\n\n\n\n\n\n\n\n\n\nTipKey idea\n\n\n\nPut the variable that matters most on a position (x or y). Use color and size for secondary variables."
+  },
+  {
+    "objectID": "W05L09_handout.html#plots-are-objects",
+    "href": "W05L09_handout.html#plots-are-objects",
+    "title": "Session 3 Handout: Plots That Tell the Truth",
+    "section": "3.4 Plots are objects",
+    "text": "3.4 Plots are objects\nSave a plot in a name and keep adding layers.\n\np &lt;- ggplot(movies, aes(x = imdb_rating, y = audience_score)) +\n  geom_point(alpha = 0.5, color = \"#6d8d24\")\n\np + labs(title = \"Audience scores track IMDB ratings\")\n\n\n\n\n\n\n\n\nNothing is displayed when you assign (p &lt;- ...). Type p or add layers to see it. This is the best way to try several versions of a plot."
+  },
+  {
+    "objectID": "W05L09_handout.html#one-number-histograms-and-densities",
+    "href": "W05L09_handout.html#one-number-histograms-and-densities",
+    "title": "Session 3 Handout: Plots That Tell the Truth",
+    "section": "4.1 One number: histograms and densities",
+    "text": "4.1 One number: histograms and densities\n\nggplot(movies, aes(x = audience_score)) +\n  geom_histogram(binwidth = 5, fill = \"#6d8d24\", color = \"white\")\n\n\n\n\n\n\n\n\nEach bar counts the movies in a bin. binwidth = 5 means a bin spans 5 points. The bin width is a choice that changes the look (see Section 6.3).\nA density plot is a smoothed version, and it works well for comparing groups, as long as the fills are see-through:\n\nggplot(movies, aes(x = imdb_rating, fill = audience_rating)) +\n  geom_density(alpha = 0.5)\n\n\n\n\n\n\n\n\naudience_rating is “Upright” (audience score at least 60) or “Spilled” (below 60)."
+  },
+  {
+    "objectID": "W05L09_handout.html#a-number-across-groups-boxplots",
+    "href": "W05L09_handout.html#a-number-across-groups-boxplots",
+    "title": "Session 3 Handout: Plots That Tell the Truth",
+    "section": "4.2 A number across groups: boxplots",
+    "text": "4.2 A number across groups: boxplots\nA boxplot shows the median (the line), the middle half of the data (the box), and the range with outliers (whiskers and dots).\n\nggplot(movies, aes(x = audience_score, y = genre)) +\n  geom_boxplot()\n\n\n\n\n\n\n\n\nThe categories are in alphabetical order, which carries no meaning. fct_reorder() sorts them by a summary of the number (the median, by default):\n\nggplot(movies, aes(x = audience_score, y = fct_reorder(genre, audience_score))) +\n  geom_boxplot() +\n  labs(y = NULL)\n\n\n\n\n\n\n\n\nPutting the long category names on the y axis avoids the overlapping labels you get on a crowded x axis.\n\n\n\n\n\n\nTipShow the points too\n\n\n\nA boxplot hides group sizes. Adding geom_jitter() on top shows every observation, so a group with 9 movies cannot masquerade as one with 300.\n\nggplot(movies, aes(x = audience_score, y = fct_reorder(genre, audience_score))) +\n  geom_boxplot(outlier.shape = NA) +\n  geom_jitter(height = 0.2, alpha = 0.3) +\n  labs(y = NULL)\n\n\n\n\n\n\n\n\noutlier.shape = NA hides the boxplot’s own outlier dots, because the jittered points already show them."
+  },
+  {
+    "objectID": "W05L09_handout.html#counts-geom_bar-vs-geom_col",
+    "href": "W05L09_handout.html#counts-geom_bar-vs-geom_col",
+    "title": "Session 3 Handout: Plots That Tell the Truth",
+    "section": "4.3 Counts: geom_bar() vs geom_col()",
+    "text": "4.3 Counts: geom_bar() vs geom_col()\ngeom_bar() counts rows for you:\n\nggplot(movies, aes(y = fct_rev(fct_infreq(genre)))) +\n  geom_bar() +\n  labs(y = NULL)\n\n\n\n\n\n\n\n\nfct_infreq() orders categories by how often they occur, and fct_rev() flips the order so the biggest bar is on top.\nIf you already have the counts (or any summary) in a column, use geom_col():\n\ngenre_counts &lt;- movies |&gt; count(genre)\n\nggplot(genre_counts, aes(x = n, y = fct_reorder(genre, n))) +\n  geom_col() +\n  labs(y = NULL)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nWarningAudit it: geom_bar() with a count column\n\n\n\n\nggplot(genre_counts, aes(x = n, y = genre)) +\n  geom_bar()\n\n#&gt; Error in `geom_bar()`:\n#&gt; ! Problem while computing stat.\n#&gt; i Error occurred in the 1st layer.\n#&gt; Caused by error in `setup_params()`:\n#&gt; ! `stat_count()` must only have an x or y aesthetic.\n\n\ngeom_bar() counts rows itself, so it refuses a variable already on the count axis. The fix is geom_col() (or geom_bar(stat = \"identity\"), the older spelling). The wording of the error message varies between versions of ggplot2."
+  },
+  {
+    "objectID": "W05L09_handout.html#position-stacked-dodged-and-filled-bars",
+    "href": "W05L09_handout.html#position-stacked-dodged-and-filled-bars",
+    "title": "Session 3 Handout: Plots That Tell the Truth",
+    "section": "4.4 Position: stacked, dodged, and filled bars",
+    "text": "4.4 Position: stacked, dodged, and filled bars\nWhen bars are split by a second variable, position decides how:\n\nggplot(movies, aes(y = genre, fill = audience_rating)) +\n  geom_bar(position = \"stack\") +      # the default: totals plus parts\n  labs(y = NULL, title = \"stack\")\n\n\n\n\n\n\n\n\n\nggplot(movies, aes(y = genre, fill = audience_rating)) +\n  geom_bar(position = \"dodge\") +      # side by side\n  labs(y = NULL, title = \"dodge\")\n\n\n\n\n\n\n\n\n\nggplot(movies, aes(y = genre, fill = audience_rating)) +\n  geom_bar(position = \"fill\") +       # every bar rescaled to 100%\n  labs(x = \"proportion\", y = NULL, title = \"fill\")\n\n\n\n\n\n\n\n\nUse stack for totals, dodge to compare parts directly, and fill to compare shares. fill hides how big each group is, so say so or show n."
+  },
+  {
+    "objectID": "W05L09_handout.html#two-numbers-overplotting",
+    "href": "W05L09_handout.html#two-numbers-overplotting",
+    "title": "Session 3 Handout: Plots That Tell the Truth",
+    "section": "4.5 Two numbers: overplotting",
+    "text": "4.5 Two numbers: overplotting\nWhen many points land on top of each other, density is hidden. Three fixes: transparency (alpha), jitter, or smaller points.\n\nggplot(movies, aes(x = mpaa_rating, y = audience_score)) +\n  geom_point()\n\n\n\n\n\n\n\n\nPoints at the same rating stack in a single line. geom_jitter() adds a small random shift so they spread out:\n\nggplot(movies, aes(x = mpaa_rating, y = audience_score)) +\n  geom_jitter(width = 0.2, height = 0, alpha = 0.5)\n\n\n\n\n\n\n\n\nJitter changes only the drawing, not the data. Keep height = 0 when the vertical value must stay exact."
+  },
+  {
+    "objectID": "W05L09_handout.html#change-over-time-lines",
+    "href": "W05L09_handout.html#change-over-time-lines",
+    "title": "Session 3 Handout: Plots That Tell the Truth",
+    "section": "4.6 Change over time: lines",
+    "text": "4.6 Change over time: lines\n\nmovies |&gt;\n  count(thtr_rel_year) |&gt;\n  ggplot(aes(x = thtr_rel_year, y = n)) +\n  geom_line() +\n  geom_point()\n\n\n\n\n\n\n\n\nSummarize first, then plot the small table. With several lines in one plot, you need a group (or a color) so ggplot2 knows which points to connect:\n\nmovies |&gt;\n  filter(genre %in% c(\"Drama\", \"Comedy\")) |&gt;\n  count(thtr_rel_year, genre) |&gt;\n  ggplot(aes(x = thtr_rel_year, y = n, color = genre)) +\n  geom_line()\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nWarningAudit it: a line with no group\n\n\n\nWithout color or group, geom_line() would try to connect all points in x order into one zigzag line across both genres. If a line chart looks like a saw blade, the grouping is missing."
+  },
+  {
+    "objectID": "W05L09_handout.html#facets-small-multiples",
+    "href": "W05L09_handout.html#facets-small-multiples",
+    "title": "Session 3 Handout: Plots That Tell the Truth",
+    "section": "4.7 Facets: small multiples",
+    "text": "4.7 Facets: small multiples\nFacets draw one panel per group, on the same scales. They are usually clearer than 11 colors.\n\nmovies |&gt;\n  filter(genre %in% c(\"Drama\", \"Comedy\", \"Documentary\", \"Horror\")) |&gt;\n  ggplot(aes(x = imdb_rating, y = audience_score)) +\n  geom_point(alpha = 0.5) +\n  geom_smooth(method = \"lm\", se = FALSE) +\n  facet_wrap(~ genre)\n\n\n\n\n\n\n\n\n\nfacet_wrap(~ genre) wraps panels into a grid.\nfacet_grid(rows = vars(a), cols = vars(b)) makes a grid from two variables.\nscales = \"free\" lets each panel have its own axes. That helps with different ranges, but it makes panels harder to compare, so use it knowingly."
+  },
+  {
+    "objectID": "W05L09_handout.html#labels",
+    "href": "W05L09_handout.html#labels",
+    "title": "Session 3 Handout: Plots That Tell the Truth",
+    "section": "5.1 Labels",
+    "text": "5.1 Labels\n\np +\n  labs(\n    title = \"Audience scores track IMDB ratings\",\n    subtitle = \"651 movies released 1970 to 2014\",\n    x = \"IMDB rating (0 to 10)\",\n    y = \"Audience score (0 to 100)\",\n    caption = \"Source: movies.csv (IMDB and Rotten Tomatoes)\"\n  )\n\n\n\n\n\n\n\n\nGood labels name the units and the source. Defaults such as imdb_num_votes are for you, not for your reader."
+  },
+  {
+    "objectID": "W05L09_handout.html#position-scales-breaks-limits-labels-logs",
+    "href": "W05L09_handout.html#position-scales-breaks-limits-labels-logs",
+    "title": "Session 3 Handout: Plots That Tell the Truth",
+    "section": "5.2 Position scales: breaks, limits, labels, logs",
+    "text": "5.2 Position scales: breaks, limits, labels, logs\nPosition scales are named scale_x_*() and scale_y_*().\n\nggplot(movies, aes(x = imdb_num_votes, y = audience_score)) +\n  geom_point(alpha = 0.5, color = \"#6d8d24\") +\n  scale_x_log10(labels = scales::label_comma()) +\n  labs(x = \"IMDB votes (log scale)\", y = \"Audience score\")\n\n\n\n\n\n\n\n\nimdb_num_votes is heavily skewed: a few movies have hundreds of thousands of votes. On a log scale equal distances mean equal ratios, which spreads out the crowd. Always say when an axis is logged.\nUseful label helpers from the scales package:\n\n\n\nHelper\nExample result\n\n\n\n\nscales::label_comma()\n1,000,000\n\n\nscales::label_percent()\n25% (for a proportion such as 0.25)\n\n\nscales::label_dollar()\n$1,500\n\n\n\n\nmovies |&gt;\n  count(genre) |&gt;\n  mutate(share = n / sum(n)) |&gt;\n  ggplot(aes(x = share, y = fct_reorder(genre, share))) +\n  geom_col(fill = \"#6d8d24\") +\n  scale_x_continuous(labels = scales::label_percent()) +\n  labs(x = \"Share of movies\", y = NULL)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nWarningAudit it: zooming with limits deletes data\n\n\n\nylim(), xlim(), and scale_*_continuous(limits = ...) remove data outside the range before anything is computed. coord_cartesian(xlim = , ylim = ) only zooms the view.\n\nby_rating &lt;- movies |&gt;\n  summarize(avg = mean(audience_score), n = n(), .by = mpaa_rating)\n\nggplot(by_rating, aes(x = mpaa_rating, y = avg)) +\n  geom_col() +\n  ylim(60, 80)\n\n#&gt; Warning: Removed 6 rows containing missing values or values outside the scale range\n#&gt; (`geom_col()`).\n\n\n\n\n\n\n\n\n\nThe warning says rows were removed. Bars below the limit vanish, and the rest are cut off. Reading a warning like this is part of the audit. If you really need to zoom, use coord_cartesian(), and even then think twice for bars (see Section 6.1)."
+  },
+  {
+    "objectID": "W05L09_handout.html#color-scales",
+    "href": "W05L09_handout.html#color-scales",
+    "title": "Session 3 Handout: Plots That Tell the Truth",
+    "section": "5.3 Color scales",
+    "text": "5.3 Color scales\nThe default palette is fine for exploration, but it is not always readable for everyone. About 1 in 12 men and 1 in 200 women have some form of color vision deficiency, and red versus green is the most common confusion.\n\nggplot(movies, aes(x = imdb_rating, y = audience_score, color = mpaa_rating)) +\n  geom_point(alpha = 0.7) +\n  scale_color_viridis_d()\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nScale\nUse for\n\n\n\n\nscale_color_viridis_d() / scale_fill_viridis_d()\ndiscrete categories; readable in grayscale and for most color-blind viewers\n\n\nscale_color_viridis_c()\na continuous variable\n\n\nscale_color_brewer(palette = \"Set2\")\ndiscrete categories (ColorBrewer palettes)\n\n\nscale_color_manual(values = c(...))\ncolors you choose yourself\n\n\n\nA manual palette is easiest to control. These eight colors (the Okabe-Ito palette) were designed to be distinguishable by color-blind readers:\n\nokabe_ito &lt;- c(\"#E69F00\", \"#56B4E9\", \"#009E73\", \"#F0E442\",\n               \"#0072B2\", \"#D55E00\", \"#CC79A7\", \"#000000\")\n\nmovies |&gt;\n  filter(genre %in% c(\"Drama\", \"Comedy\", \"Documentary\", \"Horror\")) |&gt;\n  ggplot(aes(x = imdb_rating, y = audience_score, color = genre)) +\n  geom_point(alpha = 0.7) +\n  scale_color_manual(values = okabe_ito)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nTipFewer colors, used on purpose\n\n\n\nThe strongest color design is often gray plus one accent: mute everything except the group you want the reader to see (see Section 8)."
+  },
+  {
+    "objectID": "W05L09_handout.html#legends",
+    "href": "W05L09_handout.html#legends",
+    "title": "Session 3 Handout: Plots That Tell the Truth",
+    "section": "5.4 Legends",
+    "text": "5.4 Legends\n\np2 + theme(legend.position = \"bottom\")   # \"top\", \"bottom\", \"left\", \"right\", \"none\"\np2 + guides(color = guide_legend(title = \"MPAA rating\"))\np2 + labs(color = \"MPAA rating\")          # the simplest way to rename a legend\n\nRemove a legend that adds nothing with legend.position = \"none\", for example when you have labeled the groups directly or in facet titles."
+  },
+  {
+    "objectID": "W05L09_handout.html#themes-and-saving",
+    "href": "W05L09_handout.html#themes-and-saving",
+    "title": "Session 3 Handout: Plots That Tell the Truth",
+    "section": "5.5 Themes and saving",
+    "text": "5.5 Themes and saving\nA theme controls everything that is not data: background, gridlines, fonts.\n\np +\n  theme_minimal(base_size = 12) +\n  theme(legend.position = \"bottom\")\n\n\n\n\n\n\n\n\ntheme_minimal(), theme_bw(), and theme_classic() change the whole look. theme() adjusts individual details, for example theme(axis.text.x = element_text(angle = 45, hjust = 1)) for tilted labels. Use base_size to scale all text at once.\nSave a plot with ggsave(). Set the size and resolution yourself:\n\nggsave(\"audience_vs_imdb.png\", p, width = 8, height = 4.5, dpi = 300)\n\nIn a Quarto document, set figure size per chunk with #| fig-width: 8 and #| fig-height: 4, and describe the figure for screen readers with #| fig-alt: \"Scatter plot of ...\"."
+  },
+  {
+    "objectID": "W05L09_handout.html#truncated-bar-axes",
+    "href": "W05L09_handout.html#truncated-bar-axes",
+    "title": "Session 3 Handout: Plots That Tell the Truth",
+    "section": "6.1 Truncated bar axes",
+    "text": "6.1 Truncated bar axes\nA bar encodes its value by its length, so the baseline must be zero. Zooming a bar chart makes small differences look large.\n\nggplot(by_rating, aes(x = mpaa_rating, y = avg)) +\n  geom_col() +\n  coord_cartesian(ylim = c(50, 80))\n\n\n\n\n\n\n\n\nHere “Unrated” looks several times taller than “PG-13”, although 78.5 versus 56.7 is a ratio of about 1.4. There are three more problems: the order is alphabetical, nothing shows that NC-17 is the average of only 2 movies, and the label avg means nothing to a reader.\nAn honest version starts at zero, sorts by value, shows n, and labels the axes:\n\nggplot(by_rating, aes(x = avg, y = fct_reorder(mpaa_rating, avg))) +\n  geom_col(fill = \"#6d8d24\") +\n  geom_text(aes(label = paste0(\"n = \", n)), hjust = -0.1) +\n  scale_x_continuous(limits = c(0, 100)) +\n  labs(x = \"Average audience score (0 to 100)\", y = NULL,\n       title = \"Average audience score by MPAA rating\")\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nNotePoints do not need a zero baseline\n\n\n\nThe zero-baseline rule is for bars. A dot or line chart encodes value by position, so zooming to the range of the data is fine, as long as the axis labels make it visible."
+  },
+  {
+    "objectID": "W05L09_handout.html#averages-without-sizes",
+    "href": "W05L09_handout.html#averages-without-sizes",
+    "title": "Session 3 Handout: Plots That Tell the Truth",
+    "section": "6.2 Averages without sizes",
+    "text": "6.2 Averages without sizes\nA mean of 2 values and a mean of 300 values look identical in a bar. Always show or mention n, as above. For skewed data, a boxplot or the individual points (Section 4.2) say more than a mean."
+  },
+  {
+    "objectID": "W05L09_handout.html#bin-width-changes-the-story",
+    "href": "W05L09_handout.html#bin-width-changes-the-story",
+    "title": "Session 3 Handout: Plots That Tell the Truth",
+    "section": "6.3 Bin width changes the story",
+    "text": "6.3 Bin width changes the story\n\nggplot(movies, aes(x = audience_score)) +\n  geom_histogram(binwidth = 25, fill = \"#6d8d24\", color = \"white\")\n\n\n\n\n\n\n\n\n\nggplot(movies, aes(x = audience_score)) +\n  geom_histogram(binwidth = 2, fill = \"#6d8d24\", color = \"white\")\n\n\n\n\n\n\n\n\nWide bins hide the shape; very narrow bins add noise. Try several widths (or a density plot) before choosing one, and never choose a width because it makes your claim look better."
+  },
+  {
+    "objectID": "W05L09_handout.html#other-things-to-look-for",
+    "href": "W05L09_handout.html#other-things-to-look-for",
+    "title": "Session 3 Handout: Plots That Tell the Truth",
+    "section": "6.4 Other things to look for",
+    "text": "6.4 Other things to look for\n\n\n\n\n\n\n\nProblem\nWhat to check\n\n\n\n\nDual y axes\nTwo series on separate axes can be made to look correlated by choosing the scales. ggplot2 makes this hard on purpose (sec.axis only supports a transformation of one axis). Be suspicious when an AI produces one.\n\n\nToo many colors\nMore than about 5 categories force the reader to match dots to a legend. Facet, or highlight one group.\n\n\n3D and pie charts\nAngles and areas are read poorly. A sorted bar chart is almost always better.\n\n\nArea and size encodings\nDoubling a radius quadruples the area. Prefer position.\n\n\nLog axes\nIs it labeled? Can your reader read it?\n\n\nCherry-picked range\nDoes the x range exclude inconvenient years?\n\n\nMissing context\nUnits, date range, source, and sample size\n\n\n\n\n\n\n\n\n\nTipChart audit checklist\n\n\n\n\nAxis: do bars start at zero? Is a zoom or log scale stated?\nSize: is n visible for averages and proportions?\nOrder: is the order meaningful, not alphabetical?\nColor: few colors, color-blind safe, used for a reason?\nLabels: title says something, units, source?\nWarnings: did R remove rows or drop values? Read every warning."
+  },
+  {
+    "objectID": "W05L09_handout.html#distributions-outliers-and-impossible-values",
+    "href": "W05L09_handout.html#distributions-outliers-and-impossible-values",
+    "title": "Session 3 Handout: Plots That Tell the Truth",
+    "section": "7.1 Distributions: outliers and impossible values",
+    "text": "7.1 Distributions: outliers and impossible values\n\nggplot(movies, aes(x = runtime)) +\n  geom_histogram(binwidth = 10, fill = \"#6d8d24\", color = \"white\")\n\n\n\n\n\n\n\n\nA single bar sits far to the right. Find it:\n\nmovies |&gt;\n  slice_max(runtime, n = 3) |&gt;\n  select(title, runtime, genre)\n\n#&gt; # A tibble: 3 x 3\n#&gt;   title                                              runtime genre             \n#&gt;   &lt;chr&gt;                                                &lt;dbl&gt; &lt;chr&gt;             \n#&gt; 1 Hotel Terminus: The Life and Times of Klaus Barbie     267 Documentary       \n#&gt; 2 The Godfather, Part II                                 202 Mystery & Suspense\n#&gt; 3 Titanic                                                194 Drama\n\n\nA 267-minute documentary (the 1988 film Hotel Terminus) is unusual but real. A plot flags a value; you decide whether it is an error, an outlier worth keeping, or a different kind of observation. Deleting it just because the plot looks better would be its own kind of dishonesty."
+  },
+  {
+    "objectID": "W05L09_handout.html#missing-data-how-much-and-where",
+    "href": "W05L09_handout.html#missing-data-how-much-and-where",
+    "title": "Session 3 Handout: Plots That Tell the Truth",
+    "section": "7.2 Missing data: how much, and where?",
+    "text": "7.2 Missing data: how much, and where?\nCount the missing values per column (Session 2 tools), then plot the counts:\n\nmissing_by_col &lt;- movies |&gt;\n  summarize(across(everything(), ~ sum(is.na(.x)))) |&gt;\n  pivot_longer(everything(), names_to = \"column\", values_to = \"n_missing\") |&gt;\n  filter(n_missing &gt; 0)\n\nggplot(missing_by_col, aes(x = n_missing, y = fct_reorder(column, n_missing))) +\n  geom_col(fill = \"#6d8d24\") +\n  labs(x = \"Missing values\", y = NULL)\n\n\n\n\n\n\n\n\nThe three dvd_rel_* columns have the same count (8). That suggests they are missing for the same films. A tile plot of where the missing values are confirms it:\n\nmovies |&gt;\n  mutate(row = row_number()) |&gt;\n  select(row, studio, dvd_rel_year, dvd_rel_month, dvd_rel_day, actor5) |&gt;\n  mutate(across(-row, is.na)) |&gt;\n  pivot_longer(-row, names_to = \"column\", values_to = \"is_missing\") |&gt;\n  ggplot(aes(x = column, y = row, fill = is_missing)) +\n  geom_tile() +\n  scale_fill_manual(values = c(\"grey90\", \"#f68b1f\"), labels = c(\"present\", \"missing\")) +\n  scale_y_reverse() +\n  labs(x = NULL, y = \"Row number\", fill = NULL)\n\n\n\n\n\n\n\n\nThe orange stripes in the three dvd_rel_* columns line up. Missingness that lines up usually has one cause (here, perhaps films never released on DVD). Missingness is a clue to understand, not just a nuisance to fix. The packages naniar and visdat produce ready-made versions of these plots (Appendix B)."
+  },
+  {
+    "objectID": "W05L09_handout.html#missing-for-whom-subgroup-comparison",
+    "href": "W05L09_handout.html#missing-for-whom-subgroup-comparison",
+    "title": "Session 3 Handout: Plots That Tell the Truth",
+    "section": "7.3 Missing for whom? Subgroup comparison",
+    "text": "7.3 Missing for whom? Subgroup comparison\nIs missingness spread evenly across groups?\n\nmovies |&gt;\n  summarize(n = n(), n_no_dvd = sum(is.na(dvd_rel_year)),\n            pct_no_dvd = mean(is.na(dvd_rel_year)), .by = title_type)\n\n#&gt; # A tibble: 3 x 4\n#&gt;   title_type       n n_no_dvd pct_no_dvd\n#&gt;   &lt;chr&gt;        &lt;int&gt;    &lt;int&gt;      &lt;dbl&gt;\n#&gt; 1 Feature Film   591        6     0.0102\n#&gt; 2 Documentary     55        2     0.0364\n#&gt; 3 TV Movie         5        0     0\n\n\n\nmovies |&gt;\n  summarize(pct_no_dvd = mean(is.na(dvd_rel_year)), n = n(), .by = title_type) |&gt;\n  ggplot(aes(x = pct_no_dvd, y = title_type)) +\n  geom_col(fill = \"#6d8d24\") +\n  geom_text(aes(label = paste0(\"n = \", n)), hjust = -0.1) +\n  scale_x_continuous(labels = scales::label_percent(), limits = c(0, 0.2)) +\n  labs(x = \"Share with no DVD release year\", y = NULL)\n\n\n\n\n\n\n\n\nWith only 5 TV movies (and none missing), 55 documentaries (2 missing), and 591 feature films (6 missing), the percentages are small and based on very few cases. Always read a percentage together with its n."
+  },
+  {
+    "objectID": "W05L09_handout.html#relationships-does-the-data-agree-with-itself",
+    "href": "W05L09_handout.html#relationships-does-the-data-agree-with-itself",
+    "title": "Session 3 Handout: Plots That Tell the Truth",
+    "section": "7.4 Relationships: does the data agree with itself?",
+    "text": "7.4 Relationships: does the data agree with itself?\nTwo columns that should agree can be checked with a scatter plot and a reference line:\n\nggplot(movies, aes(x = critics_score, y = audience_score)) +\n  geom_point(alpha = 0.5) +\n  geom_abline(slope = 1, intercept = 0, color = \"#f68b1f\") +\n  labs(x = \"Critics score\", y = \"Audience score\")\n\n\n\n\n\n\n\n\nPoints above the orange line are movies audiences rated higher than critics did. Most of the cloud sits above or near it, so audiences are on average a little more generous. Unexpected structure, such as a hard edge or a vertical stripe, would suggest a data entry or coding issue."
+  },
+  {
+    "objectID": "W05L09_handout.html#an-example-step-by-step",
+    "href": "W05L09_handout.html#an-example-step-by-step",
+    "title": "Session 3 Handout: Plots That Tell the Truth",
+    "section": "8.1 An example, step by step",
+    "text": "8.1 An example, step by step\nThe question: do critics and audiences rate genres differently? First the numbers:\n\ngap &lt;- movies |&gt;\n  summarize(critics = mean(critics_score), audience = mean(audience_score), .by = genre) |&gt;\n  mutate(gap = audience - critics)\n\ngap |&gt; arrange(desc(gap))\n\n#&gt; # A tibble: 11 x 4\n#&gt;   genre                     critics audience   gap\n#&gt;   &lt;chr&gt;                       &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;\n#&gt; 1 Art House & International    51.6     64   12.4 \n#&gt; 2 Action & Adventure           41.4     53.8 12.4 \n#&gt; 3 Animation                    50.2     62.4 12.2 \n#&gt; 4 Comedy                       40.9     52.5 11.6 \n#&gt; 5 Musical & Performing Arts    76.7     80.2  3.5 \n#&gt; 6 Drama                        62.2     65.3  3.13\n#&gt; # i 5 more rows\n\n\nVersion 1: the default. It shows the data, but the reader has to do all the work.\n\ngap |&gt;\n  pivot_longer(c(critics, audience), names_to = \"source\", values_to = \"score\") |&gt;\n  ggplot(aes(x = score, y = genre, color = source)) +\n  geom_point(size = 3)\n\n\n\n\n\n\n\n\nVersion 2: sort by the finding. Connect each pair with a segment so the gap is the visible object.\n\nggplot(gap, aes(y = fct_reorder(genre, gap))) +\n  geom_segment(aes(x = critics, xend = audience, yend = genre), color = \"grey75\", linewidth = 1.5) +\n  geom_point(aes(x = critics), color = \"grey40\", size = 3) +\n  geom_point(aes(x = audience), color = \"#213921\", size = 3) +\n  labs(x = \"Average score\", y = NULL)\n\n\n\n\n\n\n\n\nVersion 3: highlight the finding and say it in the title.\n\ngap |&gt;\n  mutate(big = gap &gt; 10) |&gt;\n  ggplot(aes(y = fct_reorder(genre, gap))) +\n  geom_segment(aes(x = critics, xend = audience, yend = genre, color = big),\n               linewidth = 1.5) +\n  geom_point(aes(x = critics), color = \"grey40\", size = 3) +\n  geom_point(aes(x = audience), color = \"#213921\", size = 3) +\n  scale_color_manual(values = c(\"grey80\", \"#f68b1f\"), guide = \"none\") +\n  labs(title = \"Critics score four genres about 12 points below audiences\",\n       subtitle = \"Grey dot: critics. Dark green dot: audience. Gaps over 10 points in orange.\",\n       x = \"Average score (0 to 100)\", y = NULL,\n       caption = \"Source: movies.csv, 651 movies (IMDB and Rotten Tomatoes)\") +\n  theme_minimal(base_size = 12)\n\n\n\n\n\n\n\n\nWhat changed: the title states the finding, one color carries the message, the order follows the gap, and the legend became a one-line subtitle. No data was altered.\n\n\n\n\n\n\nTipChecklist for a plot that makes a point\n\n\n\n\nTitle = finding, in a sentence (not “Critics vs audience by genre”).\nOne highlight; mute everything else.\nSort by what matters.\nLabel directly when you can, instead of using a legend.\nRemove clutter: extra gridlines, borders, redundant legends.\nContext: units, source, and the sample size.\nAccessibility: color-blind safe, large enough text, alt text.\n\n\n\n\n\n\n\n\n\nWarningAudit it: a headline the data cannot support\n\n\n\nAn AI may write a confident title such as “Critics hate comedies.” The plot shows an average difference of about 12 points across 87 comedies. It does not show that critics “hate” anything, or why they differ. Check that your title claims no more than the plot shows. Be careful with causal words (because, drives, leads to) in a title."
+  },
+  {
+    "objectID": "W05L09_handout.html#annotations-and-direct-labels",
+    "href": "W05L09_handout.html#annotations-and-direct-labels",
+    "title": "Session 3 Handout: Plots That Tell the Truth",
+    "section": "8.2 Annotations and direct labels",
+    "text": "8.2 Annotations and direct labels\nannotate() adds a note at a position in data coordinates. geom_text() labels points from a column.\n\nmovies |&gt;\n  count(thtr_rel_year) |&gt;\n  ggplot(aes(x = thtr_rel_year, y = n)) +\n  geom_line(color = \"grey50\") +\n  geom_point(data = ~ slice_max(.x, n, n = 1, with_ties = FALSE), color = \"#f68b1f\", size = 3) +\n  annotate(\"text\", x = 2006, y = 35.5, label = \"Peak: 33 movies in 2006 (and 2007)\", hjust = 1) +\n  labs(title = \"Movies in the sample per release year\", x = NULL, y = \"Movies\")\n\n\n\n\n\n\n\n\nThe highlighted point uses a function as the data for one layer (data = ~ slice_max(.x, n, n = 1)), so the label stays correct if the data changes. For many labels that would overlap, the ggrepel package (Appendix B) places them for you."
+  },
+  {
+    "objectID": "W05L09_slides.html",
+    "href": "W05L09_slides.html",
+    "title": "Plots That Tell the Truth",
+    "section": "",
+    "text": "TARGET CLOCK (assumes you skip FLEX slides if behind): Welcome 0:00-0:05 | The grammar 0:05-0:20 | Choose the geom 0:20-0:40 | Scales, labels, themes 0:40-0:50 | Audit misleading plots 0:50-0:62 | Diagnostics and stories 0:62-0:72 | Wrap-up 0:72-0:75.\nExactly THREE interaction moments (blue boxes): Interaction 1 in The grammar, Interaction 2 in Audit, Interaction 3 in Diagnostics and stories. Each is about 3 minutes. Everything else is teaching. Answers are in the notes.\nFLEX slides, skip if behind: “Fractions with position = fill”, “Bin width changes the story”, “Too many colors”. Cut material is in the Appendix.\nPress S for speaker view.\n\n\n\n\nWhy plot: summaries can hide the shape\nThe grammar: how ggplot2 builds a plot\nChoose the geom: match the plot to the question\nScales, labels, themes: make it readable\nAudit: plots can mislead without a bug\nDiagnostics and stories: plots that find problems and make a point\n\nSame pairs as before. Three short moments to talk to your neighbor.\n\n\n\nSessions 1 and 2 gave us tables: filtered, grouped, summarized, joined, reshaped.\nToday we make those tables visible.\nAI writes plotting code quickly. It does not check whether the plot is honest. That is your job as navigator.\n\n\n\n\nanscombe_long |&gt;\n  summarize(mean_x = mean(x), mean_y = mean(y), sd_y = sd(y),\n            cor = cor(x, y), .by = set)\n\n#&gt; # A tibble: 4 x 5\n#&gt;   set   mean_x mean_y  sd_y   cor\n#&gt;   &lt;chr&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;\n#&gt; 1 1          9   7.50  2.03 0.816\n#&gt; 2 2          9   7.50  2.03 0.816\n#&gt; 3 3          9   7.5   2.03 0.816\n#&gt; 4 4          9   7.50  2.03 0.817\n\n\nFour sets with nearly identical summaries. Are they the same?\n\n\n\n\nggplot(anscombe_long, aes(x, y)) +\n  geom_point(size = 2.5) +\n  facet_wrap(~ set, nrow = 1)\n\n\n\n\n\n\n\n\n. . .\n\nBug: summaries can hide the shape. Plot first."
+  },
+  {
+    "objectID": "W05L09_slides.html#todays-route",
+    "href": "W05L09_slides.html#todays-route",
+    "title": "Plots That Tell the Truth",
+    "section": "",
+    "text": "Why plot: summaries can hide the shape\nThe grammar: how ggplot2 builds a plot\nChoose the geom: match the plot to the question\nScales, labels, themes: make it readable\nAudit: plots can mislead without a bug\nDiagnostics and stories: plots that find problems and make a point\n\nSame pairs as before. Three short moments to talk to your neighbor."
+  },
+  {
+    "objectID": "W05L09_slides.html#where-we-left-off",
+    "href": "W05L09_slides.html#where-we-left-off",
+    "title": "Plots That Tell the Truth",
+    "section": "",
+    "text": "Sessions 1 and 2 gave us tables: filtered, grouped, summarized, joined, reshaped.\nToday we make those tables visible.\nAI writes plotting code quickly. It does not check whether the plot is honest. That is your job as navigator."
+  },
+  {
+    "objectID": "W05L09_slides.html#same-numbers-four-datasets",
+    "href": "W05L09_slides.html#same-numbers-four-datasets",
+    "title": "Plots That Tell the Truth",
+    "section": "",
+    "text": "anscombe_long |&gt;\n  summarize(mean_x = mean(x), mean_y = mean(y), sd_y = sd(y),\n            cor = cor(x, y), .by = set)\n\n#&gt; # A tibble: 4 x 5\n#&gt;   set   mean_x mean_y  sd_y   cor\n#&gt;   &lt;chr&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;\n#&gt; 1 1          9   7.50  2.03 0.816\n#&gt; 2 2          9   7.50  2.03 0.816\n#&gt; 3 3          9   7.5   2.03 0.816\n#&gt; 4 4          9   7.50  2.03 0.817\n\n\nFour sets with nearly identical summaries. Are they the same?"
+  },
+  {
+    "objectID": "W05L09_slides.html#plot-them",
+    "href": "W05L09_slides.html#plot-them",
+    "title": "Plots That Tell the Truth",
+    "section": "",
+    "text": "ggplot(anscombe_long, aes(x, y)) +\n  geom_point(size = 2.5) +\n  facet_wrap(~ set, nrow = 1)\n\n\n\n\n\n\n\n\n. . .\n\nBug: summaries can hide the shape. Plot first."
+  },
+  {
+    "objectID": "W05L09_slides.html#a-plot-is-a-recipe",
+    "href": "W05L09_slides.html#a-plot-is-a-recipe",
+    "title": "Plots That Tell the Truth",
+    "section": "A plot is a recipe",
+    "text": "A plot is a recipe\n\nData: a table\nAesthetics: which columns go to x, y, color, size\nGeom: the shape that is drawn (points, bars, lines)\nLater: scales, facets, labels, themes\n\nLayers are joined with +."
+  },
+  {
+    "objectID": "W05L09_slides.html#start-with-the-canvas",
+    "href": "W05L09_slides.html#start-with-the-canvas",
+    "title": "Plots That Tell the Truth",
+    "section": "Start with the canvas",
+    "text": "Start with the canvas\n\nggplot(movies, aes(x = imdb_rating, y = audience_score))\n\n\n\n\n\n\n\n\nData and aesthetics only. The axes exist. Nothing is drawn yet."
+  },
+  {
+    "objectID": "W05L09_slides.html#add-a-geom",
+    "href": "W05L09_slides.html#add-a-geom",
+    "title": "Plots That Tell the Truth",
+    "section": "Add a geom",
+    "text": "Add a geom\n\nggplot(movies, aes(x = imdb_rating, y = audience_score)) +\n  geom_point()"
+  },
+  {
+    "objectID": "W05L09_slides.html#add-another-layer",
+    "href": "W05L09_slides.html#add-another-layer",
+    "title": "Plots That Tell the Truth",
+    "section": "Add another layer",
+    "text": "Add another layer\n\nggplot(movies, aes(x = imdb_rating, y = audience_score)) +\n  geom_point() +\n  geom_smooth(method = \"lm\", se = FALSE)\n\n\n\n\n\n\n\n\nBoth layers inherit x and y from the first line."
+  },
+  {
+    "objectID": "W05L09_slides.html#map-a-column-to-color",
+    "href": "W05L09_slides.html#map-a-column-to-color",
+    "title": "Plots That Tell the Truth",
+    "section": "Map a column to color",
+    "text": "Map a column to color\n\nggplot(movies, aes(x = imdb_rating, y = audience_score)) +\n  geom_point(aes(color = title_type))\n\n\n\n\n\n\n\n\nInside aes(): the color depends on the data, and a legend appears."
+  },
+  {
+    "objectID": "W05L09_slides.html#set-a-fixed-look",
+    "href": "W05L09_slides.html#set-a-fixed-look",
+    "title": "Plots That Tell the Truth",
+    "section": "Set a fixed look",
+    "text": "Set a fixed look\n\nggplot(movies, aes(x = imdb_rating, y = audience_score)) +\n  geom_point(color = \"#6d8d24\", size = 2, alpha = 0.5)\n\n\n\n\n\n\n\n\nOutside aes(): one fixed value for every point. No legend."
+  },
+  {
+    "objectID": "W05L09_slides.html#interaction-1-predict",
+    "href": "W05L09_slides.html#interaction-1-predict",
+    "title": "Plots That Tell the Truth",
+    "section": "Interaction 1: predict",
+    "text": "Interaction 1: predict\n\nggplot(movies, aes(x = imdb_rating, y = audience_score)) +\n  geom_point(aes(color = \"blue\"))\n\n\nTurn to your neighbor (2 min): what color are the points? Will there be a legend?\n\n\nINTERACTION 1 of 3. Take 2 minutes, then reveal on the next slide. Answer: the points are NOT blue. They are the default first palette color (a salmon red), and there is a legend entry labeled “blue”. Inside aes(), “blue” is just the text of a category, so ggplot2 maps it to a color like any other label."
+  },
+  {
+    "objectID": "W05L09_slides.html#the-answer",
+    "href": "W05L09_slides.html#the-answer",
+    "title": "Plots That Tell the Truth",
+    "section": "The answer",
+    "text": "The answer\n\nggplot(movies, aes(x = imdb_rating, y = audience_score)) +\n  geom_point(aes(color = \"blue\"))\n\n\n\n\n\n\n\n\n. . .\n\nBug: inside aes(), \"blue\" is a label. Fix: geom_point(color = \"blue\")."
+  },
+  {
+    "objectID": "W05L09_slides.html#start-from-the-question",
+    "href": "W05L09_slides.html#start-from-the-question",
+    "title": "Plots That Tell the Truth",
+    "section": "Start from the question",
+    "text": "Start from the question\n\n\n\nQuestion\nGeom\n\n\n\n\nOne number: its distribution\ngeom_histogram\n\n\nA number across groups\ngeom_boxplot\n\n\nCounts per category\ngeom_bar\n\n\nTwo numbers\ngeom_point\n\n\nA number over time\ngeom_line"
+  },
+  {
+    "objectID": "W05L09_slides.html#distribution-of-one-number",
+    "href": "W05L09_slides.html#distribution-of-one-number",
+    "title": "Plots That Tell the Truth",
+    "section": "Distribution of one number",
+    "text": "Distribution of one number\n\nggplot(movies, aes(x = audience_score)) +\n  geom_histogram(binwidth = 5, fill = \"#6d8d24\", color = \"white\")\n\n\n\n\n\n\n\n\nEach bar counts the movies in a 5-point bin."
+  },
+  {
+    "objectID": "W05L09_slides.html#compare-two-distributions",
+    "href": "W05L09_slides.html#compare-two-distributions",
+    "title": "Plots That Tell the Truth",
+    "section": "Compare two distributions",
+    "text": "Compare two distributions\n\nggplot(movies, aes(x = imdb_rating, fill = audience_rating)) +\n  geom_density(alpha = 0.5)\n\n\n\n\n\n\n\n\nalpha makes fills see-through so overlaps stay visible."
+  },
+  {
+    "objectID": "W05L09_slides.html#compare-groups-with-boxplots",
+    "href": "W05L09_slides.html#compare-groups-with-boxplots",
+    "title": "Plots That Tell the Truth",
+    "section": "Compare groups with boxplots",
+    "text": "Compare groups with boxplots\n\nggplot(movies, aes(audience_score, fct_reorder(genre, audience_score))) +\n  geom_boxplot() +\n  labs(y = NULL)\n\n\n\n\n\n\n\n\n\nfct_reorder() sorts the groups by their median (the default function). The default order of a character column is alphabetical."
+  },
+  {
+    "objectID": "W05L09_slides.html#count-categories",
+    "href": "W05L09_slides.html#count-categories",
+    "title": "Plots That Tell the Truth",
+    "section": "Count categories",
+    "text": "Count categories\n\nggplot(movies, aes(y = fct_rev(fct_infreq(genre)))) +\n  geom_bar() +\n  labs(y = NULL)\n\n\n\n\n\n\n\n\n\ngeom_bar() counts rows for you. fct_infreq() orders by frequency and fct_rev() flips so the largest bar is on top."
+  },
+  {
+    "objectID": "W05L09_slides.html#geom_bar-vs-geom_col",
+    "href": "W05L09_slides.html#geom_bar-vs-geom_col",
+    "title": "Plots That Tell the Truth",
+    "section": "geom_bar vs geom_col",
+    "text": "geom_bar vs geom_col\nYou already have the counts? Use geom_col(). An AI often mixes them up:\n\ngenre_counts &lt;- movies |&gt; count(genre)\nggplot(genre_counts, aes(y = genre, x = n)) +\n  geom_bar()\n\n#&gt; Error in `geom_bar()`:\n#&gt; ! Problem while computing stat.\n#&gt; i Error occurred in the 1st layer.\n#&gt; Caused by error in `setup_params()`:\n#&gt; ! `stat_count()` must only have an x or y aesthetic.\n\n\ngeom_bar counts rows itself, so it refuses a count column. Use geom_col()."
+  },
+  {
+    "objectID": "W05L09_slides.html#two-numbers-overplotting",
+    "href": "W05L09_slides.html#two-numbers-overplotting",
+    "title": "Plots That Tell the Truth",
+    "section": "Two numbers: overplotting",
+    "text": "Two numbers: overplotting\n\nggplot(movies, aes(x = mpaa_rating, y = audience_score)) +\n  geom_jitter(width = 0.2, height = 0, alpha = 0.5)\n\n\n\n\n\n\n\n\nWithout geom_jitter, points at the same x would stack into lines. alpha shows density."
+  },
+  {
+    "objectID": "W05L09_slides.html#change-over-time",
+    "href": "W05L09_slides.html#change-over-time",
+    "title": "Plots That Tell the Truth",
+    "section": "Change over time",
+    "text": "Change over time\n\nmovies |&gt;\n  count(thtr_rel_year) |&gt;\n  ggplot(aes(x = thtr_rel_year, y = n)) +\n  geom_line()\n\n\n\n\n\n\n\n\nSummarize first (Session 2), then plot."
+  },
+  {
+    "objectID": "W05L09_slides.html#facets-small-multiples",
+    "href": "W05L09_slides.html#facets-small-multiples",
+    "title": "Plots That Tell the Truth",
+    "section": "Facets: small multiples",
+    "text": "Facets: small multiples\n\nmovies |&gt;\n  filter(genre %in% c(\"Drama\", \"Comedy\", \"Documentary\", \"Horror\")) |&gt;\n  ggplot(aes(x = imdb_rating, y = audience_score)) +\n  geom_point(alpha = 0.5) +\n  facet_wrap(~ genre, nrow = 1)\n\n\n\n\n\n\n\n\n\nOne panel per group. Often clearer than 11 colors."
+  },
+  {
+    "objectID": "W05L09_slides.html#fractions-with-position-fill-flex",
+    "href": "W05L09_slides.html#fractions-with-position-fill-flex",
+    "title": "Plots That Tell the Truth",
+    "section": "Fractions with position = fill (FLEX)",
+    "text": "Fractions with position = fill (FLEX)\n\nggplot(movies, aes(y = genre, fill = audience_rating)) +\n  geom_bar(position = \"fill\") +\n  labs(x = \"proportion\", y = NULL)\n\n\n\n\n\n\n\n\n\nFLEX: skip if behind (saves about 2 min). position = “fill” rescales every bar to 100%. Great for shares, but it hides group sizes."
+  },
+  {
+    "objectID": "W05L09_slides.html#store-a-plot-add-layers",
+    "href": "W05L09_slides.html#store-a-plot-add-layers",
+    "title": "Plots That Tell the Truth",
+    "section": "Store a plot, add layers",
+    "text": "Store a plot, add layers\n\np &lt;- ggplot(movies, aes(x = imdb_rating, y = audience_score)) +\n  geom_point(alpha = 0.5, color = \"#6d8d24\")\n\np + labs(title = \"Audience scores track IMDB ratings\")\n\nA plot is an object. Save it, then keep adding."
+  },
+  {
+    "objectID": "W05L09_slides.html#labels-do-the-explaining",
+    "href": "W05L09_slides.html#labels-do-the-explaining",
+    "title": "Plots That Tell the Truth",
+    "section": "Labels do the explaining",
+    "text": "Labels do the explaining\n\np + labs(\n  title = \"Audience scores track IMDB ratings\",\n  subtitle = \"651 movies released 1970 to 2014\",\n  x = \"IMDB rating (0 to 10)\", y = \"Audience score (0 to 100)\",\n  caption = \"Source: movies.csv (IMDB and Rotten Tomatoes)\"\n)"
+  },
+  {
+    "objectID": "W05L09_slides.html#scales-log-for-skewed-data",
+    "href": "W05L09_slides.html#scales-log-for-skewed-data",
+    "title": "Plots That Tell the Truth",
+    "section": "Scales: log for skewed data",
+    "text": "Scales: log for skewed data\n\nggplot(movies, aes(x = imdb_num_votes, y = audience_score)) +\n  geom_point(alpha = 0.5, color = \"#6d8d24\") +\n  scale_x_log10(labels = scales::label_comma())\n\n\n\n\n\n\n\n\nSkewed? A log axis spreads out the crowd."
+  },
+  {
+    "objectID": "W05L09_slides.html#colors-choose-on-purpose",
+    "href": "W05L09_slides.html#colors-choose-on-purpose",
+    "title": "Plots That Tell the Truth",
+    "section": "Colors: choose on purpose",
+    "text": "Colors: choose on purpose\n\nggplot(movies, aes(x = imdb_rating, y = audience_score, color = mpaa_rating)) +\n  geom_point(alpha = 0.7) +\n  scale_color_viridis_d()\n\n\n\n\n\n\n\n\nviridis works for most color-blind viewers."
+  },
+  {
+    "objectID": "W05L09_slides.html#themes-the-polish",
+    "href": "W05L09_slides.html#themes-the-polish",
+    "title": "Plots That Tell the Truth",
+    "section": "Themes: the polish",
+    "text": "Themes: the polish\n\np +\n  theme_minimal() +\n  theme(legend.position = \"bottom\")\n\n\n\n\n\n\n\n\ntheme_*() sets the look. theme() tweaks details."
+  },
+  {
+    "objectID": "W05L09_slides.html#save-it",
+    "href": "W05L09_slides.html#save-it",
+    "title": "Plots That Tell the Truth",
+    "section": "Save it",
+    "text": "Save it\n\nggsave(\"audience_vs_imdb.png\", p, width = 8, height = 4.5, dpi = 300)\n\nSet the size and dpi yourself. The default is whatever your window happened to be."
+  },
+  {
+    "objectID": "W05L09_slides.html#a-plot-can-lie-without-a-bug",
+    "href": "W05L09_slides.html#a-plot-can-lie-without-a-bug",
+    "title": "Plots That Tell the Truth",
+    "section": "A plot can lie without a bug",
+    "text": "A plot can lie without a bug\nCode that runs is not code that is honest.\nAn AI will happily:\n\nzoom the axis to make a small difference look huge\nshow an average without saying how many rows are behind it\nsort categories alphabetically instead of meaningfully"
+  },
+  {
+    "objectID": "W05L09_slides.html#interaction-2-audit-this-ai-plot",
+    "href": "W05L09_slides.html#interaction-2-audit-this-ai-plot",
+    "title": "Plots That Tell the Truth",
+    "section": "Interaction 2: audit this AI plot",
+    "text": "Interaction 2: audit this AI plot\n\nggplot(by_rating, aes(x = mpaa_rating, y = avg)) +\n  geom_col() +\n  coord_cartesian(ylim = c(50, 80))\n\n\n\n\n\n\n\n\n\nNeighbor (3 min): list every problem you can find.\n\n\nINTERACTION 2 of 3. The AI was asked: “Plot the average audience score by rating.” Give 3 minutes. Answers on the next slide. Problems: (1) the y axis starts at 50, so bar heights are not proportional to the values (bars encode value by length); (2) NC-17 is the average of only 2 movies, and no n is shown; (3) categories are in alphabetical order, not sorted by the value; (4) no title or axis labels (y is “avg”); (5) a bar chart of averages hides the spread."
+  },
+  {
+    "objectID": "W05L09_slides.html#the-problems",
+    "href": "W05L09_slides.html#the-problems",
+    "title": "Plots That Tell the Truth",
+    "section": "The problems",
+    "text": "The problems\n\nTruncated axis: bars start at 50, so the length no longer matches the value\nNo sample size: NC-17 has only 2 movies\nArbitrary order: alphabetical, not sorted\nNo labels: the axis just says avg\n\n. . .\nNot a coding error. A communication error."
+  },
+  {
+    "objectID": "W05L09_slides.html#a-more-honest-version",
+    "href": "W05L09_slides.html#a-more-honest-version",
+    "title": "Plots That Tell the Truth",
+    "section": "A more honest version",
+    "text": "A more honest version\n\nggplot(by_rating, aes(x = avg, y = fct_reorder(mpaa_rating, avg))) +\n  geom_col(fill = \"#6d8d24\") +\n  geom_text(aes(label = paste0(\"n = \", n)), hjust = -0.1) +\n  scale_x_continuous(limits = c(0, 100)) +\n  labs(x = \"Average audience score\", y = NULL)"
+  },
+  {
+    "objectID": "W05L09_slides.html#bin-width-changes-the-story-flex",
+    "href": "W05L09_slides.html#bin-width-changes-the-story-flex",
+    "title": "Plots That Tell the Truth",
+    "section": "Bin width changes the story (FLEX)",
+    "text": "Bin width changes the story (FLEX)\n\nggplot(movies, aes(x = audience_score)) +\n  geom_histogram(binwidth = 25, fill = \"#6d8d24\", color = \"white\")\n\n\n\n\n\n\n\n\nSame data as earlier. Wide bins hide the shape. Always try several bin widths.\n\nFLEX: skip if behind (saves about 1.5 min). Compare with the binwidth = 5 histogram in the grammar section."
+  },
+  {
+    "objectID": "W05L09_slides.html#too-many-colors-flex",
+    "href": "W05L09_slides.html#too-many-colors-flex",
+    "title": "Plots That Tell the Truth",
+    "section": "Too many colors (FLEX)",
+    "text": "Too many colors (FLEX)\n\nggplot(movies, aes(x = imdb_rating, y = audience_score, color = genre)) +\n  geom_point()\n\n\n\n\n\n\n\n\nEleven colors make the reader match every dot to the legend. Use facets, or highlight one group and gray the rest.\n\nFLEX: skip if behind (saves about 1.5 min)."
+  },
+  {
+    "objectID": "W05L09_slides.html#chart-audit-checklist",
+    "href": "W05L09_slides.html#chart-audit-checklist",
+    "title": "Plots That Tell the Truth",
+    "section": "Chart audit checklist",
+    "text": "Chart audit checklist\n\nAxis: do bars start at zero?\nSize: is n visible for averages?\nOrder: is it meaningful, not alphabetical?\nColor: few colors, color-blind safe?\nLabels: units, a title that says something?\nScale: log or zoom? Is it stated?"
+  },
+  {
+    "objectID": "W05L09_slides.html#plots-find-problems",
+    "href": "W05L09_slides.html#plots-find-problems",
+    "title": "Plots That Tell the Truth",
+    "section": "Plots find problems",
+    "text": "Plots find problems\n\nggplot(movies, aes(x = runtime)) +\n  geom_histogram(binwidth = 10, fill = \"#6d8d24\", color = \"white\")\n\n\n\n\n\n\n\n\nOne bar far to the right: a 267-minute documentary. A plot flags it. You decide if it is real."
+  },
+  {
+    "objectID": "W05L09_slides.html#where-is-the-missing-data",
+    "href": "W05L09_slides.html#where-is-the-missing-data",
+    "title": "Plots That Tell the Truth",
+    "section": "Where is the missing data?",
+    "text": "Where is the missing data?\n\nmissing_by_col &lt;- movies |&gt;\n  summarize(across(everything(), ~ sum(is.na(.x)))) |&gt;\n  pivot_longer(everything(), names_to = \"column\", values_to = \"n_missing\") |&gt;\n  filter(n_missing &gt; 0)\nmissing_by_col\n\n#&gt; # A tibble: 11 x 2\n#&gt;   column        n_missing\n#&gt;   &lt;chr&gt;             &lt;int&gt;\n#&gt; 1 runtime               1\n#&gt; 2 studio                8\n#&gt; 3 dvd_rel_year          8\n#&gt; 4 dvd_rel_month         8\n#&gt; 5 dvd_rel_day           8\n#&gt; # i 6 more rows\n\n\n\nThese are Session 2 tools: summarize, across, pivot_longer."
+  },
+  {
+    "objectID": "W05L09_slides.html#plot-the-missingness",
+    "href": "W05L09_slides.html#plot-the-missingness",
+    "title": "Plots That Tell the Truth",
+    "section": "Plot the missingness",
+    "text": "Plot the missingness\n\nggplot(missing_by_col, aes(x = n_missing, y = fct_reorder(column, n_missing))) +\n  geom_col(fill = \"#6d8d24\") +\n  labs(x = \"Missing values\", y = NULL)\n\n\n\n\n\n\n\n\nThe dvd_rel_* columns are missing for the same 8 films."
+  },
+  {
+    "objectID": "W05L09_slides.html#interaction-3-write-the-headline",
+    "href": "W05L09_slides.html#interaction-3-write-the-headline",
+    "title": "Plots That Tell the Truth",
+    "section": "Interaction 3: write the headline",
+    "text": "Interaction 3: write the headline\n\n\n\n\n\n\n\n\n\n\nNeighbor (2 min): write a one-sentence title that states the finding.\n\n\nINTERACTION 3 of 3. Give 2 minutes. Collect two or three headlines. A good one states the finding, for example: “Critics score four genres about 12 points lower than audiences do.” Next slide shows our version. Genres with the biggest gaps (audience minus critics): Art House & International and Action & Adventure (12.4), Animation (12.2), Comedy (11.6)."
+  },
+  {
+    "objectID": "W05L09_slides.html#from-chart-to-message",
+    "href": "W05L09_slides.html#from-chart-to-message",
+    "title": "Plots That Tell the Truth",
+    "section": "From chart to message",
+    "text": "From chart to message\n\ngap |&gt;\n  mutate(big = gap &gt; 10) |&gt;\n  ggplot(aes(y = fct_reorder(genre, gap))) +\n  geom_segment(aes(x = critics, xend = audience, yend = genre, color = big),\n               linewidth = 1.5) +\n  geom_point(aes(x = critics), color = \"grey40\", size = 3) +\n  geom_point(aes(x = audience), color = \"#213921\", size = 3) +\n  scale_color_manual(values = c(\"grey80\", \"#f68b1f\"), guide = \"none\") +\n  labs(title = \"Critics score four genres about 12 points below audiences\",\n       subtitle = \"Grey dot: critics. Dark green dot: audience.\",\n       x = \"Average score\", y = NULL) +\n  theme_minimal()"
+  },
+  {
+    "objectID": "W05L09_slides.html#the-story-version",
+    "href": "W05L09_slides.html#the-story-version",
+    "title": "Plots That Tell the Truth",
+    "section": "The story version",
+    "text": "The story version"
+  },
+  {
+    "objectID": "W05L09_slides.html#what-made-it-a-story",
+    "href": "W05L09_slides.html#what-made-it-a-story",
+    "title": "Plots That Tell the Truth",
+    "section": "What made it a story",
+    "text": "What made it a story\n\nThe title states the finding\nOne highlight (orange), everything else muted\nSorted by the thing that matters\nClean: no clutter, no legend needed\nColors still work for color-blind readers"
+  },
+  {
+    "objectID": "W05L09_slides.html#three-things-to-remember",
+    "href": "W05L09_slides.html#three-things-to-remember",
+    "title": "Plots That Tell the Truth",
+    "section": "Three things to remember",
+    "text": "Three things to remember\n\nGrammar: data, aesthetics, geoms, layered with +. Inside aes() means data, outside means fixed.\nChoose the geom from the question, then audit the plot: axis, n, order, color, labels.\nA plot is a diagnostic and a message: find the problem, then state the finding."
+  },
+  {
+    "objectID": "W05L09_slides.html#next-up",
+    "href": "W05L09_slides.html#next-up",
+    "title": "Plots That Tell the Truth",
+    "section": "Next up",
+    "text": "Next up\nWed 10/28: guest talk. Notice how each plot you see is built.\nSession 4 (Mon 11/02): Lab 1 kickoff on the WellSync data. Bring a laptop with R, tidyverse, and arrow working.\nThe handout has the full explanations, extra practice, and the appendix material."
+  },
+  {
+    "objectID": "W05L09_slides.html#label-points-directly-with-ggrepel",
+    "href": "W05L09_slides.html#label-points-directly-with-ggrepel",
+    "title": "Plots That Tell the Truth",
+    "section": "Label points directly with ggrepel",
+    "text": "Label points directly with ggrepel\n\n# install.packages(\"ggrepel\")  # once\nlibrary(ggrepel)\n\ngap |&gt;\n  ggplot(aes(x = critics, y = audience, label = genre)) +\n  geom_point() +\n  geom_text_repel()\n\ngeom_text_repel() places labels so they do not overlap."
+  },
+  {
+    "objectID": "W05L09_slides.html#combine-plots-with-patchwork",
+    "href": "W05L09_slides.html#combine-plots-with-patchwork",
+    "title": "Plots That Tell the Truth",
+    "section": "Combine plots with patchwork",
+    "text": "Combine plots with patchwork\n\n# install.packages(\"patchwork\")  # once\nlibrary(patchwork)\n\np1 &lt;- ggplot(movies, aes(audience_score)) + geom_histogram(binwidth = 5)\np2 &lt;- ggplot(movies, aes(critics_score)) + geom_histogram(binwidth = 5)\n\np1 + p2          # side by side\np1 / p2          # stacked"
+  },
+  {
+    "objectID": "W05L09_slides.html#missingness-plots-with-naniar",
+    "href": "W05L09_slides.html#missingness-plots-with-naniar",
+    "title": "Plots That Tell the Truth",
+    "section": "Missingness plots with naniar",
+    "text": "Missingness plots with naniar\n\n# install.packages(\"naniar\")  # once\nlibrary(naniar)\n\ngg_miss_var(movies)         # bar chart of NAs per column\nvis_miss(movies)            # every cell: present or missing\n\nThese are ready-made versions of the plot built from scratch in this session."
+  },
+  {
+    "objectID": "W05L09_slides.html#axis-labels-that-do-not-fit",
+    "href": "W05L09_slides.html#axis-labels-that-do-not-fit",
+    "title": "Plots That Tell the Truth",
+    "section": "Axis labels that do not fit",
+    "text": "Axis labels that do not fit\n\nggplot(movies, aes(x = genre)) +\n  geom_bar() +\n  theme(axis.text.x = element_text(angle = 45, hjust = 1))   # tilt the labels\n\nggplot(movies, aes(y = genre)) +\n  geom_bar()                                                  # or put the long names on y\n\nPutting the category on the y axis is usually the easier fix."
   }
 ]

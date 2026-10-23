@@ -31,7 +31,7 @@ views <- views |>
   arrange(view_date, view_id)
 
 if (requireNamespace("arrow", quietly = TRUE)) {
-  arrow::write_parquet(views, "data/views.parquet", compression = "zstd")
+  arrow::write_parquet(views, "data/views.parquet")   # default snappy compression, readable by every arrow build
   message("Wrote data/views.parquet")
 } else {
   write_csv(views, "views_tmp.csv")

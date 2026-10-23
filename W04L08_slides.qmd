@@ -267,7 +267,7 @@ n_distinct(movies$genre)
 :::
 
 ::: {.notes}
-FLEX: skip if behind (saves about 2 min). Musical & Performing Arts has a tie at 7.9.
+FLEX: should get here at 00:21. Skip if behind (saves about 2 min). Musical & Performing Arts has a tie at 7.9.
 :::
 
 ## Average of averages (FLEX)
@@ -286,7 +286,7 @@ mean(movies$audience_score) # the real overall mean
 :::
 
 ::: {.notes}
-FLEX: skip if behind (saves about 2 min). AI often does this when asked for "an overall average" after a grouped summary.
+FLEX: should get here at 00:23. skip if behind (saves about 2 min). AI often does this when asked for "an overall average" after a grouped summary.
 :::
 
 ## Read a whole pipeline aloud
@@ -316,7 +316,7 @@ Before you trust a grouped result, ask:
 # Joins {background-color="#f3f6ea"}
 
 ::: {.notes}
-Target: 0:26 to 0:46. Dataset: movies plus a hand-made lookup table, studios.csv, which maps messy raw studio names to a cleaned studio_group. The lookup is deliberately incomplete (36 studio names).
+Target: 0:26 to 0:46. If at 00:28 here, then skip FLEX. Dataset: movies plus a hand-made lookup table, studios.csv, which maps messy raw studio names to a cleaned studio_group. The lookup is deliberately incomplete (36 studio names).
 :::
 
 ## Information lives in many tables
@@ -409,7 +409,7 @@ movies |>
 `join_by(left_col == right_col)` links columns with different names.
 
 ::: {.notes}
-FLEX: skip if behind (saves about 1.5 min).
+FLEX: skip if later than 00:40 behind (saves about 1.5 min).
 :::
 
 ## Join, then summarize
@@ -568,7 +568,7 @@ movies |>
 `starts_with("actor")` picks `actor1` to `actor5`.
 
 ::: {.notes}
-FLEX: skip if behind (saves about 2 min).
+FLEX: should get here at 00:22. skip if behind (saves about 2 min).
 :::
 
 # arrow and Parquet {background-color="#f3f6ea"}
