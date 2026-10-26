@@ -1,6 +1,6 @@
 ---
 title: "Session 3 Handout: Plots That Tell the Truth"
-subtitle: "Reference companion to the Data Vis Session slides"
+subtitle: "Reference companion to the Session 3 slides"
 author: "DTR"
 description: "Full reference for ggplot2: the grammar of graphics, choosing geoms, scales and themes, auditing misleading plots, diagnostic plots, and storytelling, with Audit it boxes and practice"
 date: 2026-10-26
@@ -267,8 +267,7 @@ If you **already have** the counts (or any summary) in a column, use `geom_col()
 #| fig-height: 4
 genre_counts <- movies |> count(genre)
 
-ggplot(genre_counts, 
-       aes(x = n, y = fct_reorder(genre, n))) +
+ggplot(genre_counts, aes(x = n, y = fct_reorder(genre, n))) +
   geom_col() +
   labs(y = NULL)
 ```
@@ -457,12 +456,11 @@ A manual palette is easiest to control. These eight colors (the Okabe-Ito palett
 okabe_ito <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442",
                "#0072B2", "#D55E00", "#CC79A7", "#000000")
 
-p2 <- movies |>
+movies |>
   filter(genre %in% c("Drama", "Comedy", "Documentary", "Horror")) |>
   ggplot(aes(x = imdb_rating, y = audience_score, color = genre)) +
   geom_point(alpha = 0.7) +
   scale_color_manual(values = okabe_ito)
-p2
 ```
 
 ::: {.callout-tip title="Fewer colors, used on purpose"}
@@ -485,7 +483,7 @@ Remove a legend that adds nothing with `legend.position = "none"`, for example w
 A **theme** controls everything that is not data: background, gridlines, fonts.
 
 ```{r}
-p2 +
+p +
   theme_minimal(base_size = 12) +
   theme(legend.position = "bottom")
 ```
@@ -530,6 +528,9 @@ ggplot(by_rating, aes(x = avg, y = fct_reorder(mpaa_rating, avg))) +
        title = "Average audience score by MPAA rating")
 ```
 
+::: {.callout-note title="Points do not need a zero baseline"}
+The zero-baseline rule is for **bars**. A dot or line chart encodes value by **position**, so zooming to the range of the data is fine, as long as the axis labels make it visible.
+:::
 
 ## Averages without sizes
 
@@ -571,6 +572,58 @@ Wide bins hide the shape; very narrow bins add noise. Try several widths (or a d
 5. **Labels**: title says something, units, source?
 6. **Warnings**: did R remove rows or drop values? Read every warning.
 :::
+
+## Prompting for a plot
+
+An AI assistant gives you what you **ask for**, so a vague prompt gets a plot that runs but may not be honest. A good plot prompt names five things:
+
+1. **Data**: the data frame and the exact column names (the AI cannot see your data unless you tell it).
+2. **Message**: what the reader should see.
+3. **Form**: the geom, and the order of the categories.
+4. **Honesty rules**: a zero baseline for bars, `n` shown, labels with units, color-blind safe colors.
+5. **Output**: "Return only `ggplot2` code" (so you can paste and run it).
+
+| | Prompt |
+|:--|:--|
+| **Weak** | "Make a bar chart of average audience score by rating." |
+| **Strong** | "Using the data frame `by_rating` (columns `mpaa_rating`, `avg`, `n`), make a horizontal bar chart of `avg`, sorted from high to low. Start the axis at 0 and write `n = ` at the end of each bar. Label the axis with units and give the plot a title that states the finding. Return only `ggplot2` code." |
+
+The weak prompt tends to produce the truncated, alphabetical, unlabeled chart from Section 6.1. The strong prompt produces something close to the honest version.
+
+::: {.callout-tip title="Describe the problem in your own words, not just the fix"}
+When a result is wrong, say **what is wrong** and **what you want**: "The bars start at 50, which exaggerates the differences. Start the axis at 0." Paste the exact **error message** or **warning** when there is one, and tell the AI which package versions you use if the code fails.
+:::
+
+## Assessing what comes back
+
+Whatever the AI returns, apply the Audit Loop:
+
+1. **Read** the code. Is every column name one that exists? Are mappings inside `aes()` and fixed settings outside?
+2. **Run** it, and read every warning and error.
+3. **Restate**: what does the plot claim, and what does its title claim? Are those the same?
+4. **Refine** with a more specific prompt, or **Reject** the result.
+
+Try it. An AI was asked, "Show how critics and audiences rate genres differently, with a title," and returned this:
+
+```{r}
+#| warning: true
+gap <- movies |>
+  summarize(critics = mean(critics_score), audience = mean(audience_score), .by = genre) |>
+  mutate(gap = audience - critics)
+
+gap |>
+  ggplot(aes(x = genre, y = gap, group = 1)) +
+  geom_line(size = 1) +
+  labs(title = "Audiences always rate movies higher than critics")
+```
+
+::: {.callout-warning title="Audit it: code that runs, with a claim that does not hold"}
+- **Code**: `size` for lines is deprecated (use `linewidth`), and `group = 1` forces one line through unrelated categories.
+- **Plot**: a line implies a trend from one genre to the next, but genres have no order. They are alphabetical, the labels collide, and the axis label is the column name `gap`. It also plots only the difference, so you cannot see either score.
+- **Title**: "always" is false. For Documentary the gap is about -3.6 (critics rate higher), and for several genres it is near zero.
+:::
+
+Section 8.1 shows the kind of plot a good prompt should lead to.
 
 # Plots as diagnostics
 
@@ -878,6 +931,57 @@ movies |>
 The plot shows that nominees score higher on average (about 85 versus about 62) in this sample of 22 versus 629 movies. It does **not** show why: nominees may differ in budget, genre, or marketing, and audiences may have been influenced by the nomination itself.
 :::
 
+::: {.problem}
+**Problem 7: Prompt it.** Write a prompt (for any AI assistant) that gets a plot of **average `imdb_rating` by `genre`**, honest and readable. Use the five ingredients from Section 6.5. Send it, run the code, and check the result against the chart audit checklist. Write down one thing the AI got wrong and the follow-up prompt that fixed it.
+:::
+
+::: {.callout-note collapse="true" title="Solution 7"}
+A prompt that names the pieces:
+
+> Using the data frame `movies` (columns `genre`, `imdb_rating`), compute the average `imdb_rating` and the number of movies for each genre. Make a horizontal bar chart of the average, sorted from high to low, starting the axis at 0, with `n = ` written at the end of each bar. Label the axis "Average IMDB rating (0 to 10)", remove the y axis title, and give the plot a title that states the finding. Use `tidyverse` and `ggplot2`. Return only the code.
+
+Code that satisfies it:
+
+```{r}
+#| fig-height: 4
+movies |>
+  summarize(avg = mean(imdb_rating), n = n(), .by = genre) |>
+  ggplot(aes(x = avg, y = fct_reorder(genre, avg))) +
+  geom_col(fill = "#6d8d24") +
+  geom_text(aes(label = paste0("n = ", n)), hjust = -0.1) +
+  scale_x_continuous(limits = c(0, 10)) +
+  labs(x = "Average IMDB rating (0 to 10)", y = NULL,
+       title = "Documentaries and musicals have the highest IMDB ratings")
+```
+
+Typical things an AI gets wrong, and follow-ups: it leaves the axis starting above 0 ("Start the x axis at 0"), invents a column name ("The column is `imdb_rating`, not `rating`"), or writes a title that claims more than the plot shows ("Rewrite the title so it only describes the averages"). Your answer will differ, since AI output varies. What matters is that you **ran** the code and **checked** it.
+:::
+
+::: {.problem}
+**Problem 8: Assess it.** An AI was asked to "show whether movies with more IMDB votes get higher audience scores" and returned the code below. Run it, list at least three problems, and write the prompt you would send back.
+
+```{r}
+#| eval: false
+ggplot(movies, aes(x = imdb_num_votes, y = audience_score)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "More votes cause higher audience scores")
+```
+:::
+
+::: {.callout-note collapse="true" title="Solution 8"}
+```{r}
+ggplot(movies, aes(x = imdb_num_votes, y = audience_score)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "More votes cause higher audience scores")
+```
+
+Problems: (1) the title claims **cause**, but the plot shows only association; (2) `imdb_num_votes` is heavily skewed, so most points are crowded at the left and a straight line is a poor summary (consider a log scale); (3) points overlap (use `alpha`); (4) the axes are labeled with column names and the x axis has no thousands separator; (5) `geom_smooth(method = "lm")` hides that the pattern may be curved.
+
+A prompt to send back: "Using `movies` (columns `imdb_num_votes`, `audience_score`), make a scatter plot with a log10 x axis, transparent points, and a smooth trend line. Label the axes with units and format the x axis with commas. Give a title that describes the association without causal words. Return only `ggplot2` code."
+:::
+
 # Appendix A: Older ggplot2 code you may still see
 
 AI assistants trained on older code still produce these. Many still run but print a deprecation message. Version details differ, so read the message that **your** version prints.
@@ -891,6 +995,7 @@ AI assistants trained on older code still produce these. Many still run but prin
 | `geom_bar(stat = "identity")` | `geom_col()` |
 | `theme(legend.position = c(0.9, 0.2))` | `theme(legend.position = "inside", legend.position.inside = c(0.9, 0.2))` in recent versions |
 | `scale_x_continuous(trans = "log10")` | `scale_x_continuous(transform = "log10")` in recent versions, or `scale_x_log10()` |
+| `ggplot(df, aes(x)) %>% geom_point()` | layers are joined with `+`, not a pipe |
 | `gather()`, `spread()` before plotting | `pivot_longer()`, `pivot_wider()` |
 
 # Appendix B: Helpful add-on packages

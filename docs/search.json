@@ -1229,7 +1229,7 @@
     "href": "W05L09_handout.html#counts-geom_bar-vs-geom_col",
     "title": "Session 3 Handout: Plots That Tell the Truth",
     "section": "4.3 Counts: geom_bar() vs geom_col()",
-    "text": "4.3 Counts: geom_bar() vs geom_col()\ngeom_bar() counts rows for you:\n\nggplot(movies, aes(y = fct_rev(fct_infreq(genre)))) +\n  geom_bar() +\n  labs(y = NULL)\n\n\n\n\n\n\n\n\nfct_infreq() orders categories by how often they occur, and fct_rev() flips the order so the biggest bar is on top.\nIf you already have the counts (or any summary) in a column, use geom_col():\n\ngenre_counts &lt;- movies |&gt; count(genre)\n\nggplot(genre_counts, \n       aes(x = n, y = fct_reorder(genre, n))) +\n  geom_col() +\n  labs(y = NULL)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nWarningAudit it: geom_bar() with a count column\n\n\n\n\nggplot(genre_counts, aes(x = n, y = genre)) +\n  geom_bar()\n\n#&gt; Error in `geom_bar()`:\n#&gt; ! Problem while computing stat.\n#&gt; i Error occurred in the 1st layer.\n#&gt; Caused by error in `setup_params()`:\n#&gt; ! `stat_count()` must only have an x or y aesthetic.\n\n\ngeom_bar() counts rows itself, so it refuses a variable already on the count axis. The fix is geom_col() (or geom_bar(stat = \"identity\"), the older spelling). The wording of the error message varies between versions of ggplot2."
+    "text": "4.3 Counts: geom_bar() vs geom_col()\ngeom_bar() counts rows for you:\n\nggplot(movies, aes(y = fct_rev(fct_infreq(genre)))) +\n  geom_bar() +\n  labs(y = NULL)\n\n\n\n\n\n\n\n\nfct_infreq() orders categories by how often they occur, and fct_rev() flips the order so the biggest bar is on top.\nIf you already have the counts (or any summary) in a column, use geom_col():\n\ngenre_counts &lt;- movies |&gt; count(genre)\n\nggplot(genre_counts, aes(x = n, y = fct_reorder(genre, n))) +\n  geom_col() +\n  labs(y = NULL)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nWarningAudit it: geom_bar() with a count column\n\n\n\n\nggplot(genre_counts, aes(x = n, y = genre)) +\n  geom_bar()\n\n#&gt; Error in `geom_bar()`:\n#&gt; ! Problem while computing stat.\n#&gt; i Error occurred in the 1st layer.\n#&gt; Caused by error in `setup_params()`:\n#&gt; ! `stat_count()` must only have an x or y aesthetic.\n\n\ngeom_bar() counts rows itself, so it refuses a variable already on the count axis. The fix is geom_col() (or geom_bar(stat = \"identity\"), the older spelling). The wording of the error message varies between versions of ggplot2."
   },
   {
     "objectID": "W05L09_handout.html#position-stacked-dodged-and-filled-bars",
@@ -1278,7 +1278,7 @@
     "href": "W05L09_handout.html#color-scales",
     "title": "Session 3 Handout: Plots That Tell the Truth",
     "section": "5.3 Color scales",
-    "text": "5.3 Color scales\nThe default palette is fine for exploration, but it is not always readable for everyone. About 1 in 12 men and 1 in 200 women have some form of color vision deficiency, and red versus green is the most common confusion.\n\nggplot(movies, aes(x = imdb_rating, y = audience_score, color = mpaa_rating)) +\n  geom_point(alpha = 0.7) +\n  scale_color_viridis_d()\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nScale\nUse for\n\n\n\n\nscale_color_viridis_d() / scale_fill_viridis_d()\ndiscrete categories; readable in grayscale and for most color-blind viewers\n\n\nscale_color_viridis_c()\na continuous variable\n\n\nscale_color_brewer(palette = \"Set2\")\ndiscrete categories (ColorBrewer palettes)\n\n\nscale_color_manual(values = c(...))\ncolors you choose yourself\n\n\n\nA manual palette is easiest to control. These eight colors (the Okabe-Ito palette) were designed to be distinguishable by color-blind readers:\n\nokabe_ito &lt;- c(\"#E69F00\", \"#56B4E9\", \"#009E73\", \"#F0E442\",\n               \"#0072B2\", \"#D55E00\", \"#CC79A7\", \"#000000\")\n\np2 &lt;- movies |&gt;\n  filter(genre %in% c(\"Drama\", \"Comedy\", \"Documentary\", \"Horror\")) |&gt;\n  ggplot(aes(x = imdb_rating, y = audience_score, color = genre)) +\n  geom_point(alpha = 0.7) +\n  scale_color_manual(values = okabe_ito)\np2\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nTipFewer colors, used on purpose\n\n\n\nThe strongest color design is often gray plus one accent: mute everything except the group you want the reader to see (see Section 8)."
+    "text": "5.3 Color scales\nThe default palette is fine for exploration, but it is not always readable for everyone. About 1 in 12 men and 1 in 200 women have some form of color vision deficiency, and red versus green is the most common confusion.\n\nggplot(movies, aes(x = imdb_rating, y = audience_score, color = mpaa_rating)) +\n  geom_point(alpha = 0.7) +\n  scale_color_viridis_d()\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nScale\nUse for\n\n\n\n\nscale_color_viridis_d() / scale_fill_viridis_d()\ndiscrete categories; readable in grayscale and for most color-blind viewers\n\n\nscale_color_viridis_c()\na continuous variable\n\n\nscale_color_brewer(palette = \"Set2\")\ndiscrete categories (ColorBrewer palettes)\n\n\nscale_color_manual(values = c(...))\ncolors you choose yourself\n\n\n\nA manual palette is easiest to control. These eight colors (the Okabe-Ito palette) were designed to be distinguishable by color-blind readers:\n\nokabe_ito &lt;- c(\"#E69F00\", \"#56B4E9\", \"#009E73\", \"#F0E442\",\n               \"#0072B2\", \"#D55E00\", \"#CC79A7\", \"#000000\")\n\nmovies |&gt;\n  filter(genre %in% c(\"Drama\", \"Comedy\", \"Documentary\", \"Horror\")) |&gt;\n  ggplot(aes(x = imdb_rating, y = audience_score, color = genre)) +\n  geom_point(alpha = 0.7) +\n  scale_color_manual(values = okabe_ito)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nTipFewer colors, used on purpose\n\n\n\nThe strongest color design is often gray plus one accent: mute everything except the group you want the reader to see (see Section 8)."
   },
   {
     "objectID": "W05L09_handout.html#legends",
@@ -1292,14 +1292,14 @@
     "href": "W05L09_handout.html#themes-and-saving",
     "title": "Session 3 Handout: Plots That Tell the Truth",
     "section": "5.5 Themes and saving",
-    "text": "5.5 Themes and saving\nA theme controls everything that is not data: background, gridlines, fonts.\n\np2 +\n  theme_minimal(base_size = 12) +\n  theme(legend.position = \"bottom\")\n\n\n\n\n\n\n\n\ntheme_minimal(), theme_bw(), and theme_classic() change the whole look. theme() adjusts individual details, for example theme(axis.text.x = element_text(angle = 45, hjust = 1)) for tilted labels. Use base_size to scale all text at once.\nSave a plot with ggsave(). Set the size and resolution yourself:\n\nggsave(\"audience_vs_imdb.png\", p, width = 8, height = 4.5, dpi = 300)\n\nIn a Quarto document, set figure size per chunk with #| fig-width: 8 and #| fig-height: 4, and describe the figure for screen readers with #| fig-alt: \"Scatter plot of ...\"."
+    "text": "5.5 Themes and saving\nA theme controls everything that is not data: background, gridlines, fonts.\n\np +\n  theme_minimal(base_size = 12) +\n  theme(legend.position = \"bottom\")\n\n\n\n\n\n\n\n\ntheme_minimal(), theme_bw(), and theme_classic() change the whole look. theme() adjusts individual details, for example theme(axis.text.x = element_text(angle = 45, hjust = 1)) for tilted labels. Use base_size to scale all text at once.\nSave a plot with ggsave(). Set the size and resolution yourself:\n\nggsave(\"audience_vs_imdb.png\", p, width = 8, height = 4.5, dpi = 300)\n\nIn a Quarto document, set figure size per chunk with #| fig-width: 8 and #| fig-height: 4, and describe the figure for screen readers with #| fig-alt: \"Scatter plot of ...\"."
   },
   {
     "objectID": "W05L09_handout.html#truncated-bar-axes",
     "href": "W05L09_handout.html#truncated-bar-axes",
     "title": "Session 3 Handout: Plots That Tell the Truth",
     "section": "6.1 Truncated bar axes",
-    "text": "6.1 Truncated bar axes\nA bar encodes its value by its length, so the baseline must be zero. Zooming a bar chart makes small differences look large.\n\nggplot(by_rating, aes(x = mpaa_rating, y = avg)) +\n  geom_col() +\n  coord_cartesian(ylim = c(50, 80))\n\n\n\n\n\n\n\n\nHere “Unrated” looks several times taller than “PG-13”, although 78.5 versus 56.7 is a ratio of about 1.4. There are three more problems: the order is alphabetical, nothing shows that NC-17 is the average of only 2 movies, and the label avg means nothing to a reader.\nAn honest version starts at zero, sorts by value, shows n, and labels the axes:\n\nggplot(by_rating, aes(x = avg, y = fct_reorder(mpaa_rating, avg))) +\n  geom_col(fill = \"#6d8d24\") +\n  geom_text(aes(label = paste0(\"n = \", n)), hjust = -0.1) +\n  scale_x_continuous(limits = c(0, 100)) +\n  labs(x = \"Average audience score (0 to 100)\", y = NULL,\n       title = \"Average audience score by MPAA rating\")"
+    "text": "6.1 Truncated bar axes\nA bar encodes its value by its length, so the baseline must be zero. Zooming a bar chart makes small differences look large.\n\nggplot(by_rating, aes(x = mpaa_rating, y = avg)) +\n  geom_col() +\n  coord_cartesian(ylim = c(50, 80))\n\n\n\n\n\n\n\n\nHere “Unrated” looks several times taller than “PG-13”, although 78.5 versus 56.7 is a ratio of about 1.4. There are three more problems: the order is alphabetical, nothing shows that NC-17 is the average of only 2 movies, and the label avg means nothing to a reader.\nAn honest version starts at zero, sorts by value, shows n, and labels the axes:\n\nggplot(by_rating, aes(x = avg, y = fct_reorder(mpaa_rating, avg))) +\n  geom_col(fill = \"#6d8d24\") +\n  geom_text(aes(label = paste0(\"n = \", n)), hjust = -0.1) +\n  scale_x_continuous(limits = c(0, 100)) +\n  labs(x = \"Average audience score (0 to 100)\", y = NULL,\n       title = \"Average audience score by MPAA rating\")\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nNotePoints do not need a zero baseline\n\n\n\nThe zero-baseline rule is for bars. A dot or line chart encodes value by position, so zooming to the range of the data is fine, as long as the axis labels make it visible."
   },
   {
     "objectID": "W05L09_handout.html#averages-without-sizes",
@@ -2084,5 +2084,103 @@
     "title": "Plots That Tell the Truth",
     "section": "Combine plots with patchwork",
     "text": "Combine plots with patchwork\n\n# install.packages(\"patchwork\")  # once\nlibrary(patchwork)\n\np1 &lt;- ggplot(movies, aes(audience_score)) + geom_histogram(binwidth = 5)\np2 &lt;- ggplot(movies, aes(critics_score)) + geom_histogram(binwidth = 5)\n\np1 / p2          # stacked"
+  },
+  {
+    "objectID": "W05L09_handout.html#prompting-for-a-plot",
+    "href": "W05L09_handout.html#prompting-for-a-plot",
+    "title": "Session 3 Handout: Plots That Tell the Truth",
+    "section": "6.5 Prompting for a plot",
+    "text": "6.5 Prompting for a plot\nAn AI assistant gives you what you ask for, so a vague prompt gets a plot that runs but may not be honest. A good plot prompt names five things:\n\nData: the data frame and the exact column names (the AI cannot see your data unless you tell it).\nMessage: what the reader should see.\nForm: the geom, and the order of the categories.\nHonesty rules: a zero baseline for bars, n shown, labels with units, color-blind safe colors.\nOutput: “Return only ggplot2 code” (so you can paste and run it).\n\n\n\n\n\n\n\n\n\nPrompt\n\n\n\n\nWeak\n“Make a bar chart of average audience score by rating.”\n\n\nStrong\n“Using the data frame by_rating (columns mpaa_rating, avg, n), make a horizontal bar chart of avg, sorted from high to low. Start the axis at 0 and write n = at the end of each bar. Label the axis with units and give the plot a title that states the finding. Return only ggplot2 code.”\n\n\n\nThe weak prompt tends to produce the truncated, alphabetical, unlabeled chart from Section 6.1. The strong prompt produces something close to the honest version.\n\n\n\n\n\n\nTipDescribe the problem in your own words, not just the fix\n\n\n\nWhen a result is wrong, say what is wrong and what you want: “The bars start at 50, which exaggerates the differences. Start the axis at 0.” Paste the exact error message or warning when there is one, and tell the AI which package versions you use if the code fails."
+  },
+  {
+    "objectID": "W05L09_handout.html#assessing-what-comes-back",
+    "href": "W05L09_handout.html#assessing-what-comes-back",
+    "title": "Session 3 Handout: Plots That Tell the Truth",
+    "section": "6.6 Assessing what comes back",
+    "text": "6.6 Assessing what comes back\nWhatever the AI returns, apply the Audit Loop:\n\nRead the code. Is every column name one that exists? Are mappings inside aes() and fixed settings outside?\nRun it, and read every warning and error.\nRestate: what does the plot claim, and what does its title claim? Are those the same?\nRefine with a more specific prompt, or Reject the result.\n\nTry it. An AI was asked, “Show how critics and audiences rate genres differently, with a title,” and returned this:\n\ngap &lt;- movies |&gt;\n  summarize(critics = mean(critics_score), audience = mean(audience_score), .by = genre) |&gt;\n  mutate(gap = audience - critics)\n\ngap |&gt;\n  ggplot(aes(x = genre, y = gap, group = 1)) +\n  geom_line(size = 1) +\n  labs(title = \"Audiences always rate movies higher than critics\")\n\n#&gt; Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.\n#&gt; i Please use `linewidth` instead.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nWarningAudit it: code that runs, with a claim that does not hold\n\n\n\n\nCode: size for lines is deprecated (use linewidth), and group = 1 forces one line through unrelated categories.\nPlot: a line implies a trend from one genre to the next, but genres have no order. They are alphabetical, the labels collide, and the axis label is the column name gap. It also plots only the difference, so you cannot see either score.\nTitle: “always” is false. For Documentary the gap is about -3.6 (critics rate higher), and for several genres it is near zero.\n\n\n\nSection 8.1 shows the kind of plot a good prompt should lead to."
+  },
+  {
+    "objectID": "W05L09_slides.html#task-1-code-it",
+    "href": "W05L09_slides.html#task-1-code-it",
+    "title": "Plots That Tell the Truth",
+    "section": "Task 1: code it",
+    "text": "Task 1: code it\nAn AI was asked: “Make the points blue.” It wrote:\n\nggplot(movies, aes(x = imdb_rating, y = audience_score)) +\n  geom_point(aes(color = \"blue\"))\n\n\nCode it (4 min). Run it. Are the points blue? Fix it, then add a straight trend line (no band) and axis labels with units.\n\n\nTASK 1 of 3 (CODE IT). Give 4 minutes; walk the room. Expected fix: move color outside aes(), add geom_smooth(method = “lm”, se = FALSE), add labs(x = “IMDB rating (0 to 10)”, y = “Audience score (0 to 100)”). Answer: the points are NOT blue. They are the default first palette color (a salmon red), and there is a legend entry labeled “blue”. Inside aes(), “blue” is just the text of a category, so ggplot2 maps it to a color like any other label. Common stuck points: forgetting the + at the end of a line, putting color = “blue” still inside aes(), method = lm without quotes. Students who finish early: make the trend line orange (#f68b1f) and the points transparent."
+  },
+  {
+    "objectID": "W05L09_slides.html#one-way-to-finish-it",
+    "href": "W05L09_slides.html#one-way-to-finish-it",
+    "title": "Plots That Tell the Truth",
+    "section": "One way to finish it",
+    "text": "One way to finish it\n\nggplot(movies, aes(x = imdb_rating, y = audience_score)) +\n  geom_point(color = \"blue\", alpha = 0.4) +\n  geom_smooth(method = \"lm\", se = FALSE) +\n  labs(x = \"IMDB rating (0 to 10)\", y = \"Audience score (0 to 100)\")"
+  },
+  {
+    "objectID": "W05L09_slides.html#prompting-for-a-plot",
+    "href": "W05L09_slides.html#prompting-for-a-plot",
+    "title": "Plots That Tell the Truth",
+    "section": "Prompting for a plot",
+    "text": "Prompting for a plot\nA good plot prompt names five things:\n\nData: the data frame and the exact column names\nMessage: what the reader should see\nForm: the geom, and the order of the categories\nHonesty rules: zero baseline for bars, show n, labels with units\nOutput: “Return only ggplot2 code”"
+  },
+  {
+    "objectID": "W05L09_slides.html#a-weak-prompt-and-a-strong-prompt",
+    "href": "W05L09_slides.html#a-weak-prompt-and-a-strong-prompt",
+    "title": "Plots That Tell the Truth",
+    "section": "A weak prompt and a strong prompt",
+    "text": "A weak prompt and a strong prompt\nWeak: “Make a bar chart of average audience score by rating.”\n\nStrong: “Using the data frame by_rating (columns mpaa_rating, avg, n), make a horizontal bar chart of avg, sorted from high to low. Start the axis at 0 and write n = at the end of each bar. Label the axis with units and give the plot a title that states the finding. Return only ggplot2 code.”"
+  },
+  {
+    "objectID": "W05L09_slides.html#task-2-prompt-it",
+    "href": "W05L09_slides.html#task-2-prompt-it",
+    "title": "Plots That Tell the Truth",
+    "section": "Task 2: prompt it",
+    "text": "Task 2: prompt it\n\nggplot(by_rating, aes(x = mpaa_rating, y = avg)) +\n  geom_col() +\n  coord_cartesian(ylim = c(50, 80))\n\n\n\n\n\n\n\n\n\nPrompt it (7 min). List the problems, prompt your AI to fix them, run its code, and check it against the checklist.\n\n\nTASK 2 of 3 (PROMPT IT). Give 7 minutes: 2 to list problems, 3 to write and send the prompt and run the code, 2 to check the result against the checklist. This plot is what the weak prompt produces. Ask two or three students to read their prompt aloud and say what the AI got wrong or right. Things to listen for: did they name the columns, say zero baseline, ask for n, ask for sorting? Did the AI ignore any instruction (a common one: it adds n to the axis label but still truncates the axis)? Students must run the code and look, not just read it. Problems: (1) the y axis starts at 50, so bar heights are not proportional to the values (bars encode value by length); (2) NC-17 is the average of only 2 movies, and no n is shown; (3) categories are in alphabetical order, not sorted by the value; (4) no title or axis labels (y is “avg”); (5) a bar chart of averages hides the spread."
+  },
+  {
+    "objectID": "W05L09_slides.html#chart-audit-checklist-1",
+    "href": "W05L09_slides.html#chart-audit-checklist-1",
+    "title": "Plots That Tell the Truth",
+    "section": "Chart audit checklist",
+    "text": "Chart audit checklist\n\nAxis: do bars start at zero?\nSize: is n visible for averages?\nOrder: is it meaningful, not alphabetical?\nColor: few colors, color-blind safe?\nLabels: units, a title that says something?\nScale: log or zoom? Is it stated?"
+  },
+  {
+    "objectID": "W05L09_slides.html#plot-the-missingness-flex",
+    "href": "W05L09_slides.html#plot-the-missingness-flex",
+    "title": "Plots That Tell the Truth",
+    "section": "Plot the missingness (FLEX)",
+    "text": "Plot the missingness (FLEX)\n\nggplot(missing_by_col, aes(x = n_missing, y = fct_reorder(column, n_missing))) +\n  geom_col(fill = \"#6d8d24\") +\n  labs(x = \"Missing values\", y = NULL)\n\n\n\n\n\n\n\n\nThe dvd_rel_* columns are missing for the same 8 films."
+  },
+  {
+    "objectID": "W05L09_slides.html#task-3-the-ais-answer",
+    "href": "W05L09_slides.html#task-3-the-ais-answer",
+    "title": "Plots That Tell the Truth",
+    "section": "Task 3: the AI’s answer",
+    "text": "Task 3: the AI’s answer\nAsked: “Show how critics and audiences rate genres differently, with a title.”\n\ngap |&gt;\n  ggplot(aes(x = genre, y = gap, group = 1)) +\n  geom_line(size = 1) +\n  labs(title = \"Audiences always rate movies higher than critics\")"
+  },
+  {
+    "objectID": "W05L09_slides.html#task-3-assess-it",
+    "href": "W05L09_slides.html#task-3-assess-it",
+    "title": "Plots That Tell the Truth",
+    "section": "Task 3: assess it",
+    "text": "Task 3: assess it\n\nAssess it (5 min). Run the code, then Read, Run, Restate.\n\n\nWhat is wrong with the code?\nWhat is wrong with the plot?\nIs the title true?\nWrite the prompt you would send back.\n\n\nTASK 3 of 3 (ASSESS IT). Give 5 minutes. Students run the code (gap is defined in the setup slide). Running it also prints a warning that size is deprecated for lines (use linewidth). Problems: CODE: size = 1 is deprecated for lines (linewidth); group = 1 forces a line through unrelated categories. PLOT: a line implies a trend from one genre to the next, but genres have no order; alphabetical order; x labels crowd; y axis is the column name “gap” with no units or zero reference; it plots only the difference, so the reader cannot see the two scores; no n. TITLE: “always” is false: the gap is negative for Documentary (critics higher, about -3.6) and tiny for several genres; the plot shows an average difference, not “always” and says nothing about why. A good return prompt: “Using gap (columns genre, critics, audience, gap), make a horizontal dot plot with one dot for critics and one for audience per genre, sorted by gap. Highlight the genres where the gap is above 10 points. Title states the finding without words like always. Label the axis ‘Average score (0 to 100)’. Return only ggplot2 code.” Collect two or three headlines and prompts. Next slides show our version. Genres with the biggest gaps (audience minus critics): Art House & International and Action & Adventure (12.4), Animation (12.2), Comedy (11.6)."
+  },
+  {
+    "objectID": "W05L09_slides.html#what-was-wrong",
+    "href": "W05L09_slides.html#what-was-wrong",
+    "title": "Plots That Tell the Truth",
+    "section": "What was wrong",
+    "text": "What was wrong\n\nCode: size for lines is deprecated (linewidth), and group = 1 joins unrelated genres\nPlot: a line implies a trend across genres, order is alphabetical, labels collide, gap is not a label\nTitle: “always” is false. Documentary goes the other way\n\n\nThe code ran. The claim was the bug."
+  },
+  {
+    "objectID": "W05L09_slides.html#a-better-answer",
+    "href": "W05L09_slides.html#a-better-answer",
+    "title": "Plots That Tell the Truth",
+    "section": "A better answer",
+    "text": "A better answer\n\ngap |&gt;\n  mutate(big = gap &gt; 10) |&gt;\n  ggplot(aes(y = fct_reorder(genre, gap))) +\n  geom_segment(aes(x = critics, xend = audience, yend = genre, color = big),\n               linewidth = 1.5) +\n  geom_point(aes(x = critics), color = \"grey40\", size = 3) +\n  geom_point(aes(x = audience), color = \"#41b641\", size = 3) +\n  scale_color_manual(values = c(\"grey80\", \"#f68b1f\"), guide = \"none\") +\n  labs(title = \"Critics score four genres about 12 points below audiences\",\n       subtitle = \"Grey dot: critics. Dark green dot: audience.\",\n       x = \"Average score\", y = NULL) +\n  theme_minimal()"
+  },
+  {
+    "objectID": "W05L09_slides.html#four-things-to-remember",
+    "href": "W05L09_slides.html#four-things-to-remember",
+    "title": "Plots That Tell the Truth",
+    "section": "Four things to remember",
+    "text": "Four things to remember\n\nGrammar: data, aesthetics, geoms, layered with +. Inside aes() means data, outside means fixed.\nChoose the geom from the question, then audit the plot: axis, n, order, color, labels.\nA plot is a diagnostic and a message: find the problem, then state the finding.\nPrompt with data, message, form, and honesty rules. Assess what comes back: run it and look."
   }
 ]
