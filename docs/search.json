@@ -2174,7 +2174,7 @@
     "href": "W05L09_slides.html#a-better-answer",
     "title": "Plots That Tell the Truth",
     "section": "A better answer",
-    "text": "A better answer\n\ngap |&gt;\n  mutate(big = gap &gt; 10) |&gt;\n  ggplot(aes(y = fct_reorder(genre, gap))) +\n  geom_segment(aes(x = critics, xend = audience, yend = genre, color = big),\n               linewidth = 1.5) +\n  geom_point(aes(x = critics), color = \"grey40\", size = 3) +\n  geom_point(aes(x = audience), color = \"#41b641\", size = 3) +\n  scale_color_manual(values = c(\"grey80\", \"#f68b1f\"), guide = \"none\") +\n  labs(title = \"Critics score four genres about 12 points below audiences\",\n       subtitle = \"Grey dot: critics. Dark green dot: audience.\",\n       x = \"Average score\", y = NULL) +\n  theme_minimal()"
+    "text": "A better answer\n\ngap |&gt;\n  mutate(big = gap &gt; 10) |&gt;\n  ggplot(aes(y = fct_reorder(genre, gap))) +\n  geom_segment(aes(x = critics, xend = audience, yend = genre, color = big),\n               linewidth = 1.5) +\n  geom_point(aes(x = critics), color = \"#56B4E9\", size = 3) +\n  geom_point(aes(x = audience), color = \"#009E73\", size = 3) +\n  scale_color_manual(values = c(\"grey80\", \"#f68b1f\"), guide = \"none\") +\n  labs(title = \"Critics score four genres about 12 points below audiences\",\n       subtitle = \"Blue dot: critics. Green dot: audience.\",\n       x = \"Average score\", y = NULL) +\n  theme_minimal(base_size = 15)"
   },
   {
     "objectID": "W05L09_slides.html#four-things-to-remember",

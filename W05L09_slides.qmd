@@ -622,13 +622,13 @@ gap |>
   ggplot(aes(y = fct_reorder(genre, gap))) +
   geom_segment(aes(x = critics, xend = audience, yend = genre, color = big),
                linewidth = 1.5) +
-  geom_point(aes(x = critics), color = "grey40", size = 3) +
-  geom_point(aes(x = audience), color = "#41b641", size = 3) +
+  geom_point(aes(x = critics), color = "#56B4E9", size = 3) +
+  geom_point(aes(x = audience), color = "#009E73", size = 3) +
   scale_color_manual(values = c("grey80", "#f68b1f"), guide = "none") +
   labs(title = "Critics score four genres about 12 points below audiences",
-       subtitle = "Grey dot: critics. Dark green dot: audience.",
+       subtitle = "Blue dot: critics. Green dot: audience.",
        x = "Average score", y = NULL) +
-  theme_minimal()
+  theme_minimal(base_size = 15)
 ```
 
 ## The story version
