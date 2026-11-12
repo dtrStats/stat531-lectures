@@ -1,18 +1,772 @@
 ---
-title: "Session 6 Handout: Data Cleaning 2: Types, Anomalies, and Missingness"
-description: "Dates, sentinels, outliers, missing-data mechanisms, and validation rules"
+title: "Session 6 Handout: Types, Anomalies, and Missingness"
+subtitle: "Reference companion to the Session 6 slides"
+author: "DTR"
+description: "Full reference for the second half of data cleaning: parsing mixed dates, sentinels, outliers by domain rules and plots, validity rules as code, missing-data mechanisms, and judging an imputation by the distribution, with Audit it boxes and practice"
 date: 2026-11-18
 categories: [Handout]
-format: html
-draft: true
+format:
+  html:
+    number-sections: true
+    title-block-banner: "#213921"
+    title-block-banner-color: "#ffffff"
+    fig-width: 8
+    fig-height: 4
+    fig-dpi: 110
+    fig-align: center
 ---
 
-## Planned outline
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", message = FALSE, warning = FALSE)
+library(tidyverse)
+library(lubridate)
+options(tibble.print_max = 9, tibble.print_min = 9, width = 90, cli.unicode = FALSE)
+theme_set(theme_grey(base_size = 12))
 
-- lubridate and mixed timestamp formats
-- Sentinels with na_if(); outliers by domain rules plus plots
-- Missingness: MCAR / MAR / MNAR; document vs. impute; a first look at mice
-- Validation rules with pointblank; unit tests with testthat
-- Judging imputation by distributional recovery, not row-level match
+vitals    <- read_csv("data/s6_vitals.csv", show_col_types = FALSE)
+users     <- read_csv("data/s6_users.csv", show_col_types = FALSE)
+steps_sim <- read_csv("data/s6_steps_sim.csv", show_col_types = FALSE)
 
-*Draft: remove `draft: true` from the top of this file to publish it.*
+zs <- function(x) (x - mean(x, na.rm = TRUE)) / sd(x, na.rm = TRUE)
+iqr_flag <- function(x) {
+  q <- quantile(x, c(.25, .75), na.rm = TRUE)
+  x < q[1] - 1.5 * diff(q) | x > q[2] + 1.5 * diff(q)
+}
+```
+
+# How to use this handout
+
+The slides move fast. This handout is the slow, complete version: read it before class, and return to it when you clean a column.
+
+Session 6 is the second of two sessions on **data cleaning**. Session 5 covered text. Today covers **dates, numbers, and holes**: timestamps in many formats, numbers that secretly mean "nothing", values that are impossible or merely unusual, rules a table must obey, and missing values.
+
+The pattern from Session 5 continues: an AI assistant can make a column **look** complete or tidy in one line, and quietly damage it. **Audit it** boxes show these mistakes. The habit to keep is: **flag first, fix second, and compare before and after.**
+
+::: {.callout-note title="The Audit Loop, for numbers and holes"}
+1. **Read** the code. What happens to the `NA` values? To the extremes?
+2. **Run** it, and compare the summary **before and after** (counts, mean, spread, group means).
+3. **Restate** what changed and who it changed for.
+4. **Refine** it or **Reject** it. Log the decision.
+:::
+
+**Setup.** The examples use three small files, all on the course site in the `data/` folder: `s6_vitals.csv` (heart rate and steps with sentinels), `s6_users.csv` (ten records that break known rules), and `s6_steps_sim.csv` (a **simulation**, where the true steps are known). You need `tidyverse` and `lubridate` (both come with, or alongside, the tidyverse install), and `mice` for the imputation section.
+
+```{r}
+#| eval: false
+library(tidyverse)
+library(lubridate)
+vitals    <- read_csv("data/s6_vitals.csv")
+users     <- read_csv("data/s6_users.csv")
+steps_sim <- read_csv("data/s6_steps_sim.csv")
+```
+
+# Dates and types
+
+A column's **type** decides what you can do with it. Text sorts alphabetically, not numerically or chronologically.
+
+```{r}
+sort(c("10", "9", "100"))
+sort(c("2026-01-10", "2026-01-9", "2026-01-100"))
+```
+
+ISO dates (`2026-01-05`, year first, two-digit month and day) happen to sort correctly as text. Everything else does not. Dates should be stored as dates, so that you can sort, subtract, and group them.
+
+## One column, many formats
+
+```{r}
+ts_raw <- c("2026-01-05 07:30", "01/05/2026 7:30 AM", "5 Jan 2026 07:30",
+            "2026-01-05T07:30:00Z", "Jan 5, 2026", "yesterday")
+ts_raw
+```
+
+These might come from different devices, from different export tools, or from people typing. A single parsing function only understands the formats it was written for.
+
+```{r}
+ymd_hms(ts_raw, quiet = TRUE)
+sum(is.na(ymd_hms(ts_raw, quiet = TRUE)))
+```
+
+Five of six values became `NA`. There was no error. `quiet = TRUE` hides the warning, but even with the warning, a script that keeps going has silently discarded most of the column.
+
+::: {.callout-warning title="Audit it: a parser that loses most of the column"}
+An AI may write `mutate(ts = ymd_hms(ts_raw))`, run it, and move on. After **any** parse, count the failures: `sum(is.na(parsed)) - sum(is.na(original))` is the number of values the parser could not read. If it is more than a handful, the format list is incomplete.
+:::
+
+## Give it a list of orders
+
+`parse_date_time()` takes several **orders**, each a pattern of date and time pieces: `Y` year, `m` month number, `b` month abbreviation, `d` day, `H` hour (24-hour), `I` hour (12-hour), `M` minute, `p` AM/PM, `z` time zone offset.
+
+```{r}
+parsed <- parse_date_time(ts_raw, tz = "UTC", quiet = TRUE,
+  orders = c("Ymd HM", "mdY IMp", "dbY HM", "YmdHMSz", "bdY"))
+tibble(ts_raw, parsed, ok = !is.na(parsed))
+```
+
+Now inspect what **did not** parse:
+
+```{r}
+tibble(ts_raw, parsed) |> filter(is.na(parsed))
+```
+
+`"yesterday"` is not a date, and no list of orders should make it one. It stays `NA` and gets **flagged**. Never fill it in with a guess.
+
+Notice also `"Jan 5, 2026"`: it parsed, but with no time, so it became midnight (`00:00:00`). A missing time of day was turned into a specific time. Whether that matters depends on the analysis, so say it in your log.
+
+## The day-month trap
+
+```{r}
+d <- c("01/05/2026", "13/05/2026", "05/05/2026", "02/11/2026")
+a <- as.numeric(str_extract(d, "^\\d+"))
+b <- as.numeric(str_extract(d, "(?<=/)\\d+"))
+tibble(d, ambiguous = a <= 12 & b <= 12 & a != b)
+```
+
+`01/05/2026` is January 5 in the US and May 1 in most other places. When both numbers are 12 or less, **no code can tell**. `13/05/2026` can only be day first, which is a clue that the source uses day first, but a single clue is not proof for the others.
+
+```{r}
+mdy("01/05/2026")
+dmy("01/05/2026")
+```
+
+The honest procedure:
+
+1. Count how many values are ambiguous.
+2. Look for a clue in the data (a value with a first number above 12, which proves the format).
+3. Ask the source which convention each device or system used, then set the order **per source**.
+4. If you cannot find out, leave the ambiguous rows `NA` and flagged.
+
+::: {.callout-warning title="Audit it: `parse_date_time()` picks one format for the whole column"}
+If you list both `"mdY"` and `"dmY"`, lubridate chooses the order that parses the **most values in the vector**, then applies it to all of them. One unambiguous day-first value such as `13/05/2026` is enough to make the whole column day first, and `01/05/2026` silently becomes May 1, even if it came from a device that writes month first.
+
+```{r}
+x <- c("01/05/2026", "13/05/2026")
+parse_date_time(x, orders = c("mdY", "dmY"), quiet = TRUE)
+```
+
+Every value parses and nothing warns you. Parse **one source at a time**, list only the orders you have evidence for, and keep the ambiguous rows flagged.
+:::
+
+## Time zones
+
+```{r}
+t <- ymd_hms("2026-01-05 07:30:00", tz = "America/Los_Angeles")
+t
+with_tz(t, "UTC")
+force_tz(t, "UTC")
+```
+
+- `with_tz()` keeps the **instant** and changes how it is displayed.
+- `force_tz()` keeps the **clock reading** and changes the zone, which moves the instant. It is for repairing a timestamp that was labeled with the wrong zone.
+
+Mixing them up shifts data by hours. A good default is to store **UTC**, and convert only for display.
+
+# Sentinels and missing markers
+
+## Four kinds of "nothing"
+
+| Looks like | What it is |
+|:--|:--|
+| `NA` | R's missing value |
+| `NaN` | "not a number", the result of `0/0` |
+| `""`, `"n/a"`, `"NULL"` | text pretending to be a value |
+| `-999`, `-1`, `9999` | a **sentinel**: a number that means "no data" |
+
+`NULL` is a different thing: it means "no object at all", and it cannot be an element of a data frame column.
+
+```{r}
+x <- c(1, NA, 0 / 0)
+is.na(x)
+is.nan(x)
+```
+
+`is.na()` is `TRUE` for both `NA` and `NaN`. `is.nan()` is `TRUE` only for `NaN`.
+
+## A sentinel ruins a summary
+
+```{r}
+summary(vitals$hr)
+```
+
+The mean heart rate is about 41. A heart that slow does not exist. The `-999` values pulled the mean down, and nothing errored.
+
+## Find them: look at the extremes
+
+```{r}
+vitals |>
+  filter(hr < 30 | hr > 220) |>
+  count(hr, sort = TRUE)
+```
+
+Three different things share this table: `-999` (a sentinel, repeated many times), `0` (impossible, and possibly a failed reading), and `300` (impossible, and possibly a typo). Repetition of one odd value is the signature of a **code**. A sentinel is a decision someone made when the data was recorded.
+
+A histogram helps too, because a sentinel shows up as an isolated spike far from everything else.
+
+```{r}
+#| fig-height: 3
+ggplot(vitals, aes(x = hr)) +
+  geom_histogram(binwidth = 10, fill = "#6d8d24", color = "white")
+```
+
+## Turn sentinels into `NA`
+
+```{r}
+vit_na <- vitals |> mutate(hr = na_if(hr, -999), steps = na_if(steps, -1))
+colSums(is.na(vit_na))
+```
+
+When you read a file, you can name the sentinels up front:
+
+```{r}
+#| eval: false
+read_csv("vitals.csv", na = c("", "NA", "n/a", "-999"))
+```
+
+::: {.callout-tip title="The data dictionary decides"}
+Is `-1` a sentinel? In a steps column, yes: nobody walks negative steps. In a temperature column, `-1` is a real reading. A pattern cannot tell the difference, and neither can an AI. **Check the data dictionary** (or ask the source), and write the sentinel list into your code as a decision.
+:::
+
+::: {.callout-warning title="Audit it: `filter()` deletes the rows, `na_if()` keeps them"}
+An AI may "remove the bad values" with `filter(hr != -999)`. That deletes **entire rows**, including their steps, their user, and their timestamp. It also loses the record that the value was missing. Use `na_if()` (or `mutate()`) to blank only the bad cell, and keep the row.
+:::
+
+# Bounds and outliers
+
+Separate two questions. **Can this value exist at all?** That is a domain rule. **Is it far from the others?** That is a statistical question. They get different actions.
+
+| Question | Tool |
+|:--|:--|
+| Can this value exist at all? | **Domain bound** (a rule you know) |
+| Is it far from the rest? | z-score or IQR rule |
+| Is it odd only in combination? | Derived feature or distance |
+
+A heart rate of **300** is impossible. A heart rate of **125** is unusual but possible.
+
+## Domain bounds: flag, do not delete
+
+```{r}
+vit <- vit_na |>
+  mutate(hr_flag = case_when(is.na(hr) ~ "missing",
+                             between(hr, 30, 220) ~ "ok",
+                             .default = "impossible"))
+count(vit, hr_flag)
+```
+
+Two details matter here. **The order of `case_when()` conditions matters**: the `is.na()` test must come first, because `between(NA, 30, 220)` is `NA`, not `FALSE`, and a row with an `NA` condition falls through to `.default`. And the row is **kept with a flag**: a later step decides what to do with `"impossible"` rows.
+
+```{r}
+c(raw_mean = mean(vitals$hr),
+  clean_mean = mean(vit$hr[vit$hr_flag == "ok"]))
+```
+
+The raw mean was off by about 30 beats per minute, from sentinels alone.
+
+## z-scores
+
+$$z = \frac{x - \bar{x}}{s}$$
+
+A z-score says how many standard deviations a value is from the mean. For roughly bell-shaped data, about 95% of values fall within 2 and about 99.7% within 3 (the 68-95-99.7 rule), so only about **0.3%** are beyond $|z| > 3$.
+
+```{r}
+hr_ok <- vit |> filter(hr_flag == "ok")
+c(n = nrow(hr_ok),
+  expected_beyond_3 = round(0.0027 * nrow(hr_ok), 1),
+  found = sum(abs(zs(hr_ok$hr)) > 3))
+```
+
+The count is close to what a bell curve gives, so nothing here is alarming. A z-score cutoff has to be read against the amount of data: with a million rows you **expect** about 2,700 values beyond 3.
+
+## The IQR rule
+
+The **interquartile range** (IQR) is the distance between the 25th and 75th percentiles. A value is flagged if it is more than $1.5 \times \text{IQR}$ below the first quartile or above the third. This is the rule boxplots use for their individual points.
+
+```{r}
+#| fig-height: 3
+steps_ok <- vit |> filter(!is.na(steps))
+ggplot(steps_ok, aes(x = steps)) +
+  geom_boxplot(fill = "#cfd82d", outlier.color = "#f68b1f")
+```
+
+## z or IQR? It depends on the shape
+
+```{r}
+tibble(variable   = c("hr (bell-shaped)", "steps (skewed)"),
+       z_beyond_3 = c(sum(abs(zs(hr_ok$hr)) > 3), sum(abs(zs(steps_ok$steps)) > 3)),
+       iqr_rule   = c(sum(iqr_flag(hr_ok$hr)), sum(iqr_flag(steps_ok$steps))),
+       n          = c(nrow(hr_ok), nrow(steps_ok)))
+```
+
+Steps are skewed: a few very active days stretch a long tail on the right. Both rules flag many of those days, and the IQR rule flags more, but these days are not errors. A z-score assumes a roughly symmetric, bell-shaped variable. For skewed data, look at the plot, and consider transforming (for example, with `log()`) before applying a rule.
+
+::: {.callout-warning title="Audit it: \"remove outliers\" deletes the interesting data"}
+An AI asked to "remove outliers" will often write `filter(abs(zs(x)) < 3)`. On a skewed variable like steps, that removes the long tail of legitimately active users. On a bell-shaped variable, it removes about 0.3% at random. Either way, it makes the column look tidier than reality, and it changes every later summary. **Flag** instead, then decide for each flagged value: impossible, or merely extreme?
+:::
+
+## Look in context
+
+For each flagged value, ask three questions.
+
+1. **Impossible?** A domain bound says so, and the value is an error: flag it, and decide whether to blank it.
+2. **Plausible but extreme?** Keep it. It may be your most informative data.
+3. **Repeated?** The same odd value many times points to a code or a default, not to a person.
+
+Outliers are questions, not verdicts.
+
+## Odd only in combination
+
+Some values look normal in every column and are impossible together. We simulate height and weight, which move together, and add one record.
+
+```{r}
+set.seed(7)
+hw <- tibble(h = round(rnorm(500, 170, 9))) |>
+  mutate(w = round(70 + 0.9 * (h - 170) + rnorm(500, 0, 9)))
+hw <- bind_rows(hw, tibble(h = 190, w = 45)) |>
+  mutate(id = row_number(), zh = zs(h), zw = zs(w),
+         bmi = w / (h / 100)^2, zb = zs(bmi),
+         md = mahalanobis(cbind(h, w), colMeans(cbind(h, w)), cov(cbind(h, w))))
+
+hw |> filter(id == 501) |> select(h, w, zh, zw, bmi, zb)
+```
+
+A height of 190 cm and a weight of 45 kg each have $|z| < 3$. Together they give a BMI of about 12.5, far below the normal range. A **derived feature** (here, BMI) catches what each column alone cannot.
+
+```{r}
+hw |> filter(abs(zb) > 3) |> select(id, h, w, bmi, zb)
+```
+
+Row 501 is the most extreme, and other rows appear too: with 501 records, a few are expected beyond $|z| > 3$. Flagged rows are candidates for a look, not automatic errors.
+
+## Mahalanobis distance (optional)
+
+One distance can summarize several variables at once, accounting for how they move together:
+
+$$D^2 = (x - \mu)^\top \Sigma^{-1} (x - \mu)$$
+
+For roughly multivariate normal data, $D^2$ follows a $\chi^2$ distribution with as many degrees of freedom as variables, which gives a cutoff.
+
+```{r}
+cutoff <- qchisq(.999, df = 2)
+round(cutoff, 1)
+hw |> filter(md > cutoff) |> select(id, h, w, md)
+```
+
+Only the planted record is flagged. This distance assumes roughly normal data, so use it as a screen rather than a test.
+
+# Validity rules
+
+## Dimensions of data quality
+
+| Dimension | The question |
+|:--|:--|
+| **Validity** | Does the data follow its defined rules? |
+| **Accuracy** | Is it close to the true value? |
+| **Consistency** | Does it agree with itself and with other tables? |
+| **Uniformity** | Same units and same format throughout? |
+| **Completeness** | Is everything we need present? |
+
+A value can be **valid and still wrong**: `120` is a valid heart rate, and it may still be false for that person. Validity is checkable by code. Accuracy usually is not.
+
+## Validity rules you can write as code
+
+| Rule type | Example |
+|:--|:--|
+| Data type | `age` is numeric |
+| Range | `age` between 0 and 120 |
+| Mandatory | `id` is never `NA` |
+| Unique | `id` appears once |
+| Set membership | `device` is `watch`, `band`, or `ring` |
+| Foreign key | every `device_id` exists in the device table (`anti_join()`) |
+| Pattern | `zip` is exactly five digits |
+| Cross-field | `end` is not before `start` |
+
+## Rules become counts
+
+Here are the ten `users` records. Each of the checks below should find something.
+
+```{r}
+users
+```
+
+```{r}
+users |>
+  summarize(
+    id_missing       = sum(is.na(id)),
+    id_duplicated    = sum(duplicated(id[!is.na(id)])),
+    age_range        = sum(!between(age, 0, 120), na.rm = TRUE),
+    device_set       = sum(!device %in% c("watch", "band", "ring")),
+    zip_pattern      = sum(!str_detect(zip, "^\\d{5}$"), na.rm = TRUE),
+    end_before_start = sum(end < start)
+  ) |>
+  pivot_longer(everything(), names_to = "rule", values_to = "failing")
+```
+
+A table of **failing counts** is a report you can rerun on every new file. Notice the decisions inside it:
+
+- **`NA` age**: not out of range. It is **missing**, which is a different problem. That is why `na.rm = TRUE`, and why completeness is its own rule.
+- **Duplicated `id`**: the count above is the number of **extra** copies (1). Counting both copies would give 2. Pick one, and say which.
+- **`"Watch"`**: invalid by the rule. You could case-fold first (Session 5) and flag the repair, or flag it as is.
+- **`97201-1234`**: malformed under a five-digit rule, but a valid ZIP+4. Either the rule or the value is wrong, and the data owner decides.
+
+::: {.callout-warning title="Audit it: a validation function that changes the data"}
+A rule checker should only **report**. An AI may return a function that also drops the failing rows, fixes the value, or fills it in "to be helpful". Then the check and the cleaning are fused, and you cannot tell what was changed. Ask for a function that returns a table of rules and counts, and verify that `nrow()` and the values of the input are unchanged afterwards.
+:::
+
+## Unit tests for cleaning code
+
+`testthat` turns a rule into a test that stops the script when the data breaks it.
+
+```{r}
+#| eval: false
+library(testthat)
+
+test_that("heart rate is in range after cleaning", {
+  expect_true(all(between(clean$hr, 30, 220), na.rm = TRUE))
+  expect_equal(sum(clean$hr == -999, na.rm = TRUE), 0)
+})
+```
+
+Run the tests after every cleaning step, and again on every new file. A failing test is cheaper than a wrong model.
+
+# Missingness
+
+## Why is it missing?
+
+| Type | Meaning | Example |
+|:--|:--|:--|
+| **Structural** | The value cannot exist | "Last pregnancy date" for a man |
+| **MCAR** (missing completely at random) | Unrelated to anything | A random sync failure |
+| **MAR** (missing at random) | Related to **other columns** | Old devices drop steps more often |
+| **MNAR** (missing not at random) | Related to the **missing value itself** | Heart rate drops out when it is high |
+
+MCAR is rare in real data. MAR and MNAR are the usual cases, and what is safe to do depends on which one you have. (A better name for MAR would be "conditionally at random": the missingness is random **given** the other columns.)
+
+## Diagnose: is missingness the same everywhere?
+
+The method is to make a **missingness indicator** (`TRUE` when the value is missing) and compare it across groups.
+
+```{r}
+steps_sim |>
+  summarize(missing = mean(is.na(steps)), n = n(), .by = device)
+```
+
+Legacy devices lose about half of their steps, new devices about 8%. That is not random.
+
+```{r}
+steps_sim |>
+  mutate(age_group = cut(age, c(0, 30, 40, 50, Inf))) |>
+  summarize(missing = mean(is.na(steps)), n = n(), .by = age_group) |>
+  arrange(age_group)
+```
+
+By age, the rate is about the same in every group: age is not what drives it here. Comparing groups tells you where to look, and where not to.
+
+::: {.callout-tip title="Describe, do not prove"}
+A pattern across **observed** columns can support MAR (missing depends on `device`). It can never prove MCAR, because you cannot see whether the missing values themselves are different. And it cannot reveal MNAR at all.
+:::
+
+## What dropping the rows does
+
+```{r}
+steps_sim |>
+  summarize(all_rows = mean(device == "legacy"),
+            complete_rows = mean(device[!is.na(steps)] == "legacy"))
+```
+
+Legacy devices are about 40% of the users but only about 26% of the complete rows. Dropping rows with `NA` removes legacy users first, so any model then learns mostly from new-device users. This is a **fairness-relevant** effect: the people with older devices (often older, or lower income) are quietly underrepresented.
+
+## MNAR leaves no trace
+
+If heart rate goes missing **because** it was high (the sensor fails during intense exercise, say), no other column shows it. The data that would reveal it is exactly the data that is missing. Only **context** can raise the suspicion. What you can do:
+
+- ask the source how the sensor behaves,
+- compare with another source of the same quantity,
+- run a **sensitivity analysis**: re-do the analysis under several assumptions about the missing values and see how much the answer changes.
+
+```{r}
+#| eval: false
+# naniar (optional) gives ready-made missingness plots
+library(naniar)
+gg_miss_var(steps_sim)       # missing values per column
+vis_miss(steps_sim)          # every cell: present or missing
+```
+
+# Imputation
+
+## Options, and the rule of thumb
+
+| Option | When it is reasonable |
+|:--|:--|
+| **Drop rows** | Few are missing (under about 5 to 10%) and the cause looks random |
+| **Drop the variable** | Mostly missing, and little value |
+| **Impute** | MAR, and the variable matters |
+| **Declare unusable** | Too much is missing, or MNAR with no way to check |
+
+Percentages like 5 to 10% are rules of thumb, not laws: what matters is **who** is missing, not only how many. And **never impute the label or the outcome** you want to predict: that feeds your own guess back in as if it were data.
+
+## Mean imputation: the tempting one
+
+```{r}
+mean_imp <- steps_sim |>
+  mutate(steps = if_else(is.na(steps), mean(steps, na.rm = TRUE), steps))
+
+c(true_sd = sd(steps_sim$steps_true), after_mean_imp = sd(mean_imp$steps))
+```
+
+The mean of the column stays where it was, which looks reassuring and proves nothing, because filling with the mean keeps the mean **by construction**. The spread shrinks: a quarter of the column now holds one repeated value.
+
+```{r}
+#| fig-height: 3
+bind_rows(truth = steps_sim |> transmute(steps = steps_true),
+          `mean imputed` = mean_imp |> select(steps), .id = "version") |>
+  ggplot(aes(x = steps, fill = version)) +
+  geom_density(alpha = 0.5, color = NA) +
+  scale_fill_manual(values = c("#6d8d24", "#f68b1f"), name = NULL)
+```
+
+The mean-imputed version has a spike at the center and thin tails. Intervals computed from it will be too narrow, and correlations too weak.
+
+## Multiple imputation with `mice`
+
+`mice` (multivariate imputation by chained equations) creates **several** completed datasets, to carry the uncertainty of not knowing the missing values.
+
+```{r}
+library(mice)
+dat <- steps_sim |> select(steps, device, age) |> mutate(device = factor(device))
+imp <- mice(dat, m = 5, method = "pmm", donors = 20, printFlag = FALSE, seed = 531)
+```
+
+- `m = 5`: five completed datasets.
+- `method = "pmm"` (predictive mean matching): each hole is filled with an **observed** value taken from a row with a similar prediction, so imputed values are always realistic values.
+- `donors = 20`: how many similar rows to draw from. A small donor pool can reuse a few rows over and over.
+- `seed`: so you get the same answer when you rerun.
+
+Then **analyze each dataset** and **pool** the results. For a simple summary, average across the datasets. For a model, `mice` pools for you:
+
+```{r}
+fit <- with(imp, lm(steps ~ device + age))
+summary(pool(fit))
+```
+
+`pool()` combines the five fits using Rubin's rules, so the standard errors reflect both the usual sampling error and the extra uncertainty from imputation.
+
+## Judge it by the distribution
+
+In this simulation we know the true steps, so we can score each method.
+
+```{r}
+stats <- \(x) c(mean = mean(x), sd = sd(x))
+pooled <- sapply(1:5, \(i) stats(complete(imp, i)$steps))
+
+rbind(truth           = stats(steps_sim$steps_true),
+      `drop rows`     = stats(na.omit(steps_sim$steps)),
+      `mean imputed`  = stats(mean_imp$steps),
+      `mice (pooled)` = rowMeans(pooled)) |> round()
+```
+
+Dropping rows overstates the mean (the legacy users, who walk less, are missing most). Mean imputation keeps that biased mean and shrinks the spread. `mice` recovers both.
+
+By group:
+
+```{r}
+by_device <- function(d, nm) d |> summarize(mean = mean(steps), .by = device) |> mutate(version = nm)
+bind_rows(
+  by_device(steps_sim |> mutate(steps = steps_true), "truth"),
+  by_device(steps_sim |> filter(!is.na(steps)), "drop rows"),
+  by_device(mean_imp, "mean imputed"),
+  by_device(complete(imp, 1) |> as_tibble() |> mutate(device = as.character(device)), "mice (1 of 5)")
+) |>
+  pivot_wider(names_from = device, values_from = mean) |>
+  mutate(across(c(legacy, new), round))
+```
+
+Mean imputation gives legacy users the overall average, which is far above what they actually walk, and pulls the two groups toward each other.
+
+::: {.callout-tip title="With real data there is no truth column"}
+Here we scored against `steps_true`. Real data never has it. What you **can** do instead:
+
+1. Compare the distribution before and after imputation (same shape, same spread?).
+2. Compare **group means** before and after: does any group move a lot?
+3. Compare imputed values with observed ones: are they plausible for that group?
+4. Run the analysis on several imputed datasets: does the answer change a lot between them?
+
+You can never check a single imputed value against the truth. You can check whether the **distribution** recovered.
+:::
+
+::: {.callout-warning title="Audit it: a complete column is not a correct column"}
+An AI asked to "fill in the missing steps so the column is complete" returned this:
+
+```{r}
+steps_sim |>
+  mutate(steps = if_else(is.na(steps), mean(steps, na.rm = TRUE), steps)) |>
+  summarize(mean = mean(steps), sd = sd(steps), missing = sum(is.na(steps)))
+```
+
+and then wrote: "No missing values remain, and the mean is unchanged, so no bias was introduced." Apply the Audit Loop:
+
+- **"The mean is unchanged"** is guaranteed by the method, so it proves nothing. And that mean is **already biased**: legacy users, who walk less, are under-represented among the observed values.
+- The **spread shrinks** (the standard deviation falls well below the true one), so later intervals will be too narrow.
+- **Legacy users** are filled with the average of mostly new-device users.
+- The claim sounds like a check, but it is not one.
+
+A better prompt: "Steps are missing more often for legacy devices. Use `mice` with `device` and `age` as predictors, five imputations, `pmm`. Then compare the mean and standard deviation of steps, overall and by device, before and after, and report any group whose mean moves by more than 5%."
+:::
+
+# Assessing what comes back
+
+Whatever the AI returns for a cleaning task, apply the Audit Loop, plus these checks.
+
+1. **Count before, count after**: rows, `NA` values, distinct values, and the summary (mean, spread) of each touched column.
+2. **Who did it change?** Compare group means and group sizes before and after. The people with the most missing data are rarely a random sample.
+3. **Is the claim a check?** A statement like "the mean is unchanged" or "no missing values remain" may be true by construction. Ask what could have made it false.
+4. **Did it only report, or also change?** A check should not modify the data.
+
+# Practice problems
+
+Try each one before opening the solution.
+
+**1. Parse and count.** Parse `c("2026-03-01 08:15", "03/02/2026 9:00 PM", "Mar 3, 2026", "tomorrow")` with a list of orders. How many failed, and which?
+
+::: {.callout-note collapse="true" title="Solution 1"}
+```{r}
+x <- c("2026-03-01 08:15", "03/02/2026 9:00 PM", "Mar 3, 2026", "tomorrow")
+p <- parse_date_time(x, tz = "UTC", quiet = TRUE,
+                     orders = c("Ymd HM", "mdY IMp", "bdY"))
+tibble(x, p)
+sum(is.na(p))
+```
+One failure, `"tomorrow"`. Note that `03/02/2026` was read month first (March 2) because that was the only numeric order listed: that is a decision, and it needs evidence from the source.
+:::
+
+**2. A sentinel.** For `x <- c(5, -1, 7, -1, 9)`, where `-1` is a sentinel, compute the mean before and after `na_if(x, -1)`. Why is the second one NA unless you say something?
+
+::: {.callout-note collapse="true" title="Solution 2"}
+```{r}
+x <- c(5, -1, 7, -1, 9)
+mean(x)
+mean(na_if(x, -1))
+mean(na_if(x, -1), na.rm = TRUE)
+```
+Once the sentinel is `NA`, `mean()` returns `NA`, because R refuses to guess. `na.rm = TRUE` is a decision to ignore the missing values: it is fine, but say how many you ignored (here, 2 of 5).
+:::
+
+**3. Flag, do not delete.** In `users`, create `age_flag` with values `"missing"`, `"ok"`, and `"impossible"` (valid ages are 0 to 120). How many of each?
+
+::: {.callout-note collapse="true" title="Solution 3"}
+```{r}
+users |>
+  mutate(age_flag = case_when(is.na(age) ~ "missing",
+                              between(age, 0, 120) ~ "ok",
+                              .default = "impossible")) |>
+  count(age_flag)
+```
+The `is.na()` condition comes first, otherwise the `NA` age falls through to `"impossible"`.
+:::
+
+**4. z or IQR.** Simulate `y <- rlnorm(1000)` (a skewed variable, with `set.seed(1)` first). How many values does each rule flag? Which would you trust, and why?
+
+::: {.callout-note collapse="true" title="Solution 4"}
+```{r}
+set.seed(1)
+y <- rlnorm(1000)
+c(z_beyond_3 = sum(abs(zs(y)) > 3), iqr_rule = sum(iqr_flag(y)))
+```
+Both flag the long right tail, and the IQR rule flags many more. Neither is "right": the data is skewed, not wrong. Plot it, and consider `log(y)` before applying a rule.
+:::
+
+**5. A new rule.** Add a rule to the `users` check that counts ZIP codes that do not start with `97`. How many fail, and what do you do about `NA`?
+
+::: {.callout-note collapse="true" title="Solution 5"}
+```{r}
+users |>
+  summarize(zip_not_97 = sum(!str_starts(zip, "97"), na.rm = TRUE),
+            zip_missing = sum(is.na(zip)))
+```
+No ZIP fails this rule (all non-missing ones start with 97), and one is missing. Report the missing one under completeness, not under this rule. Whether `97` is a valid requirement at all is a question for the data owner.
+:::
+
+**6. Diagnose.** In `steps_sim`, is missingness in `steps` related to `age`? To `device`? Show it with a table or a plot.
+
+::: {.callout-note collapse="true" title="Solution 6"}
+```{r}
+#| fig-height: 3
+steps_sim |>
+  mutate(age_group = cut(age, c(0, 30, 40, 50, Inf)),
+         missing = is.na(steps)) |>
+  summarize(rate = mean(missing), .by = c(device, age_group)) |>
+  ggplot(aes(x = age_group, y = rate, fill = device)) +
+  geom_col(position = "dodge") +
+  scale_fill_manual(values = c("#f68b1f", "#6d8d24"), name = NULL) +
+  labs(x = "Age group", y = "Share of steps missing")
+```
+The rate depends on `device` (high for legacy in every age group) and hardly on age. That fits MAR given device.
+:::
+
+**7. Judge an imputation.** Without looking at `steps_true`, which three checks would you run to decide whether `mice` recovered the distribution? Then run one of them.
+
+::: {.callout-note collapse="true" title="Solution 7"}
+Compare the distribution before and after, compare group means before and after, and compare imputed values with observed ones within each group. For example, the observed and imputed steps for legacy users in the first completed dataset:
+
+```{r}
+#| fig-height: 3
+cd <- complete(imp, 1) |> as_tibble() |>
+  mutate(imputed = is.na(steps_sim$steps), device = as.character(device))
+cd |>
+  filter(device == "legacy") |>
+  ggplot(aes(x = steps, fill = imputed)) +
+  geom_density(alpha = 0.5, color = NA) +
+  scale_fill_manual(values = c("#6d8d24", "#f68b1f"), name = "Imputed?")
+```
+The imputed values follow the same shape as the observed legacy values: they came from similar rows. If the two curves were far apart, you would want to ask why.
+:::
+
+# Appendix A: `pointblank` validation reports
+
+`pointblank` is optional and is not installed with `tidyverse`. Install once with `install.packages("pointblank")`. The code is shown but not run in this handout.
+
+```{r}
+#| eval: false
+library(pointblank)
+
+users |>
+  create_agent() |>
+  col_vals_between(age, 0, 120, na_pass = TRUE) |>
+  col_vals_in_set(device, c("watch", "band", "ring")) |>
+  col_vals_regex(zip, "^\\d{5}$", na_pass = TRUE) |>
+  interrogate()
+```
+
+It does the same job as the table of failing counts, with a formatted report, and it stops short of changing any data.
+
+# Appendix B: Quick reference
+
+```{r}
+#| eval: false
+# Dates
+parse_date_time(x, orders = c("Ymd HM", "mdY IMp"), tz = "UTC")
+sum(is.na(parsed)) - sum(is.na(x))      # how many failed to parse
+with_tz(t, "UTC"); force_tz(t, "UTC")   # display change vs repair
+
+# Sentinels
+na_if(x, -999)
+read_csv(path, na = c("", "NA", "-999"))
+
+# Flags, not deletes
+case_when(is.na(x) ~ "missing", between(x, lo, hi) ~ "ok", .default = "impossible")
+
+# Outliers
+z <- (x - mean(x, na.rm = TRUE)) / sd(x, na.rm = TRUE)   # abs(z) > 3
+q <- quantile(x, c(.25, .75), na.rm = TRUE)               # 1.5 * IQR rule
+mahalanobis(df, colMeans(df), cov(df))                    # several variables at once
+
+# Rules as counts
+summarize(df, rule1 = sum(!between(a, 0, 120), na.rm = TRUE),
+              rule2 = sum(!str_detect(b, "^\\d{5}$"), na.rm = TRUE))
+
+# Missingness
+summarize(df, missing = mean(is.na(x)), .by = group)
+
+# Imputation
+library(mice)
+imp <- mice(df, m = 5, method = "pmm", seed = 531)
+complete(imp, 1)                                  # one completed dataset
+summary(pool(with(imp, lm(y ~ x))))               # pooled model
+```

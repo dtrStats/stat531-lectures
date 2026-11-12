@@ -1,19 +1,692 @@
 ---
-title: "Session 5 Handout: Data Cleaning 1: Strings and Categories"
-description: "Regex, stringr, Unicode handling, forcats, and janitor"
+title: "Session 5 Handout: Strings, Unicode, and Categories"
+subtitle: "Reference companion to the Session 5 slides"
+author: "DTR"
+description: "Full reference for the first half of data cleaning: the cleaning pipeline, ragged files, regex with stringr, Unicode look-alikes, recoding categories with a lookup table, and writing a spec before asking an AI for code, with Audit it boxes and practice"
 date: 2026-11-16
 categories: [Handout]
-format: html
-draft: true
+format:
+  html:
+    number-sections: true
+    title-block-banner: "#213921"
+    title-block-banner-color: "#ffffff"
+    fig-width: 8
+    fig-height: 4
+    fig-dpi: 110
+    fig-align: center
 ---
 
-## Planned outline
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", message = FALSE, warning = FALSE)
+library(tidyverse)
+options(
+  tibble.print_max = 9,
+  tibble.print_min = 9,
+  width = 90,
+  cli.unicode = FALSE
+)
 
-- 10-minute retrieval warm-up
-- Regex fundamentals: classes, quantifiers, anchors, groups; str_view() for debugging
-- str_detect / str_extract / str_replace / str_squish, separate_wider_regex, parse_number
-- Unicode: non-ASCII detection and normalization (homoglyphs)
-- forcats and janitor (clean_names, get_dupes, tabyl)
-- Spec-first exercise: students write input/output tables, AI writes the regex, tests judge it
+raw_lines <- c(
+  "id,name,score",
+  "1,Mia,88",
+  "2,Liam,91",
+  "3,Lopez, Liam,79",
+  "4,Mason,",
+  "5,Olivia",
+  "6,,,Sophia,85"
+)
 
-*Draft: remove `draft: true` from the top of this file to publish it.*
+body <- tibble(
+  id = 1:7,
+  weight_raw = c("165 lb", "72kg", "80 KG", "170", "n/a", "154.5 lbs", "68 kg")
+)
+
+humans <- tibble(
+  favorite = c(
+    rep("blue", 40),
+    "bl\u00fce",
+    rep(" blue", 2),
+    rep("red", 30),
+    rep("Red", 3),
+    rep("green", 25),
+    "gr\u0435\u0435n",
+    "chartreuse",
+    rep("gray", 4)
+  )
+)
+
+clean_phone <- function(x) {
+  digits <- str_remove_all(x, "\\D")
+  digits <- str_remove(digits, "^1(?=\\d{10}$)")
+  if_else(
+    str_detect(digits, "^\\d{10}$"),
+    str_replace(digits, "(\\d{3})(\\d{3})(\\d{4})", "\\1-\\2-\\3"),
+    NA_character_
+  )
+}
+```
+
+# How to use this handout
+
+The slides move fast. This handout is the slow, complete version: read it before class, and return to it when you clean a column.
+
+Coding session 5 is the first of two sessions on **data cleaning**. Today covers **text**: files whose shape is wrong, strings whose content is wrong, and categories that should be one thing and are several. Session 6 covers dates, sentinels, outliers, and missing values.
+
+Cleaning has a hazard that earlier sessions did not: an AI assistant can make a column **look** clean in one line while it quietly throws information away. **Audit it** boxes show these mistakes. The habit to build is: **count before, count after.**
+
+::: {.callout-note title="The Audit Loop, for cleaning"}
+1. **Read** the code. What does each pattern match, and what could it also match?
+2. **Run** it on the **hard rows** (empty, odd, unexpected), not only the easy ones.
+3. **Restate** what changed: how many rows, which values, and what was lost.
+4. **Refine** it or **Reject** it. Log the decision.
+:::
+
+**Setup.** Examples use small inline data, so you can run everything without a download. You need `tidyverse` (which includes `stringr`, `forcats`, and `dplyr`) and `stringi`, which `stringr` installs for you. `separate_wider_regex()` needs `tidyr` 1.3.0 or newer, and `case_match()` needs `dplyr` 1.1.0 or newer.
+
+```{r}
+#| eval: false
+library(tidyverse)
+```
+
+# The cleaning pipeline
+
+Cleaning is a sequence, and the order matters.
+
+1. **Import**: get the data in and control the column types.
+2. **Inspect**: structure, missingness, oddities. (This was Lab 1.)
+3. **Tidy**: reshape, recode, harmonize.
+4. **Validate**: assert expected ranges and consistency.
+5. **Document**: decisions become code.
+
+Inside the cleaning work itself, the order is: **flag** problems first, then **remediate** broad patterns, and only then **impute or drop**. Flagging first keeps the evidence: you can always count what you changed.
+
+## Three rules for cleaning code
+
+- **Code, not clicks.** A hand edit in a spreadsheet cannot be repeated or checked.
+- **Re-runnable.** Running the whole script twice from raw data gives the same result (this is called an *idempotent* pipeline).
+- **Every fix is logged.** What changed, how many rows, and why.
+
+::: {.callout-tip title="Key idea"}
+Every cleaning step is a **decision** that changes what a model will learn. If you cannot say what a step removed or changed, you have not finished the step.
+:::
+
+## Structural and content grime
+
+| Structural | Content |
+|:--|:--|
+| The **shape** of the file is wrong | The **values** in cells are wrong |
+| Shows up at import | Shows up at inspection |
+| Extra or missing fields, bad delimiters, encoding | Typos, mixed units, sentinels, lookalikes |
+| Often needs a manual rule | Often needs a lookup table |
+
+Handle structural problems first: content checks assume a clean grid.
+
+## Versioning data as you work
+
+How you keep track of changes depends on size.
+
+| Size of data | Approach |
+|:--|:--|
+| Fits easily in memory | Create a new object at each step; the script is the history |
+| Large | Edit in place and log each change in a text column or file |
+| Massive | Do not load it all; sample, process in chunks, or push computation to the database (see `arrow` in Session 2) |
+
+# Ragged files: structural grime
+
+A CSV has no schema. Nothing stops line 4 from having more fields than line 2. Read the file as **raw lines** first, and count.
+
+```{r}
+raw_lines
+```
+
+The header says three fields: `id`, `name`, `score`. Counting commas and adding one gives the number of fields per line.
+
+```{r}
+fields <- str_count(raw_lines, ",") + 1
+table(fields)
+raw_lines[fields != 3]
+```
+
+Three lines break the rule, each for a different reason:
+
+- `"3,Lopez, Liam,79"`: a comma inside a name (the source forgot to quote it).
+- `"5,Olivia"`: a missing field.
+- `"6,,,Sophia,85"`: doubled delimiters.
+
+No single rule fixes all three. Without the source, you cannot know whether line 3 is `Lopez Liam` or two people. The honest move is to **flag the lines and ask**.
+
+::: {.callout-warning title="Audit it: a parser that guesses quietly"}
+An AI may suggest `read_csv(..., col_names = FALSE, skip_empty_rows = TRUE)` or `fill = TRUE` options "to make it load". Loading without error is not the same as loading correctly. After any import, run `problems()` on the result, compare `nrow()` with the number of raw lines minus the header, and count how many fields were filled or truncated.
+:::
+
+```{r}
+#| eval: false
+df <- read_csv("messy.csv")
+problems(df) # rows readr could not parse as expected
+nrow(df) == length(readLines("messy.csv")) - 1
+```
+
+# Regex and stringr
+
+A **regular expression** (regex) describes a *pattern* of text, instead of one literal string. The `stringr` package applies patterns to character vectors.
+
+## The building blocks
+
+| Piece | Meaning | Example |
+|:--|:--|:--|
+| `\\d` `\\w` `\\s` | a digit, a word character, a whitespace | `\\d{5}` is five digits |
+| `.` | **any** one character | `a.c` matches `abc`, `a-c` |
+| `+` `*` `?` | one or more, zero or more, optional | `\\d+` is a run of digits |
+| `{3}` `{2,4}` | exactly 3, between 2 and 4 | `\\d{3}-\\d{4}` |
+| `^` `$` | start, end of the string | `^\\d+$` is **only** digits |
+| `( )` `\|` | group, alternatives | `kg\|lbs?` |
+| `[abc]` `[^abc]` | one of these, **none** of these | `[^0-9]` is a non-digit |
+
+In an R string the backslash must be doubled: `"\\d+"`. A **raw string** avoids the doubling: `r"(\d+)"`.
+
+```{r}
+# These two patterns are the same
+str_extract("room 204", "\\d+")
+str_extract("room 204", r"(\d+)")
+```
+
+## See what a pattern matches
+
+`str_view()` highlights the match, which makes patterns much easier to debug.
+
+```{r}
+str_view(body$weight_raw, "\\d+\\.?\\d*")
+```
+
+## Our messy column
+
+```{r}
+body
+```
+
+These weights were typed by humans: different units (`lb`, `lbs`, `kg`, `KG`), different spacing, one row with a number and **no unit**, and one with no number at all.
+
+### Which rows: `str_detect()`
+
+```{r}
+body |>
+  mutate(has_lb = str_detect(weight_raw, regex("lbs?", ignore_case = TRUE)))
+```
+
+`str_detect()` returns `TRUE` or `FALSE`. Use it inside `filter()` to keep rows, or in `mutate()` to flag them. `regex(..., ignore_case = TRUE)` makes the match case-insensitive.
+
+### What is in them: `str_extract()`
+
+```{r}
+body |>
+  mutate(
+    num = as.numeric(str_extract(weight_raw, "\\d+\\.?\\d*")),
+    unit = str_extract(str_to_lower(weight_raw), "kg|lbs?")
+  )
+```
+
+Read the number pattern aloud: "one or more digits, then an optional dot, then zero or more digits". When nothing matches, you get `NA`, not an error. Row 4 has a number (`170`) and **no unit**, and row 5 has neither.
+
+### Convert, and leave the unknown unknown
+
+```{r}
+body |>
+  mutate(
+    num = as.numeric(str_extract(weight_raw, "\\d+\\.?\\d*")),
+    unit = str_extract(str_to_lower(weight_raw), "kg|lbs?"),
+    kg = case_when(unit == "kg" ~ num, str_detect(unit, "lb") ~ num * 0.453592)
+  )
+```
+
+`case_when()` with no default returns `NA` for rows that match no condition. Here that is the right behavior: `170` could be pounds or kilograms, and a regex cannot know which. Staying `NA` (and flagged) is better than a guess that is hidden inside a pattern.
+
+::: {.callout-warning title="Audit it: `parse_number()` ignores units"}
+`parse_number()` is tempting because it is one line.
+
+```{r}
+body |> mutate(shortcut = c(parse_number(weight_raw)))
+```
+
+It returns `165`, `72`, `80` and `170` as if they shared a unit. Pounds and kilograms are now mixed in one numeric column, and nothing warns you (the one warning is for `n/a`). Extract the unit as well as the number, and decide about the rows without a unit.
+:::
+
+### Replace and tidy: `str_replace()` and friends
+
+```{r}
+c("  Portland ", "Portland,  OR", "portland") |>
+  str_squish() |>
+  str_remove(",\\s*OR$") |>
+  str_to_title()
+```
+
+- `str_squish()` trims both ends and collapses runs of spaces inside.
+- `str_remove(x, pattern)` is `str_replace(x, pattern, "")`.
+- `str_replace()` changes the **first** match, `str_replace_all()` changes **every** match.
+- `str_to_lower()`, `str_to_upper()`, `str_to_title()` change case.
+
+::: {.callout-warning title="Audit it: the dot matches anything"}
+An AI asked to "remove the dots from a phone number" may write:
+
+```{r}
+str_replace_all("503.555.0142", ".", "")
+```
+
+The result is an empty string. In a regex, `.` means "any character", so every character was removed. Escape it (`"\\."`), put it in a class (`"[.]"`), or match it literally with `fixed(".")`.
+
+```{r}
+str_replace_all("503.555.0142", fixed("."), "")
+```
+:::
+
+::: {.callout-warning title="Audit it: `str_extract()` returns only the first match"}
+"Pull the numbers out of `5 ft 11 in`" with `str_extract(x, "\\d+")` returns `"5"` and drops the `11`. Use `str_extract_all()` (which returns a list) or capture each piece on purpose, as below.
+:::
+
+## Capture groups: `separate_wider_regex()`
+
+When a string has several parts, name each one. Unnamed pieces are matched and dropped; named pieces become columns.
+
+```{r}
+tibble(height_raw = c("5 ft 11 in", "5ft 7in", "6 ft 0 in")) |>
+  separate_wider_regex(
+    height_raw,
+    c(ft = "\\d", "\\s*ft\\s*", inch = "\\d+", ".*")
+  )
+```
+
+If a string does not fit the pattern, the function stops with an error by default. That is a feature: it tells you the pattern is incomplete. Options such as `too_few = "align_start"` let rows through when you decide that is acceptable.
+
+## Lookarounds (optional)
+
+A **lookahead** checks what comes next without consuming it. The pattern `"^1(?=\\d{10}$)"` means "a leading `1`, but only if exactly ten digits follow". It is how `clean_phone()` below strips a US country code without breaking a seven-digit number that happens to start with 1.
+
+```{r}
+str_remove("15035550142", "^1(?=\\d{10}$)")
+str_remove("1503555", "^1(?=\\d{10}$)")
+```
+
+# Unicode: strings that look the same
+
+Computers store text as **code points**, and many different code points look alike on screen.
+
+```{r}
+good <- "green"
+bad <- "gr\u0435\u0435n" # two Cyrillic letters that look like Latin e
+c(good, bad)
+good == bad
+c(nchar(good), nchar(bad))
+utf8ToInt(bad)
+utf8ToInt(good)
+```
+
+The two strings print the same and have the same length, yet they are not equal. In `bad`, the two `е` are code point 1077 (Cyrillic) instead of 101 (Latin). This might be an innocent copy-paste from another system, or it might be deliberate. Either way, it is invisible to the eye.
+
+## Detect
+
+Any character outside plain ASCII (code points 0 to 127) matches `[^\\x00-\\x7F]`.
+
+```{r}
+str_detect(c(good, bad), "[^\\x00-\\x7F]")
+stringi::stri_escape_unicode(bad)
+```
+
+`stri_escape_unicode()` shows each non-ASCII character as its `\uXXXX` code. To find every offending **row** in a table:
+
+```{r}
+tibble(city = c("Portland", "\u0420ortland", "Beaverton")) |>
+  filter(str_detect(city, "[^\\x00-\\x7F]"))
+```
+
+::: {.callout-warning title="Audit it: look-alikes break joins without an error"}
+```{r}
+lookup <- tibble(
+  color = c("blue", "red", "green"),
+  hex = c("#00f", "#f00", "#0a0")
+)
+
+tibble(color = c("blue", "green", bad)) |>
+  anti_join(lookup, by = "color")
+```
+
+The join does not fail. The lookalike simply does not match, and it will be missing from every result built on that join. Run `anti_join()` against your lookup tables as a routine check (Session 2).
+:::
+
+## Decide whether to normalize
+
+`stringi::stri_trans_general()` can transliterate text.
+
+```{r}
+stringi::stri_trans_general(c(bad, "caf\u00e9"), "Any-Latin; Latin-ASCII")
+```
+
+The Cyrillic `е` became a Latin `e`, which is what we wanted. But `café` also became `cafe`. Whether that is acceptable depends on the column: for a color, yes; for a person's name, ask first. **Detect first, then decide.** Real data also contains legitimate non-ASCII text (`José`, `Zoë`), so "non-ASCII" is a flag for review, not proof of an error.
+
+## Invisible characters
+
+```{r}
+x <- c("blue", "blue\u00a0", "blue\u200b")
+nchar(x)
+nchar(str_squish(x))
+```
+
+`str_squish()` removes the non-breaking space (`\u00a0`) but not the **zero-width space** (`\u200b`), which has length but no width. If two strings look identical and are not equal, compare `nchar()` and `stri_escape_unicode()`.
+
+# Categories
+
+A categorical column should have a small set of valid values. Start by **counting** them.
+
+```{r}
+humans |> count(favorite, sort = TRUE)
+```
+
+Nine "colors" for what should be five. The counts help: a value with one occurrence next to a value with forty is probably a variant, not a separate category. (The counts alone cannot tell you which spelling is *correct*, though. Use the documentation, and do not be surprised if it does not match the data.)
+
+## Case-fold and trim
+
+```{r}
+humans |>
+  mutate(favorite = str_to_lower(str_squish(favorite))) |>
+  count(favorite, sort = TRUE)
+```
+
+Two problems are gone: `Red` merged with `red`, and `" blue"` merged with `blue`. What is left: `blüe`, the Cyrillic `green`, and `chartreuse`.
+
+::: {.callout-note title="Case folding is not always safe"}
+Case carries no meaning for a color, but it might for an identifier.
+
+```{r}
+ids <- c("ab12", "AB12")
+n_distinct(ids)
+n_distinct(str_to_lower(ids))
+```
+
+Fold case only where case carries no meaning, and say so in your log.
+:::
+
+## Fix known variants with a lookup table
+
+```{r}
+fixes <- tribble(
+  ~raw              , ~clean  ,
+  "bl\u00fce"       , "blue"  ,
+  "gr\u0435\u0435n" , "green"
+)
+
+humans |>
+  mutate(favorite = str_to_lower(str_squish(favorite))) |>
+  left_join(fixes, by = c("favorite" = "raw")) |>
+  mutate(favorite = coalesce(clean, favorite)) |>
+  count(favorite, sort = TRUE)
+```
+
+Why a table and not a chain of `ifelse()` calls:
+
+- A reviewer can **read** it in ten seconds.
+- It is **data**: you can version it, diff it, and extend it.
+- `anti_join()` shows what is **still unmapped**.
+- It works on next month's file.
+
+For a few mappings, `case_match()` is a compact alternative:
+
+```{r}
+humans |>
+  mutate(
+    favorite = str_to_lower(str_squish(favorite)),
+    favorite = case_match(
+      favorite,
+      "bl\u00fce" ~ "blue",
+      "gr\u0435\u0435n" ~ "green",
+      .default = favorite
+    )
+  ) |>
+  count(favorite, sort = TRUE)
+```
+
+The `.default = favorite` keeps every value you did not mention. Without it, unmatched values silently become `NA`.
+
+## Rare is not wrong
+
+After folding, three values occur only once: `blüe`, the Cyrillic `green`, and `chartreuse`. Two of them are errors that a lookup table can fix, and one (`chartreuse`) is a real color. Rarity alone cannot tell them apart, so **flag** rare values and look at each one in context. Do not delete them because they are rare.
+
+```{r}
+humans |>
+  mutate(favorite = str_to_lower(str_squish(favorite))) |>
+  add_count(favorite, name = "n") |>
+  mutate(rare = n < 2) |>
+  filter(rare) |>
+  distinct(favorite, n)
+```
+
+## Grouping valid levels: `fct_collapse()`
+
+```{r}
+humans |>
+  mutate(
+    favorite = str_to_lower(str_squish(favorite)),
+    group = fct_collapse(
+      favorite,
+      cool = c("blue", "green"),
+      warm = "red",
+      other_level = "other"
+    )
+  ) |>
+  count(group)
+```
+
+`fct_collapse()` and `fct_lump_*()` are for **grouping valid levels** when you want fewer categories for analysis. They are not repair tools: they hide the very values you needed to look at.
+
+::: {.callout-warning title="Audit it: `fct_lump_min()` makes a table shorter, not cleaner"}
+An AI asked to "standardize the favorite color column" returned this:
+
+```{r}
+humans |>
+  mutate(favorite = str_to_lower(favorite)) |>
+  mutate(favorite = fct_lump_min(favorite, min = 2, other_level = "other")) |>
+  count(favorite, sort = TRUE)
+```
+
+Compare with the counts at the start of this section:
+
+- **Lost counts**: 43 people said blue (`blue`, `" blue"`, `blüe`), but `blue` shows 40. Green shows 25, not 26.
+- **`"other"`** (3) hides three different things: a typo (`blüe`), a lookalike (`grееn`), and a real rare color (`chartreuse`).
+- **No `str_squish()`**: `" blue"` is still its own level.
+- **No log**: nothing says what moved where.
+
+The AI cleaned the **output**, not the **data**. The better prompt asks for trimming, lowercasing, a lookup table of known fixes, and a list of every value still outside the valid set, with the instruction not to lump or delete.
+:::
+
+# Spec first, with AI
+
+AI-written regex fails quietly: it runs, returns plausible text, and is wrong on the rows you did not think to test. The defense is to write the tests **before** the code.
+
+A **spec** is a table of inputs and the outputs you expect, including the rows that should come back `NA`.
+
+```{r}
+spec <- tribble(
+  ~input            , ~expected      ,
+  "(503) 555-0142"  , "503-555-0142" ,
+  "503.555.0142"    , "503-555-0142" ,
+  "5035550142"      , "503-555-0142" ,
+  "+1 503 555 0142" , "503-555-0142" ,
+  "555-0142"        , NA             ,
+  "call me"         , NA
+)
+```
+
+Then let the table judge the function, whoever wrote it:
+
+```{r}
+spec |>
+  mutate(
+    got = clean_phone(input),
+    pass = coalesce(got == expected, is.na(got) & is.na(expected))
+  )
+```
+
+`coalesce()` handles the case where both values are `NA`: `NA == NA` is `NA`, not `TRUE`, so we treat "both `NA`" as a pass explicitly.
+
+For a check that stops a script, use the `testthat` package:
+
+```{r}
+testthat::expect_equal(clean_phone(spec$input), spec$expected)
+```
+
+Nothing printed means the test passed. If it fails, `testthat` shows exactly which values differ.
+
+::: {.callout-tip title="Writing the spec is the cleaning decision"}
+Writing `expected` forces you to decide what `"555-0142"` should become (`NA`, since it has no area code) **before** any code exists. That decision is the real work, and it belongs to you. When two teammates write different expected values for the same input, you have found a decision the team has not made yet.
+:::
+
+## Prompting from a spec
+
+A good prompt for code like this:
+
+1. **Pastes the spec table** in as text.
+2. Says what the function takes and returns ("a character vector in, a character vector of the same length out").
+3. **Forbids guessing**: "return `NA` when the input does not match, never a default".
+4. Asks for tidyverse code only, and no extra packages.
+
+Then run the spec. A failing row is a gift: **add it to the spec** (and fix the function). The spec grows with every surprise in real data.
+
+# Assessing what comes back
+
+Whatever the AI returns for a cleaning task, apply the Audit Loop from the start of this handout, and add two cleaning-specific checks:
+
+1. **Count before, count after.** For every column the code touched: how many rows changed, how many `NA`s appeared, how many distinct values remain?
+2. **Look at the hard rows.** Empty strings, odd spacing, mixed case, non-ASCII characters, values that should come back `NA`.
+
+A good habit is to ask the AI for a **change log** along with the code, then verify it yourself.
+
+# Practice problems
+
+Try each one before opening the solution.
+
+**1. Fields per line.** For `lines2 <- c("a,b,c", "1,2,3", "4,5", "6,7,8,9", "10,11,12")`, which lines do not have three fields?
+
+::: {.callout-note collapse="true" title="Solution 1"}
+```{r}
+lines2 <- c("a,b,c", "1,2,3", "4,5", "6,7,8,9", "10,11,12")
+n_fields <- str_count(lines2, ",") + 1
+which(n_fields != 3)
+lines2[n_fields != 3]
+```
+:::
+
+**2. Extract the ZIP.** From `c("Portland OR 97201", "97201-1234", "ZIP: 9720", "97214")`, extract a five-digit ZIP. Which inputs should return `NA`, and does your pattern do that?
+
+::: {.callout-note collapse="true" title="Solution 2"}
+```{r}
+x <- c("Portland OR 97201", "97201-1234", "ZIP: 9720", "97214")
+str_extract(x, "\\b\\d{5}\\b")
+```
+`\\b` is a word boundary, so a run of exactly five digits matches, and the four-digit `9720` returns `NA`. Without `\\b`, a six-digit number would give back its first five digits. Whether `97201-1234` should become `97201` is a decision for the owner of the data.
+:::
+
+**3. Split heights.** Turn `c("5 ft 9 in", "6ft 2in")` into numeric columns `ft` and `inch`, then into a single column `cm` (1 inch = 2.54 cm).
+
+::: {.callout-note collapse="true" title="Solution 3"}
+```{r}
+tibble(height_raw = c("5 ft 9 in", "6ft 2in")) |>
+  separate_wider_regex(
+    height_raw,
+    c(ft = "\\d", "\\s*ft\\s*", inch = "\\d+", ".*")
+  ) |>
+  mutate(across(c(ft, inch), as.numeric), cm = (ft * 12 + inch) * 2.54)
+```
+:::
+
+**4. Find the look-alike.** In `cities <- c("Portland", "\u0420ortland", "Beaverton", "Salem")`, which value contains a non-ASCII character, and which character is it?
+
+::: {.callout-note collapse="true" title="Solution 4"}
+```{r}
+cities <- c("Portland", "\u0420ortland", "Beaverton", "Salem")
+cities[str_detect(cities, "[^\\x00-\\x7F]")]
+stringi::stri_escape_unicode(cities[2])
+```
+The first letter is `\u0420`, the Cyrillic capital Er, which looks like a Latin `P`.
+:::
+
+**5. Unmapped values.** Using `fixes` from the Categories section, find the values of `humans$favorite` (after trimming and lowercasing) that are in neither the valid set `c("blue", "red", "green", "gray")` nor `fixes$raw`.
+
+::: {.callout-note collapse="true" title="Solution 5"}
+```{r}
+valid <- c("blue", "red", "green", "gray")
+humans |>
+  mutate(favorite = str_to_lower(str_squish(favorite))) |>
+  filter(!favorite %in% c(valid, fixes$raw)) |>
+  count(favorite)
+```
+Only `chartreuse` remains. It is not an error to fix; it is a value to **flag** and look at.
+:::
+
+**6. A spec for ZIP codes.** Write a spec table (at least six rows) for a function `clean_zip()` that returns a five-digit ZIP or `NA`. Include `"97201-1234"`, `"9720"`, and `"  97201 "`. Decide what each should become and **why**, then compare with a teammate.
+
+::: {.callout-note collapse="true" title="Solution 6"}
+There is no single right answer, which is the point. One reasonable spec:
+
+```{r}
+spec_zip <- tribble(
+  ~input       , ~expected ,
+  "97201"      , "97201"   ,
+  "  97201 "   , "97201"   ,
+  "97201-1234" , "97201"   ,
+  "9720"       , NA        ,
+  "ZIP 97214"  , "97214"   ,
+  "none"       , NA
+)
+spec_zip
+```
+The hard row is `"9720"`. A four-digit value could be a ZIP that lost its last digit, or one that lost a leading zero, or an error. Padding it would be a guess; `NA` plus a flag is the honest answer, unless a lookup table can resolve it.
+:::
+
+# Appendix A: A helper package, `janitor`
+
+`janitor` is optional and is not installed with `tidyverse`. Install once with `install.packages("janitor")`. The code is shown but not run in this handout.
+
+```{r}
+#| eval: false
+library(janitor)
+clean_names(df) # snake_case column names
+get_dupes(df, id) # rows that share the same id
+tabyl(df, favorite) # counts with percentages
+```
+
+The same jobs in the packages you already have:
+
+```{r}
+#| eval: false
+df |> rename_with(\(x) str_to_lower(str_replace_all(x, "\\W+", "_"))) # clean_names
+df |> filter(n() > 1, .by = id) # get_dupes
+df |> count(favorite) |> mutate(percent = n / sum(n)) # tabyl
+```
+
+# Appendix B: Quick reference
+
+```{r}
+#| eval: false
+str_detect(x, pattern) # TRUE/FALSE per element
+str_extract(x, pattern) # first match, or NA
+str_extract_all(x, pattern) # every match (a list)
+str_replace(x, pattern, new) # replace the first match
+str_replace_all(x, pattern, new) # replace every match
+str_remove(x, pattern) # replace with nothing
+str_count(x, pattern) # number of matches
+str_squish(x) # trim and collapse spaces
+str_to_lower(x)
+str_to_title(x) # change case
+str_view(x, pattern) # highlight matches (debugging)
+
+# A literal string instead of a pattern
+str_replace_all(x, fixed("."), "")
+
+# Non-ASCII check
+str_detect(x, "[^\\x00-\\x7F]")
+
+# Recode with a lookup
+left_join(df, fixes, by = c("col" = "raw")) |>
+  mutate(col = coalesce(clean, col))
+case_match(x, "old" ~ "new", .default = x)
+
+# Test against a spec
+testthat::expect_equal(clean_fn(spec$input), spec$expected)
+```

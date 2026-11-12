@@ -1,0 +1,1613 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.34">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="DTR">
+<meta name="dcterms.date" content="2026-11-18">
+<meta name="description" content="Parsing mixed dates, finding sentinels, outliers by domain rules and plots, validity rules as code, missing-data mechanisms, and judging an imputation by whether it recovers the distribution">
+
+<title>Types, Anomalies, and Missingness – STAT 531: R in the AI Era</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-c8ad9e5dbd60b7b70b38521ab19b7da4.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-d7294beede67a4f0c1d75a160eaed9e1.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">STAT 531: R in the AI Era</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Contents</h2>
+   
+  <ul class="collapse">
+  <li><a href="#welcome" id="toc-welcome" class="nav-link active" data-scroll-target="#welcome">Welcome</a>
+  <ul class="collapse">
+  <li><a href="#recall-30-seconds-silent" id="toc-recall-30-seconds-silent" class="nav-link" data-scroll-target="#recall-30-seconds-silent">Recall (30 seconds, silent)</a></li>
+  <li><a href="#todays-route" id="toc-todays-route" class="nav-link" data-scroll-target="#todays-route">Today’s route</a></li>
+  <li><a href="#set-up-for-the-three-tasks" id="toc-set-up-for-the-three-tasks" class="nav-link" data-scroll-target="#set-up-for-the-three-tasks">Set up for the three tasks</a></li>
+  <li><a href="#where-we-left-off" id="toc-where-we-left-off" class="nav-link" data-scroll-target="#where-we-left-off">Where we left off</a></li>
+  </ul></li>
+  <li><a href="#dates-and-types" id="toc-dates-and-types" class="nav-link" data-scroll-target="#dates-and-types">Dates and types</a>
+  <ul class="collapse">
+  <li><a href="#text-is-not-a-date" id="toc-text-is-not-a-date" class="nav-link" data-scroll-target="#text-is-not-a-date">Text is not a date</a></li>
+  <li><a href="#one-column-many-formats" id="toc-one-column-many-formats" class="nav-link" data-scroll-target="#one-column-many-formats">One column, many formats</a></li>
+  <li><a href="#ymd_hms-parses-only-what-it-knows" id="toc-ymd_hms-parses-only-what-it-knows" class="nav-link" data-scroll-target="#ymd_hms-parses-only-what-it-knows"><code>ymd_hms()</code> parses only what it knows</a></li>
+  <li><a href="#give-it-a-list-of-orders" id="toc-give-it-a-list-of-orders" class="nav-link" data-scroll-target="#give-it-a-list-of-orders">Give it a list of orders</a></li>
+  <li><a href="#count-what-failed" id="toc-count-what-failed" class="nav-link" data-scroll-target="#count-what-failed">Count what failed</a></li>
+  <li><a href="#the-day-month-trap" id="toc-the-day-month-trap" class="nav-link" data-scroll-target="#the-day-month-trap">The day-month trap</a></li>
+  <li><a href="#time-zones-flex" id="toc-time-zones-flex" class="nav-link" data-scroll-target="#time-zones-flex">Time zones (FLEX)</a></li>
+  </ul></li>
+  <li><a href="#sentinels-and-missing-markers" id="toc-sentinels-and-missing-markers" class="nav-link" data-scroll-target="#sentinels-and-missing-markers">Sentinels and missing markers</a>
+  <ul class="collapse">
+  <li><a href="#four-kinds-of-nothing" id="toc-four-kinds-of-nothing" class="nav-link" data-scroll-target="#four-kinds-of-nothing">Four kinds of “nothing”</a></li>
+  <li><a href="#one-sentinel-wrong-average" id="toc-one-sentinel-wrong-average" class="nav-link" data-scroll-target="#one-sentinel-wrong-average">One sentinel, wrong average</a></li>
+  <li><a href="#look-at-the-extremes" id="toc-look-at-the-extremes" class="nav-link" data-scroll-target="#look-at-the-extremes">Look at the extremes</a></li>
+  <li><a href="#turn-sentinels-into-na" id="toc-turn-sentinels-into-na" class="nav-link" data-scroll-target="#turn-sentinels-into-na">Turn sentinels into <code>NA</code></a></li>
+  <li><a href="#nan-is-not-na-flex" id="toc-nan-is-not-na-flex" class="nav-link" data-scroll-target="#nan-is-not-na-flex"><code>NaN</code> is not <code>NA</code> (FLEX)</a></li>
+  </ul></li>
+  <li><a href="#bounds-and-outliers" id="toc-bounds-and-outliers" class="nav-link" data-scroll-target="#bounds-and-outliers">Bounds and outliers</a>
+  <ul class="collapse">
+  <li><a href="#impossible-first-unusual-second" id="toc-impossible-first-unusual-second" class="nav-link" data-scroll-target="#impossible-first-unusual-second">Impossible first, unusual second</a></li>
+  <li><a href="#fixed-bounds-flag-do-not-delete" id="toc-fixed-bounds-flag-do-not-delete" class="nav-link" data-scroll-target="#fixed-bounds-flag-do-not-delete">Fixed bounds: flag, do not delete</a></li>
+  <li><a href="#task-1-code-it" id="toc-task-1-code-it" class="nav-link" data-scroll-target="#task-1-code-it">Task 1: code it</a></li>
+  <li><a href="#the-answer" id="toc-the-answer" class="nav-link" data-scroll-target="#the-answer">The answer</a></li>
+  <li><a href="#z-scores-how-far-from-the-rest" id="toc-z-scores-how-far-from-the-rest" class="nav-link" data-scroll-target="#z-scores-how-far-from-the-rest">z-scores: how far from the rest?</a></li>
+  <li><a href="#the-iqr-rule" id="toc-the-iqr-rule" class="nav-link" data-scroll-target="#the-iqr-rule">The IQR rule</a></li>
+  <li><a href="#z-or-iqr-it-depends-on-the-shape" id="toc-z-or-iqr-it-depends-on-the-shape" class="nav-link" data-scroll-target="#z-or-iqr-it-depends-on-the-shape">z or IQR? It depends on the shape</a></li>
+  <li><a href="#look-in-context" id="toc-look-in-context" class="nav-link" data-scroll-target="#look-in-context">Look in context</a></li>
+  <li><a href="#odd-only-in-combination" id="toc-odd-only-in-combination" class="nav-link" data-scroll-target="#odd-only-in-combination">Odd only in combination</a></li>
+  <li><a href="#mahalanobis-distance-flex" id="toc-mahalanobis-distance-flex" class="nav-link" data-scroll-target="#mahalanobis-distance-flex">Mahalanobis distance (FLEX)</a></li>
+  </ul></li>
+  <li><a href="#validity-rules" id="toc-validity-rules" class="nav-link" data-scroll-target="#validity-rules">Validity rules</a>
+  <ul class="collapse">
+  <li><a href="#dimensions-of-data-quality" id="toc-dimensions-of-data-quality" class="nav-link" data-scroll-target="#dimensions-of-data-quality">Dimensions of data quality</a></li>
+  <li><a href="#validity-rules-you-can-write-as-code" id="toc-validity-rules-you-can-write-as-code" class="nav-link" data-scroll-target="#validity-rules-you-can-write-as-code">Validity rules you can write as code</a></li>
+  <li><a href="#rules-become-counts" id="toc-rules-become-counts" class="nav-link" data-scroll-target="#rules-become-counts">Rules become counts</a></li>
+  <li><a href="#task-2-prompt-it" id="toc-task-2-prompt-it" class="nav-link" data-scroll-target="#task-2-prompt-it">Task 2: prompt it</a></li>
+  <li><a href="#the-answer-1" id="toc-the-answer-1" class="nav-link" data-scroll-target="#the-answer-1">The answer</a></li>
+  <li><a href="#decisions-hidden-in-the-counts" id="toc-decisions-hidden-in-the-counts" class="nav-link" data-scroll-target="#decisions-hidden-in-the-counts">Decisions hidden in the counts</a></li>
+  </ul></li>
+  <li><a href="#missingness" id="toc-missingness" class="nav-link" data-scroll-target="#missingness">Missingness</a>
+  <ul class="collapse">
+  <li><a href="#why-is-it-missing" id="toc-why-is-it-missing" class="nav-link" data-scroll-target="#why-is-it-missing">Why is it missing?</a></li>
+  <li><a href="#diagnose-is-missingness-the-same-everywhere" id="toc-diagnose-is-missingness-the-same-everywhere" class="nav-link" data-scroll-target="#diagnose-is-missingness-the-same-everywhere">Diagnose: is missingness the same everywhere?</a></li>
+  <li><a href="#drop-the-rows-look-at-who-is-left" id="toc-drop-the-rows-look-at-who-is-left" class="nav-link" data-scroll-target="#drop-the-rows-look-at-who-is-left">Drop the rows? Look at who is left</a></li>
+  <li><a href="#mnar-leaves-no-trace" id="toc-mnar-leaves-no-trace" class="nav-link" data-scroll-target="#mnar-leaves-no-trace">MNAR leaves no trace</a></li>
+  </ul></li>
+  <li><a href="#imputation" id="toc-imputation" class="nav-link" data-scroll-target="#imputation">Imputation</a>
+  <ul class="collapse">
+  <li><a href="#options-and-the-rule-of-thumb" id="toc-options-and-the-rule-of-thumb" class="nav-link" data-scroll-target="#options-and-the-rule-of-thumb">Options, and the rule of thumb</a></li>
+  <li><a href="#mean-imputation-the-tempting-one" id="toc-mean-imputation-the-tempting-one" class="nav-link" data-scroll-target="#mean-imputation-the-tempting-one">Mean imputation: the tempting one</a></li>
+  <li><a href="#what-it-does-to-the-shape" id="toc-what-it-does-to-the-shape" class="nav-link" data-scroll-target="#what-it-does-to-the-shape">What it does to the shape</a></li>
+  <li><a href="#multiple-imputation-with-mice" id="toc-multiple-imputation-with-mice" class="nav-link" data-scroll-target="#multiple-imputation-with-mice">Multiple imputation with <code>mice</code></a></li>
+  <li><a href="#judge-it-by-the-distribution" id="toc-judge-it-by-the-distribution" class="nav-link" data-scroll-target="#judge-it-by-the-distribution">Judge it by the distribution</a></li>
+  <li><a href="#task-3-the-ais-answer" id="toc-task-3-the-ais-answer" class="nav-link" data-scroll-target="#task-3-the-ais-answer">Task 3: the AI’s answer</a></li>
+  <li><a href="#task-3-assess-it" id="toc-task-3-assess-it" class="nav-link" data-scroll-target="#task-3-assess-it">Task 3: assess it</a></li>
+  <li><a href="#what-was-wrong" id="toc-what-was-wrong" class="nav-link" data-scroll-target="#what-was-wrong">What was wrong</a></li>
+  </ul></li>
+  <li><a href="#wrap-up" id="toc-wrap-up" class="nav-link" data-scroll-target="#wrap-up">Wrap-up</a>
+  <ul class="collapse">
+  <li><a href="#four-things-to-remember" id="toc-four-things-to-remember" class="nav-link" data-scroll-target="#four-things-to-remember">Four things to remember</a></li>
+  <li><a href="#next-up" id="toc-next-up" class="nav-link" data-scroll-target="#next-up">Next up</a></li>
+  </ul></li>
+  <li><a href="#appendix" id="toc-appendix" class="nav-link" data-scroll-target="#appendix">Appendix</a>
+  <ul class="collapse">
+  <li><a href="#unit-tests-with-testthat" id="toc-unit-tests-with-testthat" class="nav-link" data-scroll-target="#unit-tests-with-testthat">Unit tests with <code>testthat</code></a></li>
+  <li><a href="#validation-reports-with-pointblank-not-run" id="toc-validation-reports-with-pointblank-not-run" class="nav-link" data-scroll-target="#validation-reports-with-pointblank-not-run">Validation reports with <code>pointblank</code> (not run)</a></li>
+  </ul></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="W08L16_slides.html"><i class="bi bi-file-slides"></i>RevealJS</a></li></ul></div></nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Types, Anomalies, and Missingness</h1>
+<p class="subtitle lead">Data cleaning 2 · Session 6</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">Slides</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    Parsing mixed dates, finding sentinels, outliers by domain rules and plots, validity rules as code, missing-data mechanisms, and judging an imputation by whether it recovers the distribution
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>DTR </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">November 18, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="welcome" class="level1" data-background-color="#f3f6ea">
+<h1 data-background-color="#f3f6ea">Welcome</h1>
+<div class="notes">
+<p>TARGET CLOCK (core ends at 1:05; FLEX slides add up to 5 minutes, skip them if behind): Welcome 0:00-0:05 | Dates and types 0:05-0:13 | Sentinels and missing markers 0:13-0:19 | Bounds and outliers 0:19-0:32 (Task 1) | Validity rules 0:32-0:42 (Task 2) | Missingness 0:42-0:52 | Imputation 0:52-1:02 (Task 3) | Wrap-up 1:02-1:05.</p>
+<p>This session is trimmed on purpose: about 13% less than a full 75 minutes. Cut material (time zones, NaN vs NA, Mahalanobis distance, pointblank) lives in FLEX slides, the handout, and the Appendix.</p>
+<p>Exactly THREE hands-on tasks (blue boxes): Task 1 CODE IT (sentinels and impossible values, about 5 min), Task 2 PROMPT IT (validation rules from a dictionary, about 6 min), Task 3 ASSESS IT (an imputation, about 5 min). Everything else is teaching. The opening Recall slide is silent thinking, not a task. Students need R and an AI assistant open. The data files are in the course site (data/s6_*.csv); students read them with read_csv().</p>
+<p>FLEX slides, skip if behind: “Time zones”, “NaN is not NA”, “Mahalanobis distance”.</p>
+<p>If you are still behind at 0:32 after skipping FLEX slides, also shorten “Look in context” and “Odd only in combination”: the handout covers both.</p>
+<p>Press S for speaker view.</p>
+</div>
+<section id="recall-30-seconds-silent" class="level2">
+<h2 class="anchored" data-anchor-id="recall-30-seconds-silent">Recall (30 seconds, silent)</h2>
+<ol type="1">
+<li>What does <code>"[^\\x00-\\x7F]"</code> find?</li>
+<li>Why is <code>parse_number()</code> risky on <code>"165 lb"</code> and <code>"72 kg"</code>?</li>
+<li>Why do we use a lookup table instead of a long <code>ifelse()</code>?</li>
+</ol>
+<p>. . .</p>
+<ol type="1">
+<li>Any character outside plain <strong>ASCII</strong>: lookalikes, accents</li>
+<li>It drops the <strong>unit</strong>, so pounds and kilograms mix</li>
+<li>A reviewer can <strong>read</strong> it, and <code>anti_join()</code> shows what is unmapped</li>
+</ol>
+<div class="notes">
+<p>Retrieval practice from Session 5. 30 seconds of silent thinking, then reveal. Do not discuss at length.</p>
+</div>
+</section>
+<section id="todays-route" class="level2">
+<h2 class="anchored" data-anchor-id="todays-route">Today’s route</h2>
+<ul>
+<li><strong>Types</strong>: dates arrive as text in many formats</li>
+<li><strong>Sentinels</strong>: numbers that mean “nothing”</li>
+<li><strong>Outliers</strong>: domain rules first, plots second</li>
+<li><strong>Validity rules</strong>: write them as code</li>
+<li><strong>Missingness</strong>: who is missing, and why does it matter?</li>
+<li><strong>Imputation</strong>: judge it by the distribution</li>
+</ul>
+<p>Hands-on today: <strong>code it</strong>, <strong>prompt it</strong>, <strong>assess it</strong>.</p>
+</section>
+<section id="set-up-for-the-three-tasks" class="level2">
+<h2 class="anchored" data-anchor-id="set-up-for-the-three-tasks">Set up for the three tasks</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>vitals    <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/s6_vitals.csv"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>users     <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/s6_users.csv"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>steps_sim <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/s6_steps_sim.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The files are on the course site, in the <code>data/</code> folder. Have your AI assistant open too.</p>
+</section>
+<section id="where-we-left-off" class="level2">
+<h2 class="anchored" data-anchor-id="where-we-left-off">Where we left off</h2>
+<p>Session 5 fixed <strong>text</strong>: patterns, lookalikes, categories.</p>
+<p>Today is <strong>numbers, dates, and holes</strong>. The order is the same: <strong>flag</strong> first, <strong>remediate</strong> patterns, and only then <strong>impute or drop</strong>.</p>
+<p>AI can fill a hole in one line. It will not tell you who the hole belongs to. That is your job as navigator.</p>
+</section>
+</section>
+<section id="dates-and-types" class="level1" data-background-color="#f3f6ea">
+<h1 data-background-color="#f3f6ea">Dates and types</h1>
+<div class="notes">
+<p>Target: 0:05 to 0:13. The WellSync file has timestamps in several formats, so this is the skill students need most in the lab. Keep it practical: parse with a list of orders, count failures, never guess the ambiguous ones.</p>
+</div>
+<section id="text-is-not-a-date" class="level2">
+<h2 class="anchored" data-anchor-id="text-is-not-a-date">Text is not a date</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sort</span>(<span class="fu">c</span>(<span class="st">"10"</span>, <span class="st">"9"</span>, <span class="st">"100"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "10"  "100" "9"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sort</span>(<span class="fu">c</span>(<span class="st">"2026-01-10"</span>, <span class="st">"2026-01-9"</span>, <span class="st">"2026-01-100"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "2026-01-10"  "2026-01-100" "2026-01-9"</code></pre>
+</div>
+</div>
+<p>A column stored as text sorts, compares, and subtracts as <strong>text</strong>. Types are part of the model.</p>
+</section>
+<section id="one-column-many-formats" class="level2">
+<h2 class="anchored" data-anchor-id="one-column-many-formats">One column, many formats</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>ts_raw</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "2026-01-05 07:30"     "01/05/2026 7:30 AM"   "5 Jan 2026 07:30"    
+#&gt; [4] "2026-01-05T07:30:00Z" "Jan 5, 2026"          "yesterday"</code></pre>
+</div>
+</div>
+<p>Timestamps from different devices, typed or exported differently.</p>
+</section>
+<section id="ymd_hms-parses-only-what-it-knows" class="level2">
+<h2 class="anchored" data-anchor-id="ymd_hms-parses-only-what-it-knows"><code>ymd_hms()</code> parses only what it knows</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ymd_hms</span>(ts_raw, <span class="at">quiet =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] NA                        NA                       
+#&gt; [3] NA                        "2026-01-05 07:30:00 UTC"
+#&gt; [5] NA                        NA</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(<span class="fu">ymd_hms</span>(ts_raw, <span class="at">quiet =</span> <span class="cn">TRUE</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 5</code></pre>
+</div>
+</div>
+<p>Five of six became <code>NA</code>. No error: the function did what you asked.</p>
+<p>. . .</p>
+<div class="bug">
+<p><strong>Bug:</strong> an AI that stops here has just discarded 83% of the column.</p>
+</div>
+</section>
+<section id="give-it-a-list-of-orders" class="level2">
+<h2 class="anchored" data-anchor-id="give-it-a-list-of-orders">Give it a list of orders</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>parsed <span class="ot">&lt;-</span> <span class="fu">parse_date_time</span>(ts_raw, <span class="at">tz =</span> <span class="st">"UTC"</span>, <span class="at">quiet =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">orders =</span> <span class="fu">c</span>(<span class="st">"Ymd HM"</span>, <span class="st">"mdY IMp"</span>, <span class="st">"dbY HM"</span>, <span class="st">"YmdHMSz"</span>, <span class="st">"bdY"</span>))</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(ts_raw, parsed, <span class="at">ok =</span> <span class="sc">!</span><span class="fu">is.na</span>(parsed))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 6 x 3
+#&gt;   ts_raw               parsed              ok   
+#&gt;   &lt;chr&gt;                &lt;dttm&gt;              &lt;lgl&gt;
+#&gt; 1 2026-01-05 07:30     2026-01-05 07:30:00 TRUE 
+#&gt; 2 01/05/2026 7:30 AM   2026-01-05 07:30:00 TRUE 
+#&gt; 3 5 Jan 2026 07:30     2026-01-05 07:30:00 TRUE 
+#&gt; 4 2026-01-05T07:30:00Z 2026-01-05 07:30:00 TRUE 
+#&gt; 5 Jan 5, 2026          2026-01-05 00:00:00 TRUE 
+#&gt; 6 yesterday            NA                  FALSE</code></pre>
+</div>
+</div>
+<p>Each order is a pattern: <code>Y</code> year, <code>m</code> month, <code>d</code> day, <code>HM</code> hour and minute, <code>IMp</code> 12-hour clock with AM/PM.</p>
+</section>
+<section id="count-what-failed" class="level2">
+<h2 class="anchored" data-anchor-id="count-what-failed">Count what failed</h2>
+<p>The check that matters: <strong>how many rows did not parse, and why?</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(ts_raw, parsed) <span class="sc">|&gt;</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">is.na</span>(parsed))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 1 x 2
+#&gt;   ts_raw    parsed
+#&gt;   &lt;chr&gt;     &lt;dttm&gt;
+#&gt; 1 yesterday NA</code></pre>
+</div>
+</div>
+<p><code>"yesterday"</code> is not a date. It stays <code>NA</code> and gets <strong>flagged</strong>. Never fill it in.</p>
+</section>
+<section id="the-day-month-trap" class="level2">
+<h2 class="anchored" data-anchor-id="the-day-month-trap">The day-month trap</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"01/05/2026"</span>, <span class="st">"13/05/2026"</span>, <span class="st">"05/05/2026"</span>, <span class="st">"02/11/2026"</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">str_extract</span>(d, <span class="st">"^</span><span class="sc">\\</span><span class="st">d+"</span>))</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">str_extract</span>(d, <span class="st">"(?&lt;=/)</span><span class="sc">\\</span><span class="st">d+"</span>))</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(d, <span class="at">ambiguous =</span> a <span class="sc">&lt;=</span> <span class="dv">12</span> <span class="sc">&amp;</span> b <span class="sc">&lt;=</span> <span class="dv">12</span> <span class="sc">&amp;</span> a <span class="sc">!=</span> b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 4 x 2
+#&gt;   d          ambiguous
+#&gt;   &lt;chr&gt;      &lt;lgl&gt;    
+#&gt; 1 01/05/2026 TRUE     
+#&gt; 2 13/05/2026 FALSE    
+#&gt; 3 05/05/2026 FALSE    
+#&gt; 4 02/11/2026 TRUE</code></pre>
+</div>
+</div>
+<div class="swap">
+<p><code>01/05/2026</code> is January 5 or May 1. <strong>Code cannot tell.</strong> Ask which <strong>locale</strong> the device used, then set the order.</p>
+</div>
+</section>
+<section id="time-zones-flex" class="level2">
+<h2 class="anchored" data-anchor-id="time-zones-flex">Time zones (FLEX)</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> <span class="fu">ymd_hms</span>(<span class="st">"2026-01-05 07:30:00"</span>, <span class="at">tz =</span> <span class="st">"America/Los_Angeles"</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>t</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "2026-01-05 07:30:00 PST"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with_tz</span>(t, <span class="st">"UTC"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "2026-01-05 15:30:00 UTC"</code></pre>
+</div>
+</div>
+<p>Same instant, different clock. Store in <strong>UTC</strong>, convert for display.</p>
+<div class="notes">
+<p>FLEX: skip if behind (saves about 1.5 min). force_tz() changes the clock reading and keeps the zone; with_tz() keeps the instant and changes the display. Mixing them up shifts data by hours.</p>
+</div>
+</section>
+</section>
+<section id="sentinels-and-missing-markers" class="level1" data-background-color="#f3f6ea">
+<h1 data-background-color="#f3f6ea">Sentinels and missing markers</h1>
+<div class="notes">
+<p>Target: 0:13 to 0:19. Adapted from the old sentinel slides. The point: a number can mean “nothing”, and one such number wrecks every summary.</p>
+</div>
+<section id="four-kinds-of-nothing" class="level2">
+<h2 class="anchored" data-anchor-id="four-kinds-of-nothing">Four kinds of “nothing”</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Looks like</th>
+<th style="text-align: left;">Is it missing?</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>NA</code></td>
+<td style="text-align: left;">yes: R’s missing value</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>NaN</code></td>
+<td style="text-align: left;">yes: not a number (<code>0/0</code>)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>""</code>, <code>"n/a"</code>, <code>"NULL"</code></td>
+<td style="text-align: left;">text pretending to be a value</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>-999</code>, <code>-1</code>, <code>9999</code></td>
+<td style="text-align: left;">a <strong>sentinel</strong>: a number that means “no data”</td>
+</tr>
+</tbody>
+</table>
+<p><code>NULL</code> is different: it means “no object” and cannot sit inside a data frame column.</p>
+</section>
+<section id="one-sentinel-wrong-average" class="level2">
+<h2 class="anchored" data-anchor-id="one-sentinel-wrong-average">One sentinel, wrong average</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(vitals<span class="sc">$</span>hr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#&gt;  -999.0    64.0    72.0    41.2    79.0   300.0</code></pre>
+</div>
+</div>
+<p>The mean heart rate is <strong>41</strong>. A heart that slow does not exist. The <code>-999</code>s dragged it down.</p>
+</section>
+<section id="look-at-the-extremes" class="level2">
+<h2 class="anchored" data-anchor-id="look-at-the-extremes">Look at the extremes</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>vitals <span class="sc">|&gt;</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(hr <span class="sc">&lt;</span> <span class="dv">30</span> <span class="sc">|</span> hr <span class="sc">&gt;</span> <span class="dv">220</span>) <span class="sc">|&gt;</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(hr, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 3 x 2
+#&gt;      hr     n
+#&gt;   &lt;dbl&gt; &lt;int&gt;
+#&gt; 1  -999    29
+#&gt; 2     0     8
+#&gt; 3   300     4</code></pre>
+</div>
+</div>
+<p><code>-999</code> is a <strong>sentinel</strong>. <code>0</code> and <code>300</code> are different: not a code, just impossible.</p>
+</section>
+<section id="turn-sentinels-into-na" class="level2">
+<h2 class="anchored" data-anchor-id="turn-sentinels-into-na">Turn sentinels into <code>NA</code></h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>vit_na <span class="ot">&lt;-</span> vitals <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">hr =</span> <span class="fu">na_if</span>(hr, <span class="sc">-</span><span class="dv">999</span>), <span class="at">steps =</span> <span class="fu">na_if</span>(steps, <span class="sc">-</span><span class="dv">1</span>))</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">colSums</span>(<span class="fu">is.na</span>(vit_na))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;    hr steps 
+#&gt;    29    25</code></pre>
+</div>
+</div>
+<p>When reading a file: <code>read_csv(path, na = c("", "NA", "-999"))</code>.</p>
+<p>. . .</p>
+<div class="bug">
+<p><strong>Bug:</strong> is <code>-1</code> a sentinel? In steps, yes. In a temperature column, it is a real reading. <strong>The data dictionary decides</strong>, not a regex or an AI.</p>
+</div>
+</section>
+<section id="nan-is-not-na-flex" class="level2">
+<h2 class="anchored" data-anchor-id="nan-is-not-na-flex"><code>NaN</code> is not <code>NA</code> (FLEX)</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="cn">NA</span>, <span class="dv">0</span> <span class="sc">/</span> <span class="dv">0</span>)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">is.na</span>(x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] FALSE  TRUE  TRUE</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">is.nan</span>(x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] FALSE FALSE  TRUE</code></pre>
+</div>
+</div>
+<p><code>is.na()</code> catches both. <code>is.nan()</code> catches only the second.</p>
+<div class="notes">
+<p>FLEX: skip if behind (saves about 1 min).</p>
+</div>
+</section>
+</section>
+<section id="bounds-and-outliers" class="level1" data-background-color="#f3f6ea">
+<h1 data-background-color="#f3f6ea">Bounds and outliers</h1>
+<div class="notes">
+<p>Target: 0:19 to 0:32. Domain rules first (impossible), statistics second (unusual). Interaction 1 (Task 1) comes after the bounds slides.</p>
+</div>
+<section id="impossible-first-unusual-second" class="level2">
+<h2 class="anchored" data-anchor-id="impossible-first-unusual-second">Impossible first, unusual second</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Question</th>
+<th style="text-align: left;">Tool</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Can this value exist at all?</td>
+<td style="text-align: left;"><strong>Domain bound</strong> (a rule you know)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Is it far from the rest?</td>
+<td style="text-align: left;">z-score or IQR rule</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Is it odd only in combination?</td>
+<td style="text-align: left;">Derived feature or distance</td>
+</tr>
+</tbody>
+</table>
+<p>A heart rate of <strong>300</strong> is impossible. A heart rate of <strong>125</strong> is unusual. Different actions.</p>
+</section>
+<section id="fixed-bounds-flag-do-not-delete" class="level2">
+<h2 class="anchored" data-anchor-id="fixed-bounds-flag-do-not-delete">Fixed bounds: flag, do not delete</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>vit_na <span class="sc">|&gt;</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">hr_flag =</span> <span class="fu">case_when</span>(<span class="fu">is.na</span>(hr) <span class="sc">~</span> <span class="st">"missing"</span>,</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>                             <span class="fu">between</span>(hr, <span class="dv">30</span>, <span class="dv">220</span>) <span class="sc">~</span> <span class="st">"ok"</span>,</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>                             <span class="at">.default =</span> <span class="st">"impossible"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(hr_flag)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 3 x 2
+#&gt;   hr_flag        n
+#&gt;   &lt;chr&gt;      &lt;int&gt;
+#&gt; 1 impossible    12
+#&gt; 2 missing       29
+#&gt; 3 ok           959</code></pre>
+</div>
+</div>
+<p>Keep the row. Keep the flag. A later step decides what to do.</p>
+</section>
+<section id="task-1-code-it" class="level2">
+<h2 class="anchored" data-anchor-id="task-1-code-it">Task 1: code it</h2>
+<p><code>vitals</code> has sentinels (<code>-999</code>, <code>-1</code>) and impossible heart rates (<code>0</code>, <code>300</code>).</p>
+<div class="vote">
+<p><strong>Code it (5 min).</strong> 1. Turn the sentinels into <code>NA</code>. 2. Flag heart rates outside <strong>30 to 220</strong> as <code>"impossible"</code>. 3. Compare the mean heart rate <strong>before</strong> and <strong>after</strong>, using only <code>"ok"</code> rows.</p>
+</div>
+<div class="notes">
+<p>TASK 1 of 3 (CODE IT). Give 5 minutes; walk the room. Expected: vit &lt;- vitals |&gt; mutate(hr = na_if(hr, -999), steps = na_if(steps, -1), hr_flag = case_when(is.na(hr) ~ “missing”, between(hr, 30, 220) ~ “ok”, .default = “impossible”)); then mean(vitals$hr) is 41.2 (raw) and vit |&gt; filter(hr_flag == “ok”) |&gt; summarize(mean(hr)) is about 72. Counts: 29 missing (30 sentinels, one of which was overwritten by another planted value), 12 impossible (8 zeros and 4 values of 300), 959 ok. Steps: 25 sentinels. Common stuck points: case_when order (the NA check must come first, or between(NA) returns NA and the row falls to .default), using == instead of na_if, deleting rows instead of flagging them, mean() returning NA because the NAs were not dropped (na.rm = TRUE, and say so). Early finishers: add a flag for steps above 60000 and count it. Land the point: three different problems share one column: a sentinel, an impossible value, and a plausible one. Each needs a different decision, which is why we flag instead of overwrite.</p>
+</div>
+</section>
+<section id="the-answer" class="level2">
+<h2 class="anchored" data-anchor-id="the-answer">The answer</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">raw =</span> <span class="fu">mean</span>(vitals<span class="sc">$</span>hr),</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">clean =</span> <span class="fu">mean</span>(hr_ok<span class="sc">$</span>hr))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;      raw    clean 
+#&gt; 41.20000 71.91971</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">count</span>(vit, hr_flag)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 3 x 2
+#&gt;   hr_flag        n
+#&gt;   &lt;chr&gt;      &lt;int&gt;
+#&gt; 1 impossible    12
+#&gt; 2 missing       29
+#&gt; 3 ok           959</code></pre>
+</div>
+</div>
+<p>. . .</p>
+<div class="bug">
+<p><strong>Bug:</strong> the raw mean was off by <strong>30 bpm</strong>, from sentinels alone.</p>
+</div>
+</section>
+<section id="z-scores-how-far-from-the-rest" class="level2">
+<h2 class="anchored" data-anchor-id="z-scores-how-far-from-the-rest">z-scores: how far from the rest?</h2>
+<p><span class="math display">\[z = \frac{x - \bar{x}}{s}\]</span></p>
+<p>For roughly bell-shaped data, about <strong>0.3%</strong> of values are beyond <span class="math inline">\(|z| &gt; 3\)</span>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(hr_ok)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 959</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">expected =</span> <span class="fu">round</span>(<span class="fl">0.0027</span> <span class="sc">*</span> <span class="fu">nrow</span>(hr_ok), <span class="dv">1</span>),</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">found    =</span> <span class="fu">sum</span>(<span class="fu">abs</span>(<span class="fu">zs</span>(hr_ok<span class="sc">$</span>hr)) <span class="sc">&gt;</span> <span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; expected    found 
+#&gt;      2.6      5.0</code></pre>
+</div>
+</div>
+<p>Close to what a bell curve gives: nothing alarming here.</p>
+</section>
+<section id="the-iqr-rule" class="level2">
+<h2 class="anchored" data-anchor-id="the-iqr-rule">The IQR rule</h2>
+<p>A value is “unusual” if it is beyond <strong>1.5 x IQR</strong> from the quartiles. This is the rule a boxplot uses.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(steps_ok, <span class="fu">aes</span>(<span class="at">x =</span> steps)) <span class="sc">+</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">fill =</span> <span class="st">"#cfd82d"</span>, <span class="at">outlier.color =</span> <span class="st">"#f68b1f"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W08L16_slides_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="z-or-iqr-it-depends-on-the-shape" class="level2">
+<h2 class="anchored" data-anchor-id="z-or-iqr-it-depends-on-the-shape">z or IQR? It depends on the shape</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(<span class="at">variable =</span> <span class="fu">c</span>(<span class="st">"hr (bell-shaped)"</span>, <span class="st">"steps (skewed)"</span>),</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>       <span class="at">z_beyond_3 =</span> <span class="fu">c</span>(<span class="fu">sum</span>(<span class="fu">abs</span>(<span class="fu">zs</span>(hr_ok<span class="sc">$</span>hr)) <span class="sc">&gt;</span> <span class="dv">3</span>), <span class="fu">sum</span>(<span class="fu">abs</span>(<span class="fu">zs</span>(steps_ok<span class="sc">$</span>steps)) <span class="sc">&gt;</span> <span class="dv">3</span>)),</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>       <span class="at">iqr_rule   =</span> <span class="fu">c</span>(<span class="fu">sum</span>(<span class="fu">iqr_flag</span>(hr_ok<span class="sc">$</span>hr)), <span class="fu">sum</span>(<span class="fu">iqr_flag</span>(steps_ok<span class="sc">$</span>steps))),</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">n          =</span> <span class="fu">c</span>(<span class="fu">nrow</span>(hr_ok), <span class="fu">nrow</span>(steps_ok)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 2 x 4
+#&gt;   variable         z_beyond_3 iqr_rule     n
+#&gt;   &lt;chr&gt;                 &lt;int&gt;    &lt;int&gt; &lt;int&gt;
+#&gt; 1 hr (bell-shaped)          5        8   959
+#&gt; 2 steps (skewed)           14       32   975</code></pre>
+</div>
+</div>
+<p>Skewed data flags many “outliers” on the long tail. Rare is <strong>not</strong> wrong.</p>
+</section>
+<section id="look-in-context" class="level2">
+<h2 class="anchored" data-anchor-id="look-in-context">Look in context</h2>
+<ol type="1">
+<li><strong>Impossible?</strong> A bound says so: flag as an error.</li>
+<li><strong>Plausible but extreme?</strong> Keep it: it may be your most interesting data.</li>
+<li><strong>Repeated?</strong> The same odd value many times: look for a code, not a person.</li>
+</ol>
+<p>. . .</p>
+<p>Outliers are <strong>questions</strong>, not verdicts. Flag, look, document.</p>
+</section>
+<section id="odd-only-in-combination" class="level2">
+<h2 class="anchored" data-anchor-id="odd-only-in-combination">Odd only in combination</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>hw <span class="sc">|&gt;</span> <span class="fu">filter</span>(id <span class="sc">==</span> <span class="dv">501</span>) <span class="sc">|&gt;</span> <span class="fu">select</span>(h, w, zh, zw, bmi, zb)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 1 x 6
+#&gt;       h     w    zh    zw   bmi    zb
+#&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+#&gt; 1   190    45  2.17 -2.07  12.5 -3.73</code></pre>
+</div>
+</div>
+<p>Height and weight each look normal: <span class="math inline">\(|z| &lt; 3\)</span>. But <strong>BMI</strong> is 12.5, far below normal.</p>
+<p>. . .</p>
+<p>A <strong>derived feature</strong> can catch what each column alone cannot.</p>
+</section>
+<section id="mahalanobis-distance-flex" class="level2">
+<h2 class="anchored" data-anchor-id="mahalanobis-distance-flex">Mahalanobis distance (FLEX)</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>hw <span class="sc">|&gt;</span> <span class="fu">filter</span>(md <span class="sc">&gt;</span> <span class="fu">qchisq</span>(.<span class="dv">999</span>, <span class="dv">2</span>)) <span class="sc">|&gt;</span> <span class="fu">select</span>(id, h, w, md)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 1 x 4
+#&gt;      id     h     w    md
+#&gt;   &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+#&gt; 1   501   190    45  27.7</code></pre>
+</div>
+</div>
+<p>One distance for several variables at once. It accounts for how they move together. Cutoff: <span class="math inline">\(\chi^2_2\)</span> at 99.9%, about <strong>13.8</strong>.</p>
+<div class="notes">
+<p>FLEX: skip if behind (saves about 1.5 min). Assumes roughly multivariate normal data. It flags the one planted case (height 190, weight 45), which no single-variable z-score does.</p>
+</div>
+</section>
+</section>
+<section id="validity-rules" class="level1" data-background-color="#f3f6ea">
+<h1 data-background-color="#f3f6ea">Validity rules</h1>
+<div class="notes">
+<p>Target: 0:32 to 0:42. Quality dimensions, then rules as code, then Task 2 (PROMPT IT). Keep the dimensions slide to about one minute.</p>
+</div>
+<section id="dimensions-of-data-quality" class="level2">
+<h2 class="anchored" data-anchor-id="dimensions-of-data-quality">Dimensions of data quality</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Dimension</th>
+<th style="text-align: left;">The question</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>Validity</strong></td>
+<td style="text-align: left;">Does it follow the rules?</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Accuracy</strong></td>
+<td style="text-align: left;">Is it close to the truth?</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Consistency</strong></td>
+<td style="text-align: left;">Does it agree with itself and other tables?</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Uniformity</strong></td>
+<td style="text-align: left;">Same units, same format?</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Completeness</strong></td>
+<td style="text-align: left;">Is everything we need here?</td>
+</tr>
+</tbody>
+</table>
+<p>A value can be <strong>valid and still wrong</strong>: <code>120</code> is a valid heart rate that may be false.</p>
+</section>
+<section id="validity-rules-you-can-write-as-code" class="level2">
+<h2 class="anchored" data-anchor-id="validity-rules-you-can-write-as-code">Validity rules you can write as code</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Rule type</th>
+<th style="text-align: left;">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Data type</td>
+<td style="text-align: left;"><code>age</code> is numeric</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Range</td>
+<td style="text-align: left;"><code>age</code> between 0 and 120</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Mandatory</td>
+<td style="text-align: left;"><code>id</code> is never <code>NA</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Unique</td>
+<td style="text-align: left;"><code>id</code> appears once</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Set membership</td>
+<td style="text-align: left;"><code>device</code> is <code>watch</code>, <code>band</code>, or <code>ring</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Pattern</td>
+<td style="text-align: left;"><code>zip</code> is exactly 5 digits</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Cross-field</td>
+<td style="text-align: left;"><code>end</code> is not before <code>start</code></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="rules-become-counts" class="level2">
+<h2 class="anchored" data-anchor-id="rules-become-counts">Rules become counts</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>users <span class="sc">|&gt;</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">id_missing  =</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(id)),</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">age_range   =</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">between</span>(age, <span class="dv">0</span>, <span class="dv">120</span>), <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">device_set  =</span> <span class="fu">sum</span>(<span class="sc">!</span>device <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"watch"</span>, <span class="st">"band"</span>, <span class="st">"ring"</span>)),</span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">zip_pattern =</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">str_detect</span>(zip, <span class="st">"^</span><span class="sc">\\</span><span class="st">d{5}$"</span>), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">everything</span>(), <span class="at">names_to =</span> <span class="st">"rule"</span>, <span class="at">values_to =</span> <span class="st">"failing"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 4 x 2
+#&gt;   rule        failing
+#&gt;   &lt;chr&gt;         &lt;int&gt;
+#&gt; 1 id_missing        1
+#&gt; 2 age_range         2
+#&gt; 3 device_set        2
+#&gt; 4 zip_pattern       2</code></pre>
+</div>
+</div>
+<p>A table of <strong>failing counts</strong> is a report you can rerun on every new file.</p>
+</section>
+<section id="task-2-prompt-it" class="level2">
+<h2 class="anchored" data-anchor-id="task-2-prompt-it">Task 2: prompt it</h2>
+<p>Rules for <code>users</code> (from the data dictionary):</p>
+<p><code>id</code>: never missing, unique · <code>age</code>: 0 to 120 · <code>device</code>: <code>watch</code>, <code>band</code>, <code>ring</code> · <code>zip</code>: 5 digits · <code>end</code> not before <code>start</code></p>
+<div class="vote">
+<p><strong>Prompt it (6 min).</strong> 1. <strong>Count by hand</strong> the failing rows per rule. 2. Prompt your AI for <code>check_rules(df)</code>: one row per rule, with the failing count. It must <strong>not change</strong> the data. 3. Run it. Do your counts match?</p>
+</div>
+<div class="notes">
+<p>TASK 2 of 3 (PROMPT IT). Give 6 minutes: about 2 for the hand count, 2 for prompting, 2 for running and comparing. Expected failing counts (users has 10 rows): id missing 1; id duplicated 1 (the second 3); age out of range 2 (151 and -2; the NA age is not out of range, it is missing); device not in set 2 (“Watch” with a capital, and “phone”); zip not 5 digits 2 (“9720” and “97201-1234”; the NA zip is missing, not malformed); end before start 4. A good prompt: pastes the dictionary rules as text, says the function takes a data frame and returns a tibble with columns rule and n_failing, forbids modifying or dropping rows, says to handle NA explicitly (and say how), and asks for dplyr only. Where it goes wrong: the AI counts NA as failing (or as passing) without saying so; counts BOTH copies of a duplicate id (2 instead of 1) or flags the first one; uses a case-insensitive device check so “Watch” passes; returns the cleaned data instead of the report; or pulls in a package nobody has. The hand count exists to catch exactly these. Land the point: when the counts differ, the DISAGREEMENT is the finding. Decide which count is right, then write that decision into the prompt.</p>
+</div>
+</section>
+<section id="the-answer-1" class="level2">
+<h2 class="anchored" data-anchor-id="the-answer-1">The answer</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>users <span class="sc">|&gt;</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">id_missing    =</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(id)),</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">id_duplicated =</span> <span class="fu">sum</span>(<span class="fu">duplicated</span>(id[<span class="sc">!</span><span class="fu">is.na</span>(id)])),</span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">age_range     =</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">between</span>(age, <span class="dv">0</span>, <span class="dv">120</span>), <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">device_set    =</span> <span class="fu">sum</span>(<span class="sc">!</span>device <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"watch"</span>, <span class="st">"band"</span>, <span class="st">"ring"</span>)),</span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">zip_pattern   =</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">str_detect</span>(zip, <span class="st">"^</span><span class="sc">\\</span><span class="st">d{5}$"</span>), <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">end_early     =</span> <span class="fu">sum</span>(end <span class="sc">&lt;</span> start)</span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 1 x 6
+#&gt;   id_missing id_duplicated age_range device_set zip_pattern end_early
+#&gt;        &lt;int&gt;         &lt;int&gt;     &lt;int&gt;      &lt;int&gt;       &lt;int&gt;     &lt;int&gt;
+#&gt; 1          1             1         2          2           2         4</code></pre>
+</div>
+</div>
+</section>
+<section id="decisions-hidden-in-the-counts" class="level2">
+<h2 class="anchored" data-anchor-id="decisions-hidden-in-the-counts">Decisions hidden in the counts</h2>
+<ul>
+<li><strong><code>NA</code> age</strong>: not out of range. It is <strong>missing</strong>, a different problem</li>
+<li><strong>Duplicated <code>id</code></strong>: count the <strong>extra</strong> copies, or both?</li>
+<li><strong><code>"Watch"</code></strong>: invalid by the rule. Case-fold first, or flag it?</li>
+<li><strong><code>97201-1234</code></strong>: malformed, or a valid ZIP+4?</li>
+</ul>
+<p>. . .</p>
+<p>The rule table is code <strong>and</strong> documentation. Write the decision down.</p>
+</section>
+</section>
+<section id="missingness" class="level1" data-background-color="#f3f6ea">
+<h1 data-background-color="#f3f6ea">Missingness</h1>
+<div class="notes">
+<p>Target: 0:42 to 0:52. Mechanisms, then diagnosis by group comparison, then the cost of dropping rows. We use the steps_sim data, where we know the truth, to SHOW what real data would never show. Say that out loud.</p>
+</div>
+<section id="why-is-it-missing" class="level2">
+<h2 class="anchored" data-anchor-id="why-is-it-missing">Why is it missing?</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Meaning</th>
+<th style="text-align: left;">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>Structural</strong></td>
+<td style="text-align: left;">cannot exist</td>
+<td style="text-align: left;">“last pregnancy date” for a man</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>MCAR</strong></td>
+<td style="text-align: left;">unrelated to anything</td>
+<td style="text-align: left;">a random sync failure</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>MAR</strong></td>
+<td style="text-align: left;">related to <strong>other columns</strong></td>
+<td style="text-align: left;">old devices drop steps</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>MNAR</strong></td>
+<td style="text-align: left;">related to the <strong>missing value itself</strong></td>
+<td style="text-align: left;">heart rate dropped when it is high</td>
+</tr>
+</tbody>
+</table>
+<p>Real data is rarely MCAR. The mechanism decides what is safe to do.</p>
+</section>
+<section id="diagnose-is-missingness-the-same-everywhere" class="level2">
+<h2 class="anchored" data-anchor-id="diagnose-is-missingness-the-same-everywhere">Diagnose: is missingness the same everywhere?</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>steps_sim <span class="sc">|&gt;</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">missing =</span> <span class="fu">mean</span>(<span class="fu">is.na</span>(steps)), <span class="at">n =</span> <span class="fu">n</span>(), <span class="at">.by =</span> device)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 2 x 3
+#&gt;   device missing     n
+#&gt;   &lt;chr&gt;    &lt;dbl&gt; &lt;int&gt;
+#&gt; 1 new     0.0798  1203
+#&gt; 2 legacy  0.512    797</code></pre>
+</div>
+</div>
+<p>Legacy devices lose <strong>51%</strong> of steps, new devices <strong>8%</strong>. That is not random.</p>
+<p>. . .</p>
+<p>You can <strong>describe</strong> this pattern. You cannot <strong>prove</strong> the cause from the file.</p>
+</section>
+<section id="drop-the-rows-look-at-who-is-left" class="level2">
+<h2 class="anchored" data-anchor-id="drop-the-rows-look-at-who-is-left">Drop the rows? Look at who is left</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>steps_sim <span class="sc">|&gt;</span></span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">all_rows =</span> <span class="fu">mean</span>(device <span class="sc">==</span> <span class="st">"legacy"</span>),</span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">complete_rows =</span> <span class="fu">mean</span>(device[<span class="sc">!</span><span class="fu">is.na</span>(steps)] <span class="sc">==</span> <span class="st">"legacy"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 1 x 2
+#&gt;   all_rows complete_rows
+#&gt;      &lt;dbl&gt;         &lt;dbl&gt;
+#&gt; 1    0.398         0.260</code></pre>
+</div>
+</div>
+<p>Legacy devices were <strong>40%</strong> of users, but only <strong>26%</strong> of complete rows.</p>
+<p>. . .</p>
+<div class="bug">
+<p><strong>Bug:</strong> dropping rows with <code>NA</code> removes legacy users first. The model then learns mostly from <strong>new-device</strong> users.</p>
+</div>
+</section>
+<section id="mnar-leaves-no-trace" class="level2">
+<h2 class="anchored" data-anchor-id="mnar-leaves-no-trace">MNAR leaves no trace</h2>
+<p>If heart rate goes missing <strong>because</strong> it was high, no other column shows it.</p>
+<div class="swap">
+<p>Only <strong>context</strong> can raise the suspicion: how does the sensor behave when the wearer is exercising?</p>
+</div>
+<p>What you can do: ask the source, compare with another source, or test how much the answer <strong>changes</strong> under different assumptions (a <strong>sensitivity analysis</strong>).</p>
+</section>
+</section>
+<section id="imputation" class="level1" data-background-color="#f3f6ea">
+<h1 data-background-color="#f3f6ea">Imputation</h1>
+<div class="notes">
+<p>Target: 0:52 to 1:02. Options, then why mean imputation fails, then mice, then Task 3 (ASSESS IT). The simulation lets us score the methods against the truth; with real data students compare distributions and group means instead.</p>
+</div>
+<section id="options-and-the-rule-of-thumb" class="level2">
+<h2 class="anchored" data-anchor-id="options-and-the-rule-of-thumb">Options, and the rule of thumb</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Option</th>
+<th style="text-align: left;">When</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>Drop rows</strong></td>
+<td style="text-align: left;">few missing (under about 5 to 10%) and MCAR</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Drop the variable</strong></td>
+<td style="text-align: left;">mostly missing, little value</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Impute</strong></td>
+<td style="text-align: left;">MAR, and the variable is a predictor</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Declare unusable</strong></td>
+<td style="text-align: left;">too much missing, or MNAR with no way to check</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Never impute the label or the outcome</strong> you are trying to predict.</p>
+</section>
+<section id="mean-imputation-the-tempting-one" class="level2">
+<h2 class="anchored" data-anchor-id="mean-imputation-the-tempting-one">Mean imputation: the tempting one</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>mean_imp <span class="ot">&lt;-</span> steps_sim <span class="sc">|&gt;</span></span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">steps =</span> <span class="fu">if_else</span>(<span class="fu">is.na</span>(steps), <span class="fu">mean</span>(steps, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), steps))</span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">true_sd =</span> <span class="fu">sd</span>(steps_sim<span class="sc">$</span>steps_true), <span class="at">after_mean_imp =</span> <span class="fu">sd</span>(mean_imp<span class="sc">$</span>steps))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;        true_sd after_mean_imp 
+#&gt;       2564.128       2193.206</code></pre>
+</div>
+</div>
+<p>The mean stays put. The <strong>spread shrinks</strong>, because one value now fills 25% of the column.</p>
+</section>
+<section id="what-it-does-to-the-shape" class="level2">
+<h2 class="anchored" data-anchor-id="what-it-does-to-the-shape">What it does to the shape</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bind_rows</span>(<span class="at">truth =</span> steps_sim <span class="sc">|&gt;</span> <span class="fu">transmute</span>(<span class="at">steps =</span> steps_true),</span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>          <span class="st">`</span><span class="at">mean imputed</span><span class="st">`</span> <span class="ot">=</span> mean_imp <span class="sc">|&gt;</span> <span class="fu">select</span>(steps), <span class="at">.id =</span> <span class="st">"version"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> steps, <span class="at">fill =</span> version)) <span class="sc">+</span></span>
+<span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">color =</span> <span class="cn">NA</span>) <span class="sc">+</span></span>
+<span id="cb59-5"><a href="#cb59-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"#6d8d24"</span>, <span class="st">"#f68b1f"</span>), <span class="at">name =</span> <span class="cn">NULL</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="W08L16_slides_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="multiple-imputation-with-mice" class="level2">
+<h2 class="anchored" data-anchor-id="multiple-imputation-with-mice">Multiple imputation with <code>mice</code></h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mice)</span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> steps_sim <span class="sc">|&gt;</span> <span class="fu">select</span>(steps, device, age) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">device =</span> <span class="fu">factor</span>(device))</span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>imp <span class="ot">&lt;-</span> <span class="fu">mice</span>(dat, <span class="at">m =</span> <span class="dv">5</span>, <span class="at">method =</span> <span class="st">"pmm"</span>, <span class="at">donors =</span> <span class="dv">20</span>, <span class="at">printFlag =</span> <span class="cn">FALSE</span>, <span class="at">seed =</span> <span class="dv">531</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
+<li><code>m = 5</code>: five completed datasets, to carry the <strong>uncertainty</strong></li>
+<li><code>pmm</code>: fill each hole with an <strong>observed</strong> value from a similar row</li>
+<li>Analyze each dataset, then <strong>pool</strong></li>
+</ul>
+</section>
+<section id="judge-it-by-the-distribution" class="level2">
+<h2 class="anchored" data-anchor-id="judge-it-by-the-distribution">Judge it by the distribution</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>stats <span class="ot">&lt;-</span> \(x) <span class="fu">c</span>(<span class="at">mean =</span> <span class="fu">mean</span>(x), <span class="at">sd =</span> <span class="fu">sd</span>(x))</span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>pooled <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, \(i) <span class="fu">stats</span>(<span class="fu">complete</span>(imp, i)<span class="sc">$</span>steps))</span>
+<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-4"><a href="#cb61-4" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(<span class="at">truth           =</span> <span class="fu">stats</span>(steps_sim<span class="sc">$</span>steps_true),</span>
+<span id="cb61-5"><a href="#cb61-5" aria-hidden="true" tabindex="-1"></a>      <span class="st">`</span><span class="at">drop rows</span><span class="st">`</span>     <span class="ot">=</span> <span class="fu">stats</span>(<span class="fu">na.omit</span>(steps_sim<span class="sc">$</span>steps)),</span>
+<span id="cb61-6"><a href="#cb61-6" aria-hidden="true" tabindex="-1"></a>      <span class="st">`</span><span class="at">mean imputed</span><span class="st">`</span>  <span class="ot">=</span> <span class="fu">stats</span>(mean_imp<span class="sc">$</span>steps),</span>
+<span id="cb61-7"><a href="#cb61-7" aria-hidden="true" tabindex="-1"></a>      <span class="st">`</span><span class="at">mice (pooled)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">rowMeans</span>(pooled)) <span class="sc">|&gt;</span> <span class="fu">round</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;               mean   sd
+#&gt; truth         7419 2564
+#&gt; drop rows     7791 2536
+#&gt; mean imputed  7791 2193
+#&gt; mice (pooled) 7404 2604</code></pre>
+</div>
+</div>
+<p>. . .</p>
+<p>Real data has <strong>no truth column</strong>. There you compare distributions and <strong>group means</strong> before and after, never single imputed values.</p>
+</section>
+<section id="task-3-the-ais-answer" class="level2">
+<h2 class="anchored" data-anchor-id="task-3-the-ais-answer">Task 3: the AI’s answer</h2>
+<p>Asked: “Fill in the missing steps so the column is complete.”</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>steps_sim <span class="sc">|&gt;</span></span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">steps =</span> <span class="fu">if_else</span>(<span class="fu">is.na</span>(steps), <span class="fu">mean</span>(steps, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), steps)) <span class="sc">|&gt;</span></span>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">mean =</span> <span class="fu">mean</span>(steps), <span class="at">sd =</span> <span class="fu">sd</span>(steps), <span class="at">missing =</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(steps)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 1 x 3
+#&gt;    mean    sd missing
+#&gt;   &lt;dbl&gt; &lt;dbl&gt;   &lt;int&gt;
+#&gt; 1 7791. 2193.       0</code></pre>
+</div>
+</div>
+<p>The AI then wrote: “No missing values remain, and the mean is unchanged, so no bias was introduced.”</p>
+</section>
+<section id="task-3-assess-it" class="level2">
+<h2 class="anchored" data-anchor-id="task-3-assess-it">Task 3: assess it</h2>
+<div class="vote">
+<p><strong>Assess it (5 min).</strong> Run it. Compare with <code>steps_true</code> and with the group means by <code>device</code>. <strong>Read</strong>, <strong>Run</strong>, <strong>Restate</strong>.</p>
+</div>
+<ol type="1">
+<li>Is the claim “no bias” true? Check <strong>two</strong> things.</li>
+<li>What happened to the <strong>spread</strong>?</li>
+<li>What does it do to legacy users?</li>
+<li>What would you ask for instead?</li>
+</ol>
+<div class="notes">
+<p>TASK 3 of 3 (ASSESS IT). Give 5 minutes. Findings: (1) The mean is unchanged BY CONSTRUCTION (we filled with the mean of the observed values), so “unchanged” proves nothing. But the observed values over-represent new devices (74% of the complete rows), so the mean the AI preserved (about 7791) is already biased relative to the truth (about 7419). Check the group means by device: after mean imputation both groups collapse toward the overall mean. (2) The sd falls (about 2193 vs 2564 truth): the column looks tidier than reality, and every later interval will be too narrow. (3) Legacy users have a true mean of about 5676 steps; mean imputation gives all of their missing rows about 7791, so legacy users appear to walk more than they do, which would flow into any model or score. (4) A better prompt: “The steps are missing more often for legacy devices. Use mice with device and age as predictors, 5 imputations, pmm. Then compare the mean and sd of steps, overall and by device, before and after imputation, and report any group whose mean moves by more than 5%.” Restate: the AI “completed” the column and certified itself. The claim sounds like a check and is not one.</p>
+</div>
+</section>
+<section id="what-was-wrong" class="level2">
+<h2 class="anchored" data-anchor-id="what-was-wrong">What was wrong</h2>
+<ul>
+<li><strong>“Unchanged mean”</strong> is guaranteed by the method, so it proves nothing</li>
+<li>That mean is <strong>already biased</strong>: legacy devices are under-represented</li>
+<li>The <strong>spread shrinks</strong>: intervals will be too narrow</li>
+<li><strong>Legacy users</strong> are filled with the new-device average</li>
+</ul>
+<p>. . .</p>
+<p>A complete column is not a correct column. Compare <strong>distributions and groups</strong>.</p>
+</section>
+</section>
+<section id="wrap-up" class="level1" data-background-color="#f3f6ea">
+<h1 data-background-color="#f3f6ea">Wrap-up</h1>
+<div class="notes">
+<p>Target: 1:02 to 1:05.</p>
+</div>
+<section id="four-things-to-remember" class="level2">
+<h2 class="anchored" data-anchor-id="four-things-to-remember">Four things to remember</h2>
+<ol type="1">
+<li><strong>Parse with a list of orders</strong>, count the failures, and never let code guess an ambiguous date.</li>
+<li><strong>Impossible first, unusual second.</strong> Sentinels and bounds, then z or IQR. Flag, do not delete.</li>
+<li><strong>Rules are code.</strong> A table of failing counts is a report you can rerun.</li>
+<li><strong>Missingness has a pattern.</strong> Check who is missing before you drop or fill, and judge imputation by the <strong>distribution</strong>.</li>
+</ol>
+</section>
+<section id="next-up" class="level2">
+<h2 class="anchored" data-anchor-id="next-up">Next up</h2>
+<p>Wed 11/25, Session 7: <strong>the cleaning lab kickoff</strong>. That is the Wednesday before Thanksgiving, so it is designed to work on your own schedule.</p>
+<p>The <strong>handout</strong> has the full explanations, extra practice, and the <code>pointblank</code> appendix.</p>
+</section>
+</section>
+<section id="appendix" class="level1" data-background-color="#f3f6ea">
+<h1 data-background-color="#f3f6ea">Appendix</h1>
+<section id="unit-tests-with-testthat" class="level2">
+<h2 class="anchored" data-anchor-id="unit-tests-with-testthat">Unit tests with <code>testthat</code></h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(testthat)</span>
+<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb65-3"><a href="#cb65-3" aria-hidden="true" tabindex="-1"></a><span class="fu">test_that</span>(<span class="st">"heart rate is in range after cleaning"</span>, {</span>
+<span id="cb65-4"><a href="#cb65-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">expect_true</span>(<span class="fu">all</span>(<span class="fu">between</span>(clean<span class="sc">$</span>hr, <span class="dv">30</span>, <span class="dv">220</span>), <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb65-5"><a href="#cb65-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">expect_equal</span>(<span class="fu">sum</span>(clean<span class="sc">$</span>hr <span class="sc">==</span> <span class="sc">-</span><span class="dv">999</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="dv">0</span>)</span>
+<span id="cb65-6"><a href="#cb65-6" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>A failing test stops the script. Run it after every cleaning step.</p>
+</section>
+<section id="validation-reports-with-pointblank-not-run" class="level2">
+<h2 class="anchored" data-anchor-id="validation-reports-with-pointblank-not-run">Validation reports with <code>pointblank</code> (not run)</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages("pointblank")  # once</span></span>
+<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pointblank)</span>
+<span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb66-4"><a href="#cb66-4" aria-hidden="true" tabindex="-1"></a>users <span class="sc">|&gt;</span></span>
+<span id="cb66-5"><a href="#cb66-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">create_agent</span>() <span class="sc">|&gt;</span></span>
+<span id="cb66-6"><a href="#cb66-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">col_vals_between</span>(age, <span class="dv">0</span>, <span class="dv">120</span>, <span class="at">na_pass =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb66-7"><a href="#cb66-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">col_vals_in_set</span>(device, <span class="fu">c</span>(<span class="st">"watch"</span>, <span class="st">"band"</span>, <span class="st">"ring"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb66-8"><a href="#cb66-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">col_vals_regex</span>(zip, <span class="st">"^</span><span class="sc">\\</span><span class="st">d{5}$"</span>, <span class="at">na_pass =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb66-9"><a href="#cb66-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">interrogate</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Same idea as <code>check_rules()</code>, with a formatted report.</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>STAT 531: Ethics and Practice of Data Science</p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

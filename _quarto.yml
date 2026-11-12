@@ -5,10 +5,13 @@ project:
   render:
     - "*.qmd"
   resources:
-   - data/movies.csv
-   - data/studios.csv
-   - data/movies.parquet
-   - scripts/make-views.R
+    - data/studios.csv
+    - data/movies.parquet
+    - scripts/make-views.R
+    - data/movies.csv
+    - data/s6_vitals.csv
+    - data/s6_users.csv
+    - data/s6_steps_sim.csv
 
 website:
   title: "STAT 531: R in the AI Era"

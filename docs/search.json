@@ -18,7 +18,7 @@
     "href": "index.html#sessions",
     "title": "R in the AI Era",
     "section": "Sessions",
-    "text": "Sessions\nNew sessions appear in the table below as they are published. Slides are for class and handouts are the detailed reference. Lab’s 2 and 3 instructions will be pushed into your team’s repo when the time comes.\n\n\n\n\nDate\n\n\nSession\n\n\nSlides\n\n\nHandout\n\n\n\n\n\n\n2026-10-19\n\n\nYou Navigate, AI DrivesDriver-navigator mindset, the Audit Loop, R essentials, and the first dplyr verbs\n\n\nSlides\n\n\nHandout\n\n\n\n\n2026-10-21\n\n\nSummarize, Combine, and ScaleGrouped summaries, joins with row-count checks, pivots, and big data with arrow and Parquet\n\n\nSlides\n\n\nHandout\n\n\n\n\n2026-10-26\n\n\nPlots That Tell the TruthThe grammar of graphics with ggplot2, choosing the right geom, auditing misleading plots, and plots as diagnostics and stories\n\n\nSlides\n\n\nHandout\n\n\n\n\nCourse datasets for in-class examples: movies.csv, studios.csv, movies.parquet"
+    "text": "Sessions\nNew sessions appear in the table below as they are published. Slides are for class and handouts are the detailed reference. Lab’s 2 and 3 instructions will be pushed into your team’s repo when the time comes.\n\n\n\n\nDate\n\n\nSession\n\n\nSlides\n\n\nHandout\n\n\n\n\n\n\n2026-10-19\n\n\nYou Navigate, AI DrivesDriver-navigator mindset, the Audit Loop, R essentials, and the first dplyr verbs\n\n\nSlides\n\n\nHandout\n\n\n\n\n2026-10-21\n\n\nSummarize, Combine, and ScaleGrouped summaries, joins with row-count checks, pivots, and big data with arrow and Parquet\n\n\nSlides\n\n\nHandout\n\n\n\n\n2026-10-26\n\n\nPlots That Tell the TruthThe grammar of graphics with ggplot2, choosing the right geom, auditing misleading plots, and plots as diagnostics and stories\n\n\nSlides\n\n\nHandout\n\n\n\n\n2026-11-16\n\n\nStrings, Unicode, and CategoriesThe cleaning pipeline, regex with stringr, invisible Unicode traps, recoding categories with a lookup table, and writing a spec before asking an AI for code\n\n\nSlides\n\n\nHandout\n\n\n\n\n2026-11-18\n\n\nTypes, Anomalies, and MissingnessParsing mixed dates, finding sentinels, outliers by domain rules and plots, validity rules as code, missing-data mechanisms, and judging an imputation by whether it recovers the distribution\n\n\nSlides\n\n\nHandout\n\n\n\n\nCourse datasets for in-class examples: movies.csv, studios.csv, movies.parquet"
   },
   {
     "objectID": "W04L08_handout.html",
@@ -2182,5 +2182,957 @@
     "title": "Plots That Tell the Truth",
     "section": "Four things to remember",
     "text": "Four things to remember\n\nGrammar: data, aesthetics, geoms, layered with +. Inside aes() means data, outside means fixed.\nChoose the geom from the question, then audit the plot: axis, n, order, color, labels.\nA plot is a diagnostic and a message: find the problem, then state the finding.\nPrompt with data, message, form, and honesty rules. Assess what comes back: run it and look."
+  },
+  {
+    "objectID": "W08L16_slides.html",
+    "href": "W08L16_slides.html",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "",
+    "text": "TARGET CLOCK (core ends at 1:05; FLEX slides add up to 5 minutes, skip them if behind): Welcome 0:00-0:05 | Dates and types 0:05-0:13 | Sentinels and missing markers 0:13-0:19 | Bounds and outliers 0:19-0:32 (Task 1) | Validity rules 0:32-0:42 (Task 2) | Missingness 0:42-0:52 | Imputation 0:52-1:02 (Task 3) | Wrap-up 1:02-1:05.\nThis session is trimmed on purpose: about 13% less than a full 75 minutes. Cut material (time zones, NaN vs NA, Mahalanobis distance, pointblank) lives in FLEX slides, the handout, and the Appendix.\nExactly THREE hands-on tasks (blue boxes): Task 1 CODE IT (sentinels and impossible values, about 5 min), Task 2 PROMPT IT (validation rules from a dictionary, about 6 min), Task 3 ASSESS IT (an imputation, about 5 min). Everything else is teaching. The opening Recall slide is silent thinking, not a task. Students need R and an AI assistant open. The data files are in the course site (data/s6_*.csv); students read them with read_csv().\nFLEX slides, skip if behind: “Time zones”, “NaN is not NA”, “Mahalanobis distance”.\nIf you are still behind at 0:32 after skipping FLEX slides, also shorten “Look in context” and “Odd only in combination”: the handout covers both.\nPress S for speaker view.\n\n\n\n\nWhat does \"[^\\\\x00-\\\\x7F]\" find?\nWhy is parse_number() risky on \"165 lb\" and \"72 kg\"?\nWhy do we use a lookup table instead of a long ifelse()?\n\n. . .\n\nAny character outside plain ASCII: lookalikes, accents\nIt drops the unit, so pounds and kilograms mix\nA reviewer can read it, and anti_join() shows what is unmapped\n\n\nRetrieval practice from Session 5. 30 seconds of silent thinking, then reveal. Do not discuss at length.\n\n\n\n\n\nTypes: dates arrive as text in many formats\nSentinels: numbers that mean “nothing”\nOutliers: domain rules first, plots second\nValidity rules: write them as code\nMissingness: who is missing, and why does it matter?\nImputation: judge it by the distribution\n\nHands-on today: code it, prompt it, assess it.\n\n\n\n\nlibrary(tidyverse)\nvitals    &lt;- read_csv(\"data/s6_vitals.csv\")\nusers     &lt;- read_csv(\"data/s6_users.csv\")\nsteps_sim &lt;- read_csv(\"data/s6_steps_sim.csv\")\n\nThe files are on the course site, in the data/ folder. Have your AI assistant open too.\n\n\n\nSession 5 fixed text: patterns, lookalikes, categories.\nToday is numbers, dates, and holes. The order is the same: flag first, remediate patterns, and only then impute or drop.\nAI can fill a hole in one line. It will not tell you who the hole belongs to. That is your job as navigator."
+  },
+  {
+    "objectID": "W08L16_slides.html#recall-30-seconds-silent",
+    "href": "W08L16_slides.html#recall-30-seconds-silent",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "",
+    "text": "What does \"[^\\\\x00-\\\\x7F]\" find?\nWhy is parse_number() risky on \"165 lb\" and \"72 kg\"?\nWhy do we use a lookup table instead of a long ifelse()?\n\n. . .\n\nAny character outside plain ASCII: lookalikes, accents\nIt drops the unit, so pounds and kilograms mix\nA reviewer can read it, and anti_join() shows what is unmapped\n\n\nRetrieval practice from Session 5. 30 seconds of silent thinking, then reveal. Do not discuss at length."
+  },
+  {
+    "objectID": "W08L16_slides.html#todays-route",
+    "href": "W08L16_slides.html#todays-route",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "",
+    "text": "Types: dates arrive as text in many formats\nSentinels: numbers that mean “nothing”\nOutliers: domain rules first, plots second\nValidity rules: write them as code\nMissingness: who is missing, and why does it matter?\nImputation: judge it by the distribution\n\nHands-on today: code it, prompt it, assess it."
+  },
+  {
+    "objectID": "W08L16_slides.html#set-up-for-the-three-tasks",
+    "href": "W08L16_slides.html#set-up-for-the-three-tasks",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "",
+    "text": "library(tidyverse)\nvitals    &lt;- read_csv(\"data/s6_vitals.csv\")\nusers     &lt;- read_csv(\"data/s6_users.csv\")\nsteps_sim &lt;- read_csv(\"data/s6_steps_sim.csv\")\n\nThe files are on the course site, in the data/ folder. Have your AI assistant open too."
+  },
+  {
+    "objectID": "W08L16_slides.html#where-we-left-off",
+    "href": "W08L16_slides.html#where-we-left-off",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "",
+    "text": "Session 5 fixed text: patterns, lookalikes, categories.\nToday is numbers, dates, and holes. The order is the same: flag first, remediate patterns, and only then impute or drop.\nAI can fill a hole in one line. It will not tell you who the hole belongs to. That is your job as navigator."
+  },
+  {
+    "objectID": "W08L16_slides.html#text-is-not-a-date",
+    "href": "W08L16_slides.html#text-is-not-a-date",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "Text is not a date",
+    "text": "Text is not a date\n\nsort(c(\"10\", \"9\", \"100\"))\n\n#&gt; [1] \"10\"  \"100\" \"9\"\n\nsort(c(\"2026-01-10\", \"2026-01-9\", \"2026-01-100\"))\n\n#&gt; [1] \"2026-01-10\"  \"2026-01-100\" \"2026-01-9\"\n\n\nA column stored as text sorts, compares, and subtracts as text. Types are part of the model."
+  },
+  {
+    "objectID": "W08L16_slides.html#one-column-many-formats",
+    "href": "W08L16_slides.html#one-column-many-formats",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "One column, many formats",
+    "text": "One column, many formats\n\nts_raw\n\n#&gt; [1] \"2026-01-05 07:30\"     \"01/05/2026 7:30 AM\"   \"5 Jan 2026 07:30\"    \n#&gt; [4] \"2026-01-05T07:30:00Z\" \"Jan 5, 2026\"          \"yesterday\"\n\n\nTimestamps from different devices, typed or exported differently."
+  },
+  {
+    "objectID": "W08L16_slides.html#ymd_hms-parses-only-what-it-knows",
+    "href": "W08L16_slides.html#ymd_hms-parses-only-what-it-knows",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "ymd_hms() parses only what it knows",
+    "text": "ymd_hms() parses only what it knows\n\nymd_hms(ts_raw, quiet = TRUE)\n\n#&gt; [1] NA                        NA                       \n#&gt; [3] NA                        \"2026-01-05 07:30:00 UTC\"\n#&gt; [5] NA                        NA\n\nsum(is.na(ymd_hms(ts_raw, quiet = TRUE)))\n\n#&gt; [1] 5\n\n\nFive of six became NA. No error: the function did what you asked.\n. . .\n\nBug: an AI that stops here has just discarded 83% of the column."
+  },
+  {
+    "objectID": "W08L16_slides.html#give-it-a-list-of-orders",
+    "href": "W08L16_slides.html#give-it-a-list-of-orders",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "Give it a list of orders",
+    "text": "Give it a list of orders\n\nparsed &lt;- parse_date_time(ts_raw, tz = \"UTC\", quiet = TRUE,\n  orders = c(\"Ymd HM\", \"mdY IMp\", \"dbY HM\", \"YmdHMSz\", \"bdY\"))\ntibble(ts_raw, parsed, ok = !is.na(parsed))\n\n#&gt; # A tibble: 6 x 3\n#&gt;   ts_raw               parsed              ok   \n#&gt;   &lt;chr&gt;                &lt;dttm&gt;              &lt;lgl&gt;\n#&gt; 1 2026-01-05 07:30     2026-01-05 07:30:00 TRUE \n#&gt; 2 01/05/2026 7:30 AM   2026-01-05 07:30:00 TRUE \n#&gt; 3 5 Jan 2026 07:30     2026-01-05 07:30:00 TRUE \n#&gt; 4 2026-01-05T07:30:00Z 2026-01-05 07:30:00 TRUE \n#&gt; 5 Jan 5, 2026          2026-01-05 00:00:00 TRUE \n#&gt; 6 yesterday            NA                  FALSE\n\n\nEach order is a pattern: Y year, m month, d day, HM hour and minute, IMp 12-hour clock with AM/PM."
+  },
+  {
+    "objectID": "W08L16_slides.html#count-what-failed",
+    "href": "W08L16_slides.html#count-what-failed",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "Count what failed",
+    "text": "Count what failed\nThe check that matters: how many rows did not parse, and why?\n\ntibble(ts_raw, parsed) |&gt;\n  filter(is.na(parsed))\n\n#&gt; # A tibble: 1 x 2\n#&gt;   ts_raw    parsed\n#&gt;   &lt;chr&gt;     &lt;dttm&gt;\n#&gt; 1 yesterday NA\n\n\n\"yesterday\" is not a date. It stays NA and gets flagged. Never fill it in."
+  },
+  {
+    "objectID": "W08L16_slides.html#the-day-month-trap",
+    "href": "W08L16_slides.html#the-day-month-trap",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "The day-month trap",
+    "text": "The day-month trap\n\nd &lt;- c(\"01/05/2026\", \"13/05/2026\", \"05/05/2026\", \"02/11/2026\")\na &lt;- as.numeric(str_extract(d, \"^\\\\d+\"))\nb &lt;- as.numeric(str_extract(d, \"(?&lt;=/)\\\\d+\"))\ntibble(d, ambiguous = a &lt;= 12 & b &lt;= 12 & a != b)\n\n#&gt; # A tibble: 4 x 2\n#&gt;   d          ambiguous\n#&gt;   &lt;chr&gt;      &lt;lgl&gt;    \n#&gt; 1 01/05/2026 TRUE     \n#&gt; 2 13/05/2026 FALSE    \n#&gt; 3 05/05/2026 FALSE    \n#&gt; 4 02/11/2026 TRUE\n\n\n\n01/05/2026 is January 5 or May 1. Code cannot tell. Ask which locale the device used, then set the order."
+  },
+  {
+    "objectID": "W08L16_slides.html#time-zones-flex",
+    "href": "W08L16_slides.html#time-zones-flex",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "Time zones (FLEX)",
+    "text": "Time zones (FLEX)\n\nt &lt;- ymd_hms(\"2026-01-05 07:30:00\", tz = \"America/Los_Angeles\")\nt\n\n#&gt; [1] \"2026-01-05 07:30:00 PST\"\n\nwith_tz(t, \"UTC\")\n\n#&gt; [1] \"2026-01-05 15:30:00 UTC\"\n\n\nSame instant, different clock. Store in UTC, convert for display.\n\nFLEX: skip if behind (saves about 1.5 min). force_tz() changes the clock reading and keeps the zone; with_tz() keeps the instant and changes the display. Mixing them up shifts data by hours."
+  },
+  {
+    "objectID": "W08L16_slides.html#four-kinds-of-nothing",
+    "href": "W08L16_slides.html#four-kinds-of-nothing",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "Four kinds of “nothing”",
+    "text": "Four kinds of “nothing”\n\n\n\nLooks like\nIs it missing?\n\n\n\n\nNA\nyes: R’s missing value\n\n\nNaN\nyes: not a number (0/0)\n\n\n\"\", \"n/a\", \"NULL\"\ntext pretending to be a value\n\n\n-999, -1, 9999\na sentinel: a number that means “no data”\n\n\n\nNULL is different: it means “no object” and cannot sit inside a data frame column."
+  },
+  {
+    "objectID": "W08L16_slides.html#one-sentinel-wrong-average",
+    "href": "W08L16_slides.html#one-sentinel-wrong-average",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "One sentinel, wrong average",
+    "text": "One sentinel, wrong average\n\nsummary(vitals$hr)\n\n#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. \n#&gt;  -999.0    64.0    72.0    41.2    79.0   300.0\n\n\nThe mean heart rate is 41. A heart that slow does not exist. The -999s dragged it down."
+  },
+  {
+    "objectID": "W08L16_slides.html#look-at-the-extremes",
+    "href": "W08L16_slides.html#look-at-the-extremes",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "Look at the extremes",
+    "text": "Look at the extremes\n\nvitals |&gt;\n  filter(hr &lt; 30 | hr &gt; 220) |&gt;\n  count(hr, sort = TRUE)\n\n#&gt; # A tibble: 3 x 2\n#&gt;      hr     n\n#&gt;   &lt;dbl&gt; &lt;int&gt;\n#&gt; 1  -999    29\n#&gt; 2     0     8\n#&gt; 3   300     4\n\n\n-999 is a sentinel. 0 and 300 are different: not a code, just impossible."
+  },
+  {
+    "objectID": "W08L16_slides.html#turn-sentinels-into-na",
+    "href": "W08L16_slides.html#turn-sentinels-into-na",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "Turn sentinels into NA",
+    "text": "Turn sentinels into NA\n\nvit_na &lt;- vitals |&gt; mutate(hr = na_if(hr, -999), steps = na_if(steps, -1))\ncolSums(is.na(vit_na))\n\n#&gt;    hr steps \n#&gt;    29    25\n\n\nWhen reading a file: read_csv(path, na = c(\"\", \"NA\", \"-999\")).\n. . .\n\nBug: is -1 a sentinel? In steps, yes. In a temperature column, it is a real reading. The data dictionary decides, not a regex or an AI."
+  },
+  {
+    "objectID": "W08L16_slides.html#nan-is-not-na-flex",
+    "href": "W08L16_slides.html#nan-is-not-na-flex",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "NaN is not NA (FLEX)",
+    "text": "NaN is not NA (FLEX)\n\nx &lt;- c(1, NA, 0 / 0)\nis.na(x)\n\n#&gt; [1] FALSE  TRUE  TRUE\n\nis.nan(x)\n\n#&gt; [1] FALSE FALSE  TRUE\n\n\nis.na() catches both. is.nan() catches only the second.\n\nFLEX: skip if behind (saves about 1 min)."
+  },
+  {
+    "objectID": "W08L16_slides.html#impossible-first-unusual-second",
+    "href": "W08L16_slides.html#impossible-first-unusual-second",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "Impossible first, unusual second",
+    "text": "Impossible first, unusual second\n\n\n\nQuestion\nTool\n\n\n\n\nCan this value exist at all?\nDomain bound (a rule you know)\n\n\nIs it far from the rest?\nz-score or IQR rule\n\n\nIs it odd only in combination?\nDerived feature or distance\n\n\n\nA heart rate of 300 is impossible. A heart rate of 125 is unusual. Different actions."
+  },
+  {
+    "objectID": "W08L16_slides.html#fixed-bounds-flag-do-not-delete",
+    "href": "W08L16_slides.html#fixed-bounds-flag-do-not-delete",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "Fixed bounds: flag, do not delete",
+    "text": "Fixed bounds: flag, do not delete\n\nvit_na |&gt;\n  mutate(hr_flag = case_when(is.na(hr) ~ \"missing\",\n                             between(hr, 30, 220) ~ \"ok\",\n                             .default = \"impossible\")) |&gt;\n  count(hr_flag)\n\n#&gt; # A tibble: 3 x 2\n#&gt;   hr_flag        n\n#&gt;   &lt;chr&gt;      &lt;int&gt;\n#&gt; 1 impossible    12\n#&gt; 2 missing       29\n#&gt; 3 ok           959\n\n\nKeep the row. Keep the flag. A later step decides what to do."
+  },
+  {
+    "objectID": "W08L16_slides.html#task-1-code-it",
+    "href": "W08L16_slides.html#task-1-code-it",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "Task 1: code it",
+    "text": "Task 1: code it\nvitals has sentinels (-999, -1) and impossible heart rates (0, 300).\n\nCode it (5 min). 1. Turn the sentinels into NA. 2. Flag heart rates outside 30 to 220 as \"impossible\". 3. Compare the mean heart rate before and after, using only \"ok\" rows.\n\n\nTASK 1 of 3 (CODE IT). Give 5 minutes; walk the room. Expected: vit &lt;- vitals |&gt; mutate(hr = na_if(hr, -999), steps = na_if(steps, -1), hr_flag = case_when(is.na(hr) ~ “missing”, between(hr, 30, 220) ~ “ok”, .default = “impossible”)); then mean(vitals$hr) is 41.2 (raw) and vit |&gt; filter(hr_flag == “ok”) |&gt; summarize(mean(hr)) is about 72. Counts: 29 missing (30 sentinels, one of which was overwritten by another planted value), 12 impossible (8 zeros and 4 values of 300), 959 ok. Steps: 25 sentinels. Common stuck points: case_when order (the NA check must come first, or between(NA) returns NA and the row falls to .default), using == instead of na_if, deleting rows instead of flagging them, mean() returning NA because the NAs were not dropped (na.rm = TRUE, and say so). Early finishers: add a flag for steps above 60000 and count it. Land the point: three different problems share one column: a sentinel, an impossible value, and a plausible one. Each needs a different decision, which is why we flag instead of overwrite."
+  },
+  {
+    "objectID": "W08L16_slides.html#the-answer",
+    "href": "W08L16_slides.html#the-answer",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "The answer",
+    "text": "The answer\n\nc(raw = mean(vitals$hr),\n  clean = mean(hr_ok$hr))\n\n#&gt;      raw    clean \n#&gt; 41.20000 71.91971\n\ncount(vit, hr_flag)\n\n#&gt; # A tibble: 3 x 2\n#&gt;   hr_flag        n\n#&gt;   &lt;chr&gt;      &lt;int&gt;\n#&gt; 1 impossible    12\n#&gt; 2 missing       29\n#&gt; 3 ok           959\n\n\n. . .\n\nBug: the raw mean was off by 30 bpm, from sentinels alone."
+  },
+  {
+    "objectID": "W08L16_slides.html#z-scores-how-far-from-the-rest",
+    "href": "W08L16_slides.html#z-scores-how-far-from-the-rest",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "z-scores: how far from the rest?",
+    "text": "z-scores: how far from the rest?\n\\[z = \\frac{x - \\bar{x}}{s}\\]\nFor roughly bell-shaped data, about 0.3% of values are beyond \\(|z| &gt; 3\\).\n\nnrow(hr_ok)\n\n#&gt; [1] 959\n\nc(expected = round(0.0027 * nrow(hr_ok), 1),\n  found    = sum(abs(zs(hr_ok$hr)) &gt; 3))\n\n#&gt; expected    found \n#&gt;      2.6      5.0\n\n\nClose to what a bell curve gives: nothing alarming here."
+  },
+  {
+    "objectID": "W08L16_slides.html#the-iqr-rule",
+    "href": "W08L16_slides.html#the-iqr-rule",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "The IQR rule",
+    "text": "The IQR rule\nA value is “unusual” if it is beyond 1.5 x IQR from the quartiles. This is the rule a boxplot uses.\n\nggplot(steps_ok, aes(x = steps)) +\n  geom_boxplot(fill = \"#cfd82d\", outlier.color = \"#f68b1f\")"
+  },
+  {
+    "objectID": "W08L16_slides.html#z-or-iqr-it-depends-on-the-shape",
+    "href": "W08L16_slides.html#z-or-iqr-it-depends-on-the-shape",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "z or IQR? It depends on the shape",
+    "text": "z or IQR? It depends on the shape\n\ntibble(variable = c(\"hr (bell-shaped)\", \"steps (skewed)\"),\n       z_beyond_3 = c(sum(abs(zs(hr_ok$hr)) &gt; 3), sum(abs(zs(steps_ok$steps)) &gt; 3)),\n       iqr_rule   = c(sum(iqr_flag(hr_ok$hr)), sum(iqr_flag(steps_ok$steps))),\n       n          = c(nrow(hr_ok), nrow(steps_ok)))\n\n#&gt; # A tibble: 2 x 4\n#&gt;   variable         z_beyond_3 iqr_rule     n\n#&gt;   &lt;chr&gt;                 &lt;int&gt;    &lt;int&gt; &lt;int&gt;\n#&gt; 1 hr (bell-shaped)          5        8   959\n#&gt; 2 steps (skewed)           14       32   975\n\n\nSkewed data flags many “outliers” on the long tail. Rare is not wrong."
+  },
+  {
+    "objectID": "W08L16_slides.html#look-in-context",
+    "href": "W08L16_slides.html#look-in-context",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "Look in context",
+    "text": "Look in context\n\nImpossible? A bound says so: flag as an error.\nPlausible but extreme? Keep it: it may be your most interesting data.\nRepeated? The same odd value many times: look for a code, not a person.\n\n. . .\nOutliers are questions, not verdicts. Flag, look, document."
+  },
+  {
+    "objectID": "W08L16_slides.html#odd-only-in-combination",
+    "href": "W08L16_slides.html#odd-only-in-combination",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "Odd only in combination",
+    "text": "Odd only in combination\n\nhw |&gt; filter(id == 501) |&gt; select(h, w, zh, zw, bmi, zb)\n\n#&gt; # A tibble: 1 x 6\n#&gt;       h     w    zh    zw   bmi    zb\n#&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;\n#&gt; 1   190    45  2.17 -2.07  12.5 -3.73\n\n\nHeight and weight each look normal: \\(|z| &lt; 3\\). But BMI is 12.5, far below normal.\n. . .\nA derived feature can catch what each column alone cannot."
+  },
+  {
+    "objectID": "W08L16_slides.html#mahalanobis-distance-flex",
+    "href": "W08L16_slides.html#mahalanobis-distance-flex",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "Mahalanobis distance (FLEX)",
+    "text": "Mahalanobis distance (FLEX)\n\nhw |&gt; filter(md &gt; qchisq(.999, 2)) |&gt; select(id, h, w, md)\n\n#&gt; # A tibble: 1 x 4\n#&gt;      id     h     w    md\n#&gt;   &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;\n#&gt; 1   501   190    45  27.7\n\n\nOne distance for several variables at once. It accounts for how they move together. Cutoff: \\(\\chi^2_2\\) at 99.9%, about 13.8.\n\nFLEX: skip if behind (saves about 1.5 min). Assumes roughly multivariate normal data. It flags the one planted case (height 190, weight 45), which no single-variable z-score does."
+  },
+  {
+    "objectID": "W08L16_slides.html#dimensions-of-data-quality",
+    "href": "W08L16_slides.html#dimensions-of-data-quality",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "Dimensions of data quality",
+    "text": "Dimensions of data quality\n\n\n\nDimension\nThe question\n\n\n\n\nValidity\nDoes it follow the rules?\n\n\nAccuracy\nIs it close to the truth?\n\n\nConsistency\nDoes it agree with itself and other tables?\n\n\nUniformity\nSame units, same format?\n\n\nCompleteness\nIs everything we need here?\n\n\n\nA value can be valid and still wrong: 120 is a valid heart rate that may be false."
+  },
+  {
+    "objectID": "W08L16_slides.html#validity-rules-you-can-write-as-code",
+    "href": "W08L16_slides.html#validity-rules-you-can-write-as-code",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "Validity rules you can write as code",
+    "text": "Validity rules you can write as code\n\n\n\nRule type\nExample\n\n\n\n\nData type\nage is numeric\n\n\nRange\nage between 0 and 120\n\n\nMandatory\nid is never NA\n\n\nUnique\nid appears once\n\n\nSet membership\ndevice is watch, band, or ring\n\n\nPattern\nzip is exactly 5 digits\n\n\nCross-field\nend is not before start"
+  },
+  {
+    "objectID": "W08L16_slides.html#rules-become-counts",
+    "href": "W08L16_slides.html#rules-become-counts",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "Rules become counts",
+    "text": "Rules become counts\n\nusers |&gt;\n  summarize(\n    id_missing  = sum(is.na(id)),\n    age_range   = sum(!between(age, 0, 120), na.rm = TRUE),\n    device_set  = sum(!device %in% c(\"watch\", \"band\", \"ring\")),\n    zip_pattern = sum(!str_detect(zip, \"^\\\\d{5}$\"), na.rm = TRUE)\n  ) |&gt;\n  pivot_longer(everything(), names_to = \"rule\", values_to = \"failing\")\n\n#&gt; # A tibble: 4 x 2\n#&gt;   rule        failing\n#&gt;   &lt;chr&gt;         &lt;int&gt;\n#&gt; 1 id_missing        1\n#&gt; 2 age_range         2\n#&gt; 3 device_set        2\n#&gt; 4 zip_pattern       2\n\n\nA table of failing counts is a report you can rerun on every new file."
+  },
+  {
+    "objectID": "W08L16_slides.html#task-2-prompt-it",
+    "href": "W08L16_slides.html#task-2-prompt-it",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "Task 2: prompt it",
+    "text": "Task 2: prompt it\nRules for users (from the data dictionary):\nid: never missing, unique · age: 0 to 120 · device: watch, band, ring · zip: 5 digits · end not before start\n\nPrompt it (6 min). 1. Count by hand the failing rows per rule. 2. Prompt your AI for check_rules(df): one row per rule, with the failing count. It must not change the data. 3. Run it. Do your counts match?\n\n\nTASK 2 of 3 (PROMPT IT). Give 6 minutes: about 2 for the hand count, 2 for prompting, 2 for running and comparing. Expected failing counts (users has 10 rows): id missing 1; id duplicated 1 (the second 3); age out of range 2 (151 and -2; the NA age is not out of range, it is missing); device not in set 2 (“Watch” with a capital, and “phone”); zip not 5 digits 2 (“9720” and “97201-1234”; the NA zip is missing, not malformed); end before start 4. A good prompt: pastes the dictionary rules as text, says the function takes a data frame and returns a tibble with columns rule and n_failing, forbids modifying or dropping rows, says to handle NA explicitly (and say how), and asks for dplyr only. Where it goes wrong: the AI counts NA as failing (or as passing) without saying so; counts BOTH copies of a duplicate id (2 instead of 1) or flags the first one; uses a case-insensitive device check so “Watch” passes; returns the cleaned data instead of the report; or pulls in a package nobody has. The hand count exists to catch exactly these. Land the point: when the counts differ, the DISAGREEMENT is the finding. Decide which count is right, then write that decision into the prompt."
+  },
+  {
+    "objectID": "W08L16_slides.html#the-answer-1",
+    "href": "W08L16_slides.html#the-answer-1",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "The answer",
+    "text": "The answer\n\nusers |&gt;\n  summarize(\n    id_missing    = sum(is.na(id)),\n    id_duplicated = sum(duplicated(id[!is.na(id)])),\n    age_range     = sum(!between(age, 0, 120), na.rm = TRUE),\n    device_set    = sum(!device %in% c(\"watch\", \"band\", \"ring\")),\n    zip_pattern   = sum(!str_detect(zip, \"^\\\\d{5}$\"), na.rm = TRUE),\n    end_early     = sum(end &lt; start)\n  )\n\n#&gt; # A tibble: 1 x 6\n#&gt;   id_missing id_duplicated age_range device_set zip_pattern end_early\n#&gt;        &lt;int&gt;         &lt;int&gt;     &lt;int&gt;      &lt;int&gt;       &lt;int&gt;     &lt;int&gt;\n#&gt; 1          1             1         2          2           2         4"
+  },
+  {
+    "objectID": "W08L16_slides.html#decisions-hidden-in-the-counts",
+    "href": "W08L16_slides.html#decisions-hidden-in-the-counts",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "Decisions hidden in the counts",
+    "text": "Decisions hidden in the counts\n\nNA age: not out of range. It is missing, a different problem\nDuplicated id: count the extra copies, or both?\n\"Watch\": invalid by the rule. Case-fold first, or flag it?\n97201-1234: malformed, or a valid ZIP+4?\n\n. . .\nThe rule table is code and documentation. Write the decision down."
+  },
+  {
+    "objectID": "W08L16_slides.html#why-is-it-missing",
+    "href": "W08L16_slides.html#why-is-it-missing",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "Why is it missing?",
+    "text": "Why is it missing?\n\n\n\n\n\n\n\n\nType\nMeaning\nExample\n\n\n\n\nStructural\ncannot exist\n“last pregnancy date” for a man\n\n\nMCAR\nunrelated to anything\na random sync failure\n\n\nMAR\nrelated to other columns\nold devices drop steps\n\n\nMNAR\nrelated to the missing value itself\nheart rate dropped when it is high\n\n\n\nReal data is rarely MCAR. The mechanism decides what is safe to do."
+  },
+  {
+    "objectID": "W08L16_slides.html#diagnose-is-missingness-the-same-everywhere",
+    "href": "W08L16_slides.html#diagnose-is-missingness-the-same-everywhere",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "Diagnose: is missingness the same everywhere?",
+    "text": "Diagnose: is missingness the same everywhere?\n\nsteps_sim |&gt;\n  summarize(missing = mean(is.na(steps)), n = n(), .by = device)\n\n#&gt; # A tibble: 2 x 3\n#&gt;   device missing     n\n#&gt;   &lt;chr&gt;    &lt;dbl&gt; &lt;int&gt;\n#&gt; 1 new     0.0798  1203\n#&gt; 2 legacy  0.512    797\n\n\nLegacy devices lose 51% of steps, new devices 8%. That is not random.\n. . .\nYou can describe this pattern. You cannot prove the cause from the file."
+  },
+  {
+    "objectID": "W08L16_slides.html#drop-the-rows-look-at-who-is-left",
+    "href": "W08L16_slides.html#drop-the-rows-look-at-who-is-left",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "Drop the rows? Look at who is left",
+    "text": "Drop the rows? Look at who is left\n\nsteps_sim |&gt;\n  summarize(all_rows = mean(device == \"legacy\"),\n            complete_rows = mean(device[!is.na(steps)] == \"legacy\"))\n\n#&gt; # A tibble: 1 x 2\n#&gt;   all_rows complete_rows\n#&gt;      &lt;dbl&gt;         &lt;dbl&gt;\n#&gt; 1    0.398         0.260\n\n\nLegacy devices were 40% of users, but only 26% of complete rows.\n. . .\n\nBug: dropping rows with NA removes legacy users first. The model then learns mostly from new-device users."
+  },
+  {
+    "objectID": "W08L16_slides.html#mnar-leaves-no-trace",
+    "href": "W08L16_slides.html#mnar-leaves-no-trace",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "MNAR leaves no trace",
+    "text": "MNAR leaves no trace\nIf heart rate goes missing because it was high, no other column shows it.\n\nOnly context can raise the suspicion: how does the sensor behave when the wearer is exercising?\n\nWhat you can do: ask the source, compare with another source, or test how much the answer changes under different assumptions (a sensitivity analysis)."
+  },
+  {
+    "objectID": "W08L16_slides.html#options-and-the-rule-of-thumb",
+    "href": "W08L16_slides.html#options-and-the-rule-of-thumb",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "Options, and the rule of thumb",
+    "text": "Options, and the rule of thumb\n\n\n\n\n\n\n\nOption\nWhen\n\n\n\n\nDrop rows\nfew missing (under about 5 to 10%) and MCAR\n\n\nDrop the variable\nmostly missing, little value\n\n\nImpute\nMAR, and the variable is a predictor\n\n\nDeclare unusable\ntoo much missing, or MNAR with no way to check\n\n\n\nNever impute the label or the outcome you are trying to predict."
+  },
+  {
+    "objectID": "W08L16_slides.html#mean-imputation-the-tempting-one",
+    "href": "W08L16_slides.html#mean-imputation-the-tempting-one",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "Mean imputation: the tempting one",
+    "text": "Mean imputation: the tempting one\n\nmean_imp &lt;- steps_sim |&gt;\n  mutate(steps = if_else(is.na(steps), mean(steps, na.rm = TRUE), steps))\n\nc(true_sd = sd(steps_sim$steps_true), after_mean_imp = sd(mean_imp$steps))\n\n#&gt;        true_sd after_mean_imp \n#&gt;       2564.128       2193.206\n\n\nThe mean stays put. The spread shrinks, because one value now fills 25% of the column."
+  },
+  {
+    "objectID": "W08L16_slides.html#what-it-does-to-the-shape",
+    "href": "W08L16_slides.html#what-it-does-to-the-shape",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "What it does to the shape",
+    "text": "What it does to the shape\n\nbind_rows(truth = steps_sim |&gt; transmute(steps = steps_true),\n          `mean imputed` = mean_imp |&gt; select(steps), .id = \"version\") |&gt;\n  ggplot(aes(x = steps, fill = version)) +\n  geom_density(alpha = 0.5, color = NA) +\n  scale_fill_manual(values = c(\"#6d8d24\", \"#f68b1f\"), name = NULL)"
+  },
+  {
+    "objectID": "W08L16_slides.html#multiple-imputation-with-mice",
+    "href": "W08L16_slides.html#multiple-imputation-with-mice",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "Multiple imputation with mice",
+    "text": "Multiple imputation with mice\n\nlibrary(mice)\ndat &lt;- steps_sim |&gt; select(steps, device, age) |&gt; mutate(device = factor(device))\nimp &lt;- mice(dat, m = 5, method = \"pmm\", donors = 20, printFlag = FALSE, seed = 531)\n\n\nm = 5: five completed datasets, to carry the uncertainty\npmm: fill each hole with an observed value from a similar row\nAnalyze each dataset, then pool"
+  },
+  {
+    "objectID": "W08L16_slides.html#judge-it-by-the-distribution",
+    "href": "W08L16_slides.html#judge-it-by-the-distribution",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "Judge it by the distribution",
+    "text": "Judge it by the distribution\n\nstats &lt;- \\(x) c(mean = mean(x), sd = sd(x))\npooled &lt;- sapply(1:5, \\(i) stats(complete(imp, i)$steps))\n\nrbind(truth           = stats(steps_sim$steps_true),\n      `drop rows`     = stats(na.omit(steps_sim$steps)),\n      `mean imputed`  = stats(mean_imp$steps),\n      `mice (pooled)` = rowMeans(pooled)) |&gt; round()\n\n#&gt;               mean   sd\n#&gt; truth         7419 2564\n#&gt; drop rows     7791 2536\n#&gt; mean imputed  7791 2193\n#&gt; mice (pooled) 7404 2604\n\n\n. . .\nReal data has no truth column. There you compare distributions and group means before and after, never single imputed values."
+  },
+  {
+    "objectID": "W08L16_slides.html#task-3-the-ais-answer",
+    "href": "W08L16_slides.html#task-3-the-ais-answer",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "Task 3: the AI’s answer",
+    "text": "Task 3: the AI’s answer\nAsked: “Fill in the missing steps so the column is complete.”\n\nsteps_sim |&gt;\n  mutate(steps = if_else(is.na(steps), mean(steps, na.rm = TRUE), steps)) |&gt;\n  summarize(mean = mean(steps), sd = sd(steps), missing = sum(is.na(steps)))\n\n#&gt; # A tibble: 1 x 3\n#&gt;    mean    sd missing\n#&gt;   &lt;dbl&gt; &lt;dbl&gt;   &lt;int&gt;\n#&gt; 1 7791. 2193.       0\n\n\nThe AI then wrote: “No missing values remain, and the mean is unchanged, so no bias was introduced.”"
+  },
+  {
+    "objectID": "W08L16_slides.html#task-3-assess-it",
+    "href": "W08L16_slides.html#task-3-assess-it",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "Task 3: assess it",
+    "text": "Task 3: assess it\n\nAssess it (5 min). Run it. Compare with steps_true and with the group means by device. Read, Run, Restate.\n\n\nIs the claim “no bias” true? Check two things.\nWhat happened to the spread?\nWhat does it do to legacy users?\nWhat would you ask for instead?\n\n\nTASK 3 of 3 (ASSESS IT). Give 5 minutes. Findings: (1) The mean is unchanged BY CONSTRUCTION (we filled with the mean of the observed values), so “unchanged” proves nothing. But the observed values over-represent new devices (74% of the complete rows), so the mean the AI preserved (about 7791) is already biased relative to the truth (about 7419). Check the group means by device: after mean imputation both groups collapse toward the overall mean. (2) The sd falls (about 2193 vs 2564 truth): the column looks tidier than reality, and every later interval will be too narrow. (3) Legacy users have a true mean of about 5676 steps; mean imputation gives all of their missing rows about 7791, so legacy users appear to walk more than they do, which would flow into any model or score. (4) A better prompt: “The steps are missing more often for legacy devices. Use mice with device and age as predictors, 5 imputations, pmm. Then compare the mean and sd of steps, overall and by device, before and after imputation, and report any group whose mean moves by more than 5%.” Restate: the AI “completed” the column and certified itself. The claim sounds like a check and is not one."
+  },
+  {
+    "objectID": "W08L16_slides.html#what-was-wrong",
+    "href": "W08L16_slides.html#what-was-wrong",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "What was wrong",
+    "text": "What was wrong\n\n“Unchanged mean” is guaranteed by the method, so it proves nothing\nThat mean is already biased: legacy devices are under-represented\nThe spread shrinks: intervals will be too narrow\nLegacy users are filled with the new-device average\n\n. . .\nA complete column is not a correct column. Compare distributions and groups."
+  },
+  {
+    "objectID": "W08L16_slides.html#four-things-to-remember",
+    "href": "W08L16_slides.html#four-things-to-remember",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "Four things to remember",
+    "text": "Four things to remember\n\nParse with a list of orders, count the failures, and never let code guess an ambiguous date.\nImpossible first, unusual second. Sentinels and bounds, then z or IQR. Flag, do not delete.\nRules are code. A table of failing counts is a report you can rerun.\nMissingness has a pattern. Check who is missing before you drop or fill, and judge imputation by the distribution."
+  },
+  {
+    "objectID": "W08L16_slides.html#next-up",
+    "href": "W08L16_slides.html#next-up",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "Next up",
+    "text": "Next up\nWed 11/25, Session 7: the cleaning lab kickoff. That is the Wednesday before Thanksgiving, so it is designed to work on your own schedule.\nThe handout has the full explanations, extra practice, and the pointblank appendix."
+  },
+  {
+    "objectID": "W08L16_slides.html#unit-tests-with-testthat",
+    "href": "W08L16_slides.html#unit-tests-with-testthat",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "Unit tests with testthat",
+    "text": "Unit tests with testthat\n\nlibrary(testthat)\n\ntest_that(\"heart rate is in range after cleaning\", {\n  expect_true(all(between(clean$hr, 30, 220), na.rm = TRUE))\n  expect_equal(sum(clean$hr == -999, na.rm = TRUE), 0)\n})\n\nA failing test stops the script. Run it after every cleaning step."
+  },
+  {
+    "objectID": "W08L16_slides.html#validation-reports-with-pointblank-not-run",
+    "href": "W08L16_slides.html#validation-reports-with-pointblank-not-run",
+    "title": "Types, Anomalies, and Missingness",
+    "section": "Validation reports with pointblank (not run)",
+    "text": "Validation reports with pointblank (not run)\n\n# install.packages(\"pointblank\")  # once\nlibrary(pointblank)\n\nusers |&gt;\n  create_agent() |&gt;\n  col_vals_between(age, 0, 120, na_pass = TRUE) |&gt;\n  col_vals_in_set(device, c(\"watch\", \"band\", \"ring\")) |&gt;\n  col_vals_regex(zip, \"^\\\\d{5}$\", na_pass = TRUE) |&gt;\n  interrogate()\n\nSame idea as check_rules(), with a formatted report."
+  },
+  {
+    "objectID": "W08L16_handout.html",
+    "href": "W08L16_handout.html",
+    "title": "Session 6 Handout: Types, Anomalies, and Missingness",
+    "section": "",
+    "text": "The slides move fast. This handout is the slow, complete version: read it before class, and return to it when you clean a column.\nSession 6 is the second of two sessions on data cleaning. Session 5 covered text. Today covers dates, numbers, and holes: timestamps in many formats, numbers that secretly mean “nothing”, values that are impossible or merely unusual, rules a table must obey, and missing values.\nThe pattern from Session 5 continues: an AI assistant can make a column look complete or tidy in one line, and quietly damage it. Audit it boxes show these mistakes. The habit to keep is: flag first, fix second, and compare before and after.\n\n\n\n\n\n\nThe Audit Loop, for numbers and holes\n\n\n\n\nRead the code. What happens to the NA values? To the extremes?\nRun it, and compare the summary before and after (counts, mean, spread, group means).\nRestate what changed and who it changed for.\nRefine it or Reject it. Log the decision.\n\n\n\nSetup. The examples use three small files, all on the course site in the data/ folder: s6_vitals.csv (heart rate and steps with sentinels), s6_users.csv (ten records that break known rules), and s6_steps_sim.csv (a simulation, where the true steps are known). You need tidyverse and lubridate (both come with, or alongside, the tidyverse install), and mice for the imputation section.\n\nlibrary(tidyverse)\nlibrary(lubridate)\nvitals    &lt;- read_csv(\"data/s6_vitals.csv\")\nusers     &lt;- read_csv(\"data/s6_users.csv\")\nsteps_sim &lt;- read_csv(\"data/s6_steps_sim.csv\")"
+  },
+  {
+    "objectID": "W08L16_handout.html#one-column-many-formats",
+    "href": "W08L16_handout.html#one-column-many-formats",
+    "title": "Session 6 Handout: Types, Anomalies, and Missingness",
+    "section": "2.1 One column, many formats",
+    "text": "2.1 One column, many formats\n\nts_raw &lt;- c(\"2026-01-05 07:30\", \"01/05/2026 7:30 AM\", \"5 Jan 2026 07:30\",\n            \"2026-01-05T07:30:00Z\", \"Jan 5, 2026\", \"yesterday\")\nts_raw\n\n#&gt; [1] \"2026-01-05 07:30\"     \"01/05/2026 7:30 AM\"   \"5 Jan 2026 07:30\"    \n#&gt; [4] \"2026-01-05T07:30:00Z\" \"Jan 5, 2026\"          \"yesterday\"\n\n\nThese might come from different devices, from different export tools, or from people typing. A single parsing function only understands the formats it was written for.\n\nymd_hms(ts_raw, quiet = TRUE)\n\n#&gt; [1] NA                        NA                        NA                       \n#&gt; [4] \"2026-01-05 07:30:00 UTC\" NA                        NA\n\nsum(is.na(ymd_hms(ts_raw, quiet = TRUE)))\n\n#&gt; [1] 5\n\n\nFive of six values became NA. There was no error. quiet = TRUE hides the warning, but even with the warning, a script that keeps going has silently discarded most of the column.\n\n\n\n\n\n\nAudit it: a parser that loses most of the column\n\n\n\nAn AI may write mutate(ts = ymd_hms(ts_raw)), run it, and move on. After any parse, count the failures: sum(is.na(parsed)) - sum(is.na(original)) is the number of values the parser could not read. If it is more than a handful, the format list is incomplete."
+  },
+  {
+    "objectID": "W08L16_handout.html#give-it-a-list-of-orders",
+    "href": "W08L16_handout.html#give-it-a-list-of-orders",
+    "title": "Session 6 Handout: Types, Anomalies, and Missingness",
+    "section": "2.2 Give it a list of orders",
+    "text": "2.2 Give it a list of orders\nparse_date_time() takes several orders, each a pattern of date and time pieces: Y year, m month number, b month abbreviation, d day, H hour (24-hour), I hour (12-hour), M minute, p AM/PM, z time zone offset.\n\nparsed &lt;- parse_date_time(ts_raw, tz = \"UTC\", quiet = TRUE,\n  orders = c(\"Ymd HM\", \"mdY IMp\", \"dbY HM\", \"YmdHMSz\", \"bdY\"))\ntibble(ts_raw, parsed, ok = !is.na(parsed))\n\n#&gt; # A tibble: 6 x 3\n#&gt;   ts_raw               parsed              ok   \n#&gt;   &lt;chr&gt;                &lt;dttm&gt;              &lt;lgl&gt;\n#&gt; 1 2026-01-05 07:30     2026-01-05 07:30:00 TRUE \n#&gt; 2 01/05/2026 7:30 AM   2026-01-05 07:30:00 TRUE \n#&gt; 3 5 Jan 2026 07:30     2026-01-05 07:30:00 TRUE \n#&gt; 4 2026-01-05T07:30:00Z 2026-01-05 07:30:00 TRUE \n#&gt; 5 Jan 5, 2026          2026-01-05 00:00:00 TRUE \n#&gt; 6 yesterday            NA                  FALSE\n\n\nNow inspect what did not parse:\n\ntibble(ts_raw, parsed) |&gt; filter(is.na(parsed))\n\n#&gt; # A tibble: 1 x 2\n#&gt;   ts_raw    parsed\n#&gt;   &lt;chr&gt;     &lt;dttm&gt;\n#&gt; 1 yesterday NA\n\n\n\"yesterday\" is not a date, and no list of orders should make it one. It stays NA and gets flagged. Never fill it in with a guess.\nNotice also \"Jan 5, 2026\": it parsed, but with no time, so it became midnight (00:00:00). A missing time of day was turned into a specific time. Whether that matters depends on the analysis, so say it in your log."
+  },
+  {
+    "objectID": "W08L16_handout.html#the-day-month-trap",
+    "href": "W08L16_handout.html#the-day-month-trap",
+    "title": "Session 6 Handout: Types, Anomalies, and Missingness",
+    "section": "2.3 The day-month trap",
+    "text": "2.3 The day-month trap\n\nd &lt;- c(\"01/05/2026\", \"13/05/2026\", \"05/05/2026\", \"02/11/2026\")\na &lt;- as.numeric(str_extract(d, \"^\\\\d+\"))\nb &lt;- as.numeric(str_extract(d, \"(?&lt;=/)\\\\d+\"))\ntibble(d, ambiguous = a &lt;= 12 & b &lt;= 12 & a != b)\n\n#&gt; # A tibble: 4 x 2\n#&gt;   d          ambiguous\n#&gt;   &lt;chr&gt;      &lt;lgl&gt;    \n#&gt; 1 01/05/2026 TRUE     \n#&gt; 2 13/05/2026 FALSE    \n#&gt; 3 05/05/2026 FALSE    \n#&gt; 4 02/11/2026 TRUE\n\n\n01/05/2026 is January 5 in the US and May 1 in most other places. When both numbers are 12 or less, no code can tell. 13/05/2026 can only be day first, which is a clue that the source uses day first, but a single clue is not proof for the others.\n\nmdy(\"01/05/2026\")\n\n#&gt; [1] \"2026-01-05\"\n\ndmy(\"01/05/2026\")\n\n#&gt; [1] \"2026-05-01\"\n\n\nThe honest procedure:\n\nCount how many values are ambiguous.\nLook for a clue in the data (a value with a first number above 12, which proves the format).\nAsk the source which convention each device or system used, then set the order per source.\nIf you cannot find out, leave the ambiguous rows NA and flagged.\n\n\n\n\n\n\n\nAudit it: parse_date_time() picks one format for the whole column\n\n\n\nIf you list both \"mdY\" and \"dmY\", lubridate chooses the order that parses the most values in the vector, then applies it to all of them. One unambiguous day-first value such as 13/05/2026 is enough to make the whole column day first, and 01/05/2026 silently becomes May 1, even if it came from a device that writes month first.\n\nx &lt;- c(\"01/05/2026\", \"13/05/2026\")\nparse_date_time(x, orders = c(\"mdY\", \"dmY\"), quiet = TRUE)\n\n#&gt; [1] \"2026-05-01 UTC\" \"2026-05-13 UTC\"\n\n\nEvery value parses and nothing warns you. Parse one source at a time, list only the orders you have evidence for, and keep the ambiguous rows flagged."
+  },
+  {
+    "objectID": "W08L16_handout.html#time-zones",
+    "href": "W08L16_handout.html#time-zones",
+    "title": "Session 6 Handout: Types, Anomalies, and Missingness",
+    "section": "2.4 Time zones",
+    "text": "2.4 Time zones\n\nt &lt;- ymd_hms(\"2026-01-05 07:30:00\", tz = \"America/Los_Angeles\")\nt\n\n#&gt; [1] \"2026-01-05 07:30:00 PST\"\n\nwith_tz(t, \"UTC\")\n\n#&gt; [1] \"2026-01-05 15:30:00 UTC\"\n\nforce_tz(t, \"UTC\")\n\n#&gt; [1] \"2026-01-05 07:30:00 UTC\"\n\n\n\nwith_tz() keeps the instant and changes how it is displayed.\nforce_tz() keeps the clock reading and changes the zone, which moves the instant. It is for repairing a timestamp that was labeled with the wrong zone.\n\nMixing them up shifts data by hours. A good default is to store UTC, and convert only for display."
+  },
+  {
+    "objectID": "W08L16_handout.html#four-kinds-of-nothing",
+    "href": "W08L16_handout.html#four-kinds-of-nothing",
+    "title": "Session 6 Handout: Types, Anomalies, and Missingness",
+    "section": "3.1 Four kinds of “nothing”",
+    "text": "3.1 Four kinds of “nothing”\n\n\n\nLooks like\nWhat it is\n\n\n\n\nNA\nR’s missing value\n\n\nNaN\n“not a number”, the result of 0/0\n\n\n\"\", \"n/a\", \"NULL\"\ntext pretending to be a value\n\n\n-999, -1, 9999\na sentinel: a number that means “no data”\n\n\n\nNULL is a different thing: it means “no object at all”, and it cannot be an element of a data frame column.\n\nx &lt;- c(1, NA, 0 / 0)\nis.na(x)\n\n#&gt; [1] FALSE  TRUE  TRUE\n\nis.nan(x)\n\n#&gt; [1] FALSE FALSE  TRUE\n\n\nis.na() is TRUE for both NA and NaN. is.nan() is TRUE only for NaN."
+  },
+  {
+    "objectID": "W08L16_handout.html#a-sentinel-ruins-a-summary",
+    "href": "W08L16_handout.html#a-sentinel-ruins-a-summary",
+    "title": "Session 6 Handout: Types, Anomalies, and Missingness",
+    "section": "3.2 A sentinel ruins a summary",
+    "text": "3.2 A sentinel ruins a summary\n\nsummary(vitals$hr)\n\n#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. \n#&gt;  -999.0    64.0    72.0    41.2    79.0   300.0\n\n\nThe mean heart rate is about 41. A heart that slow does not exist. The -999 values pulled the mean down, and nothing errored."
+  },
+  {
+    "objectID": "W08L16_handout.html#find-them-look-at-the-extremes",
+    "href": "W08L16_handout.html#find-them-look-at-the-extremes",
+    "title": "Session 6 Handout: Types, Anomalies, and Missingness",
+    "section": "3.3 Find them: look at the extremes",
+    "text": "3.3 Find them: look at the extremes\n\nvitals |&gt;\n  filter(hr &lt; 30 | hr &gt; 220) |&gt;\n  count(hr, sort = TRUE)\n\n#&gt; # A tibble: 3 x 2\n#&gt;      hr     n\n#&gt;   &lt;dbl&gt; &lt;int&gt;\n#&gt; 1  -999    29\n#&gt; 2     0     8\n#&gt; 3   300     4\n\n\nThree different things share this table: -999 (a sentinel, repeated many times), 0 (impossible, and possibly a failed reading), and 300 (impossible, and possibly a typo). Repetition of one odd value is the signature of a code. A sentinel is a decision someone made when the data was recorded.\nA histogram helps too, because a sentinel shows up as an isolated spike far from everything else.\n\nggplot(vitals, aes(x = hr)) +\n  geom_histogram(binwidth = 10, fill = \"#6d8d24\", color = \"white\")"
+  },
+  {
+    "objectID": "W08L16_handout.html#turn-sentinels-into-na",
+    "href": "W08L16_handout.html#turn-sentinels-into-na",
+    "title": "Session 6 Handout: Types, Anomalies, and Missingness",
+    "section": "3.4 Turn sentinels into NA",
+    "text": "3.4 Turn sentinels into NA\n\nvit_na &lt;- vitals |&gt; mutate(hr = na_if(hr, -999), steps = na_if(steps, -1))\ncolSums(is.na(vit_na))\n\n#&gt;    hr steps \n#&gt;    29    25\n\n\nWhen you read a file, you can name the sentinels up front:\n\nread_csv(\"vitals.csv\", na = c(\"\", \"NA\", \"n/a\", \"-999\"))\n\n\n\n\n\n\n\nThe data dictionary decides\n\n\n\nIs -1 a sentinel? In a steps column, yes: nobody walks negative steps. In a temperature column, -1 is a real reading. A pattern cannot tell the difference, and neither can an AI. Check the data dictionary (or ask the source), and write the sentinel list into your code as a decision.\n\n\n\n\n\n\n\n\nAudit it: filter() deletes the rows, na_if() keeps them\n\n\n\nAn AI may “remove the bad values” with filter(hr != -999). That deletes entire rows, including their steps, their user, and their timestamp. It also loses the record that the value was missing. Use na_if() (or mutate()) to blank only the bad cell, and keep the row."
+  },
+  {
+    "objectID": "W08L16_handout.html#domain-bounds-flag-do-not-delete",
+    "href": "W08L16_handout.html#domain-bounds-flag-do-not-delete",
+    "title": "Session 6 Handout: Types, Anomalies, and Missingness",
+    "section": "4.1 Domain bounds: flag, do not delete",
+    "text": "4.1 Domain bounds: flag, do not delete\n\nvit &lt;- vit_na |&gt;\n  mutate(hr_flag = case_when(is.na(hr) ~ \"missing\",\n                             between(hr, 30, 220) ~ \"ok\",\n                             .default = \"impossible\"))\ncount(vit, hr_flag)\n\n#&gt; # A tibble: 3 x 2\n#&gt;   hr_flag        n\n#&gt;   &lt;chr&gt;      &lt;int&gt;\n#&gt; 1 impossible    12\n#&gt; 2 missing       29\n#&gt; 3 ok           959\n\n\nTwo details matter here. The order of case_when() conditions matters: the is.na() test must come first, because between(NA, 30, 220) is NA, not FALSE, and a row with an NA condition falls through to .default. And the row is kept with a flag: a later step decides what to do with \"impossible\" rows.\n\nc(raw_mean = mean(vitals$hr),\n  clean_mean = mean(vit$hr[vit$hr_flag == \"ok\"]))\n\n#&gt;   raw_mean clean_mean \n#&gt;   41.20000   71.91971\n\n\nThe raw mean was off by about 30 beats per minute, from sentinels alone."
+  },
+  {
+    "objectID": "W08L16_handout.html#z-scores",
+    "href": "W08L16_handout.html#z-scores",
+    "title": "Session 6 Handout: Types, Anomalies, and Missingness",
+    "section": "4.2 z-scores",
+    "text": "4.2 z-scores\n\\[z = \\frac{x - \\bar{x}}{s}\\]\nA z-score says how many standard deviations a value is from the mean. For roughly bell-shaped data, about 95% of values fall within 2 and about 99.7% within 3 (the 68-95-99.7 rule), so only about 0.3% are beyond \\(|z| &gt; 3\\).\n\nhr_ok &lt;- vit |&gt; filter(hr_flag == \"ok\")\nc(n = nrow(hr_ok),\n  expected_beyond_3 = round(0.0027 * nrow(hr_ok), 1),\n  found = sum(abs(zs(hr_ok$hr)) &gt; 3))\n\n#&gt;                 n expected_beyond_3             found \n#&gt;             959.0               2.6               5.0\n\n\nThe count is close to what a bell curve gives, so nothing here is alarming. A z-score cutoff has to be read against the amount of data: with a million rows you expect about 2,700 values beyond 3."
+  },
+  {
+    "objectID": "W08L16_handout.html#the-iqr-rule",
+    "href": "W08L16_handout.html#the-iqr-rule",
+    "title": "Session 6 Handout: Types, Anomalies, and Missingness",
+    "section": "4.3 The IQR rule",
+    "text": "4.3 The IQR rule\nThe interquartile range (IQR) is the distance between the 25th and 75th percentiles. A value is flagged if it is more than \\(1.5 \\times \\text{IQR}\\) below the first quartile or above the third. This is the rule boxplots use for their individual points.\n\nsteps_ok &lt;- vit |&gt; filter(!is.na(steps))\nggplot(steps_ok, aes(x = steps)) +\n  geom_boxplot(fill = \"#cfd82d\", outlier.color = \"#f68b1f\")"
+  },
+  {
+    "objectID": "W08L16_handout.html#z-or-iqr-it-depends-on-the-shape",
+    "href": "W08L16_handout.html#z-or-iqr-it-depends-on-the-shape",
+    "title": "Session 6 Handout: Types, Anomalies, and Missingness",
+    "section": "4.4 z or IQR? It depends on the shape",
+    "text": "4.4 z or IQR? It depends on the shape\n\ntibble(variable   = c(\"hr (bell-shaped)\", \"steps (skewed)\"),\n       z_beyond_3 = c(sum(abs(zs(hr_ok$hr)) &gt; 3), sum(abs(zs(steps_ok$steps)) &gt; 3)),\n       iqr_rule   = c(sum(iqr_flag(hr_ok$hr)), sum(iqr_flag(steps_ok$steps))),\n       n          = c(nrow(hr_ok), nrow(steps_ok)))\n\n#&gt; # A tibble: 2 x 4\n#&gt;   variable         z_beyond_3 iqr_rule     n\n#&gt;   &lt;chr&gt;                 &lt;int&gt;    &lt;int&gt; &lt;int&gt;\n#&gt; 1 hr (bell-shaped)          5        8   959\n#&gt; 2 steps (skewed)           14       32   975\n\n\nSteps are skewed: a few very active days stretch a long tail on the right. Both rules flag many of those days, and the IQR rule flags more, but these days are not errors. A z-score assumes a roughly symmetric, bell-shaped variable. For skewed data, look at the plot, and consider transforming (for example, with log()) before applying a rule.\n\n\n\n\n\n\nAudit it: “remove outliers” deletes the interesting data\n\n\n\nAn AI asked to “remove outliers” will often write filter(abs(zs(x)) &lt; 3). On a skewed variable like steps, that removes the long tail of legitimately active users. On a bell-shaped variable, it removes about 0.3% at random. Either way, it makes the column look tidier than reality, and it changes every later summary. Flag instead, then decide for each flagged value: impossible, or merely extreme?"
+  },
+  {
+    "objectID": "W08L16_handout.html#look-in-context",
+    "href": "W08L16_handout.html#look-in-context",
+    "title": "Session 6 Handout: Types, Anomalies, and Missingness",
+    "section": "4.5 Look in context",
+    "text": "4.5 Look in context\nFor each flagged value, ask three questions.\n\nImpossible? A domain bound says so, and the value is an error: flag it, and decide whether to blank it.\nPlausible but extreme? Keep it. It may be your most informative data.\nRepeated? The same odd value many times points to a code or a default, not to a person.\n\nOutliers are questions, not verdicts."
+  },
+  {
+    "objectID": "W08L16_handout.html#odd-only-in-combination",
+    "href": "W08L16_handout.html#odd-only-in-combination",
+    "title": "Session 6 Handout: Types, Anomalies, and Missingness",
+    "section": "4.6 Odd only in combination",
+    "text": "4.6 Odd only in combination\nSome values look normal in every column and are impossible together. We simulate height and weight, which move together, and add one record.\n\nset.seed(7)\nhw &lt;- tibble(h = round(rnorm(500, 170, 9))) |&gt;\n  mutate(w = round(70 + 0.9 * (h - 170) + rnorm(500, 0, 9)))\nhw &lt;- bind_rows(hw, tibble(h = 190, w = 45)) |&gt;\n  mutate(id = row_number(), zh = zs(h), zw = zs(w),\n         bmi = w / (h / 100)^2, zb = zs(bmi),\n         md = mahalanobis(cbind(h, w), colMeans(cbind(h, w)), cov(cbind(h, w))))\n\nhw |&gt; filter(id == 501) |&gt; select(h, w, zh, zw, bmi, zb)\n\n#&gt; # A tibble: 1 x 6\n#&gt;       h     w    zh    zw   bmi    zb\n#&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;\n#&gt; 1   190    45  2.17 -2.07  12.5 -3.73\n\n\nA height of 190 cm and a weight of 45 kg each have \\(|z| &lt; 3\\). Together they give a BMI of about 12.5, far below the normal range. A derived feature (here, BMI) catches what each column alone cannot.\n\nhw |&gt; filter(abs(zb) &gt; 3) |&gt; select(id, h, w, bmi, zb)\n\n#&gt; # A tibble: 4 x 5\n#&gt;      id     h     w   bmi    zb\n#&gt;   &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;\n#&gt; 1   252   143    30  14.7 -3.02\n#&gt; 2   353   158    36  14.4 -3.10\n#&gt; 3   449   168    95  33.7  3.14\n#&gt; 4   501   190    45  12.5 -3.73\n\n\nRow 501 is the most extreme, and other rows appear too: with 501 records, a few are expected beyond \\(|z| &gt; 3\\). Flagged rows are candidates for a look, not automatic errors."
+  },
+  {
+    "objectID": "W08L16_handout.html#mahalanobis-distance-optional",
+    "href": "W08L16_handout.html#mahalanobis-distance-optional",
+    "title": "Session 6 Handout: Types, Anomalies, and Missingness",
+    "section": "4.7 Mahalanobis distance (optional)",
+    "text": "4.7 Mahalanobis distance (optional)\nOne distance can summarize several variables at once, accounting for how they move together:\n\\[D^2 = (x - \\mu)^\\top \\Sigma^{-1} (x - \\mu)\\]\nFor roughly multivariate normal data, \\(D^2\\) follows a \\(\\chi^2\\) distribution with as many degrees of freedom as variables, which gives a cutoff.\n\ncutoff &lt;- qchisq(.999, df = 2)\nround(cutoff, 1)\n\n#&gt; [1] 13.8\n\nhw |&gt; filter(md &gt; cutoff) |&gt; select(id, h, w, md)\n\n#&gt; # A tibble: 1 x 4\n#&gt;      id     h     w    md\n#&gt;   &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;\n#&gt; 1   501   190    45  27.7\n\n\nOnly the planted record is flagged. This distance assumes roughly normal data, so use it as a screen rather than a test."
+  },
+  {
+    "objectID": "W08L16_handout.html#dimensions-of-data-quality",
+    "href": "W08L16_handout.html#dimensions-of-data-quality",
+    "title": "Session 6 Handout: Types, Anomalies, and Missingness",
+    "section": "5.1 Dimensions of data quality",
+    "text": "5.1 Dimensions of data quality\n\n\n\nDimension\nThe question\n\n\n\n\nValidity\nDoes the data follow its defined rules?\n\n\nAccuracy\nIs it close to the true value?\n\n\nConsistency\nDoes it agree with itself and with other tables?\n\n\nUniformity\nSame units and same format throughout?\n\n\nCompleteness\nIs everything we need present?\n\n\n\nA value can be valid and still wrong: 120 is a valid heart rate, and it may still be false for that person. Validity is checkable by code. Accuracy usually is not."
+  },
+  {
+    "objectID": "W08L16_handout.html#validity-rules-you-can-write-as-code",
+    "href": "W08L16_handout.html#validity-rules-you-can-write-as-code",
+    "title": "Session 6 Handout: Types, Anomalies, and Missingness",
+    "section": "5.2 Validity rules you can write as code",
+    "text": "5.2 Validity rules you can write as code\n\n\n\n\n\n\n\nRule type\nExample\n\n\n\n\nData type\nage is numeric\n\n\nRange\nage between 0 and 120\n\n\nMandatory\nid is never NA\n\n\nUnique\nid appears once\n\n\nSet membership\ndevice is watch, band, or ring\n\n\nForeign key\nevery device_id exists in the device table (anti_join())\n\n\nPattern\nzip is exactly five digits\n\n\nCross-field\nend is not before start"
+  },
+  {
+    "objectID": "W08L16_handout.html#rules-become-counts",
+    "href": "W08L16_handout.html#rules-become-counts",
+    "title": "Session 6 Handout: Types, Anomalies, and Missingness",
+    "section": "5.3 Rules become counts",
+    "text": "5.3 Rules become counts\nHere are the ten users records. Each of the checks below should find something.\n\nusers\n\n#&gt; # A tibble: 10 x 6\n#&gt;      id   age device zip        start      end       \n#&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;      &lt;date&gt;     &lt;date&gt;    \n#&gt; 1     1    34 watch  97201      2026-01-01 2026-01-06\n#&gt; 2     2    29 band   9720       2026-01-02 2026-01-01\n#&gt; 3     3   151 ring   97214      2026-01-03 2026-01-05\n#&gt; 4     3    45 watch  97201      2026-01-04 2026-01-03\n#&gt; 5     5    -2 Watch  97201-1234 2026-01-05 2026-01-10\n#&gt; 6     6    38 band   97005      2026-01-06 2026-01-10\n#&gt; 7     7    52 ring   97006      2026-01-07 2026-01-06\n#&gt; 8     8    NA watch  97201      2026-01-08 2026-01-11\n#&gt; 9    NA    41 band   &lt;NA&gt;       2026-01-09 2026-01-13\n#&gt; # i 1 more row\n\n\n\nusers |&gt;\n  summarize(\n    id_missing       = sum(is.na(id)),\n    id_duplicated    = sum(duplicated(id[!is.na(id)])),\n    age_range        = sum(!between(age, 0, 120), na.rm = TRUE),\n    device_set       = sum(!device %in% c(\"watch\", \"band\", \"ring\")),\n    zip_pattern      = sum(!str_detect(zip, \"^\\\\d{5}$\"), na.rm = TRUE),\n    end_before_start = sum(end &lt; start)\n  ) |&gt;\n  pivot_longer(everything(), names_to = \"rule\", values_to = \"failing\")\n\n#&gt; # A tibble: 6 x 2\n#&gt;   rule             failing\n#&gt;   &lt;chr&gt;              &lt;int&gt;\n#&gt; 1 id_missing             1\n#&gt; 2 id_duplicated          1\n#&gt; 3 age_range              2\n#&gt; 4 device_set             2\n#&gt; 5 zip_pattern            2\n#&gt; 6 end_before_start       4\n\n\nA table of failing counts is a report you can rerun on every new file. Notice the decisions inside it:\n\nNA age: not out of range. It is missing, which is a different problem. That is why na.rm = TRUE, and why completeness is its own rule.\nDuplicated id: the count above is the number of extra copies (1). Counting both copies would give 2. Pick one, and say which.\n\"Watch\": invalid by the rule. You could case-fold first (Session 5) and flag the repair, or flag it as is.\n97201-1234: malformed under a five-digit rule, but a valid ZIP+4. Either the rule or the value is wrong, and the data owner decides.\n\n\n\n\n\n\n\nAudit it: a validation function that changes the data\n\n\n\nA rule checker should only report. An AI may return a function that also drops the failing rows, fixes the value, or fills it in “to be helpful”. Then the check and the cleaning are fused, and you cannot tell what was changed. Ask for a function that returns a table of rules and counts, and verify that nrow() and the values of the input are unchanged afterwards."
+  },
+  {
+    "objectID": "W08L16_handout.html#unit-tests-for-cleaning-code",
+    "href": "W08L16_handout.html#unit-tests-for-cleaning-code",
+    "title": "Session 6 Handout: Types, Anomalies, and Missingness",
+    "section": "5.4 Unit tests for cleaning code",
+    "text": "5.4 Unit tests for cleaning code\ntestthat turns a rule into a test that stops the script when the data breaks it.\n\nlibrary(testthat)\n\ntest_that(\"heart rate is in range after cleaning\", {\n  expect_true(all(between(clean$hr, 30, 220), na.rm = TRUE))\n  expect_equal(sum(clean$hr == -999, na.rm = TRUE), 0)\n})\n\nRun the tests after every cleaning step, and again on every new file. A failing test is cheaper than a wrong model."
+  },
+  {
+    "objectID": "W08L16_handout.html#why-is-it-missing",
+    "href": "W08L16_handout.html#why-is-it-missing",
+    "title": "Session 6 Handout: Types, Anomalies, and Missingness",
+    "section": "6.1 Why is it missing?",
+    "text": "6.1 Why is it missing?\n\n\n\n\n\n\n\n\nType\nMeaning\nExample\n\n\n\n\nStructural\nThe value cannot exist\n“Last pregnancy date” for a man\n\n\nMCAR (missing completely at random)\nUnrelated to anything\nA random sync failure\n\n\nMAR (missing at random)\nRelated to other columns\nOld devices drop steps more often\n\n\nMNAR (missing not at random)\nRelated to the missing value itself\nHeart rate drops out when it is high\n\n\n\nMCAR is rare in real data. MAR and MNAR are the usual cases, and what is safe to do depends on which one you have. (A better name for MAR would be “conditionally at random”: the missingness is random given the other columns.)"
+  },
+  {
+    "objectID": "W08L16_handout.html#diagnose-is-missingness-the-same-everywhere",
+    "href": "W08L16_handout.html#diagnose-is-missingness-the-same-everywhere",
+    "title": "Session 6 Handout: Types, Anomalies, and Missingness",
+    "section": "6.2 Diagnose: is missingness the same everywhere?",
+    "text": "6.2 Diagnose: is missingness the same everywhere?\nThe method is to make a missingness indicator (TRUE when the value is missing) and compare it across groups.\n\nsteps_sim |&gt;\n  summarize(missing = mean(is.na(steps)), n = n(), .by = device)\n\n#&gt; # A tibble: 2 x 3\n#&gt;   device missing     n\n#&gt;   &lt;chr&gt;    &lt;dbl&gt; &lt;int&gt;\n#&gt; 1 new     0.0798  1203\n#&gt; 2 legacy  0.512    797\n\n\nLegacy devices lose about half of their steps, new devices about 8%. That is not random.\n\nsteps_sim |&gt;\n  mutate(age_group = cut(age, c(0, 30, 40, 50, Inf))) |&gt;\n  summarize(missing = mean(is.na(steps)), n = n(), .by = age_group) |&gt;\n  arrange(age_group)\n\n#&gt; # A tibble: 5 x 3\n#&gt;   age_group missing     n\n#&gt;   &lt;fct&gt;       &lt;dbl&gt; &lt;int&gt;\n#&gt; 1 (0,30]      0.238   407\n#&gt; 2 (30,40]     0.295   631\n#&gt; 3 (40,50]     0.253   593\n#&gt; 4 (50,Inf]    0.193   368\n#&gt; 5 &lt;NA&gt;        0         1\n\n\nBy age, the rate is about the same in every group: age is not what drives it here. Comparing groups tells you where to look, and where not to.\n\n\n\n\n\n\nDescribe, do not prove\n\n\n\nA pattern across observed columns can support MAR (missing depends on device). It can never prove MCAR, because you cannot see whether the missing values themselves are different. And it cannot reveal MNAR at all."
+  },
+  {
+    "objectID": "W08L16_handout.html#what-dropping-the-rows-does",
+    "href": "W08L16_handout.html#what-dropping-the-rows-does",
+    "title": "Session 6 Handout: Types, Anomalies, and Missingness",
+    "section": "6.3 What dropping the rows does",
+    "text": "6.3 What dropping the rows does\n\nsteps_sim |&gt;\n  summarize(all_rows = mean(device == \"legacy\"),\n            complete_rows = mean(device[!is.na(steps)] == \"legacy\"))\n\n#&gt; # A tibble: 1 x 2\n#&gt;   all_rows complete_rows\n#&gt;      &lt;dbl&gt;         &lt;dbl&gt;\n#&gt; 1    0.398         0.260\n\n\nLegacy devices are about 40% of the users but only about 26% of the complete rows. Dropping rows with NA removes legacy users first, so any model then learns mostly from new-device users. This is a fairness-relevant effect: the people with older devices (often older, or lower income) are quietly underrepresented."
+  },
+  {
+    "objectID": "W08L16_handout.html#mnar-leaves-no-trace",
+    "href": "W08L16_handout.html#mnar-leaves-no-trace",
+    "title": "Session 6 Handout: Types, Anomalies, and Missingness",
+    "section": "6.4 MNAR leaves no trace",
+    "text": "6.4 MNAR leaves no trace\nIf heart rate goes missing because it was high (the sensor fails during intense exercise, say), no other column shows it. The data that would reveal it is exactly the data that is missing. Only context can raise the suspicion. What you can do:\n\nask the source how the sensor behaves,\ncompare with another source of the same quantity,\nrun a sensitivity analysis: re-do the analysis under several assumptions about the missing values and see how much the answer changes.\n\n\n# naniar (optional) gives ready-made missingness plots\nlibrary(naniar)\ngg_miss_var(steps_sim)       # missing values per column\nvis_miss(steps_sim)          # every cell: present or missing"
+  },
+  {
+    "objectID": "W08L16_handout.html#options-and-the-rule-of-thumb",
+    "href": "W08L16_handout.html#options-and-the-rule-of-thumb",
+    "title": "Session 6 Handout: Types, Anomalies, and Missingness",
+    "section": "7.1 Options, and the rule of thumb",
+    "text": "7.1 Options, and the rule of thumb\n\n\n\n\n\n\n\nOption\nWhen it is reasonable\n\n\n\n\nDrop rows\nFew are missing (under about 5 to 10%) and the cause looks random\n\n\nDrop the variable\nMostly missing, and little value\n\n\nImpute\nMAR, and the variable matters\n\n\nDeclare unusable\nToo much is missing, or MNAR with no way to check\n\n\n\nPercentages like 5 to 10% are rules of thumb, not laws: what matters is who is missing, not only how many. And never impute the label or the outcome you want to predict: that feeds your own guess back in as if it were data."
+  },
+  {
+    "objectID": "W08L16_handout.html#mean-imputation-the-tempting-one",
+    "href": "W08L16_handout.html#mean-imputation-the-tempting-one",
+    "title": "Session 6 Handout: Types, Anomalies, and Missingness",
+    "section": "7.2 Mean imputation: the tempting one",
+    "text": "7.2 Mean imputation: the tempting one\n\nmean_imp &lt;- steps_sim |&gt;\n  mutate(steps = if_else(is.na(steps), mean(steps, na.rm = TRUE), steps))\n\nc(true_sd = sd(steps_sim$steps_true), after_mean_imp = sd(mean_imp$steps))\n\n#&gt;        true_sd after_mean_imp \n#&gt;       2564.128       2193.206\n\n\nThe mean of the column stays where it was, which looks reassuring and proves nothing, because filling with the mean keeps the mean by construction. The spread shrinks: a quarter of the column now holds one repeated value.\n\nbind_rows(truth = steps_sim |&gt; transmute(steps = steps_true),\n          `mean imputed` = mean_imp |&gt; select(steps), .id = \"version\") |&gt;\n  ggplot(aes(x = steps, fill = version)) +\n  geom_density(alpha = 0.5, color = NA) +\n  scale_fill_manual(values = c(\"#6d8d24\", \"#f68b1f\"), name = NULL)\n\n\n\n\n\n\n\n\nThe mean-imputed version has a spike at the center and thin tails. Intervals computed from it will be too narrow, and correlations too weak."
+  },
+  {
+    "objectID": "W08L16_handout.html#multiple-imputation-with-mice",
+    "href": "W08L16_handout.html#multiple-imputation-with-mice",
+    "title": "Session 6 Handout: Types, Anomalies, and Missingness",
+    "section": "7.3 Multiple imputation with mice",
+    "text": "7.3 Multiple imputation with mice\nmice (multivariate imputation by chained equations) creates several completed datasets, to carry the uncertainty of not knowing the missing values.\n\nlibrary(mice)\ndat &lt;- steps_sim |&gt; select(steps, device, age) |&gt; mutate(device = factor(device))\nimp &lt;- mice(dat, m = 5, method = \"pmm\", donors = 20, printFlag = FALSE, seed = 531)\n\n\nm = 5: five completed datasets.\nmethod = \"pmm\" (predictive mean matching): each hole is filled with an observed value taken from a row with a similar prediction, so imputed values are always realistic values.\ndonors = 20: how many similar rows to draw from. A small donor pool can reuse a few rows over and over.\nseed: so you get the same answer when you rerun.\n\nThen analyze each dataset and pool the results. For a simple summary, average across the datasets. For a model, mice pools for you:\n\nfit &lt;- with(imp, lm(steps ~ device + age))\nsummary(pool(fit))\n\n#&gt;          term  estimate  std.error statistic       df      p.value\n#&gt; 1 (Intercept) 8094.8690 200.819735  40.30913 38.48911 4.307036e-33\n#&gt; 2   devicenew 3015.5652 115.636787  26.07791 30.31960 2.517706e-22\n#&gt; 3         age  -62.4752   4.225107 -14.78665 91.19317 5.954934e-26\n\n\npool() combines the five fits using Rubin’s rules, so the standard errors reflect both the usual sampling error and the extra uncertainty from imputation."
+  },
+  {
+    "objectID": "W08L16_handout.html#judge-it-by-the-distribution",
+    "href": "W08L16_handout.html#judge-it-by-the-distribution",
+    "title": "Session 6 Handout: Types, Anomalies, and Missingness",
+    "section": "7.4 Judge it by the distribution",
+    "text": "7.4 Judge it by the distribution\nIn this simulation we know the true steps, so we can score each method.\n\nstats &lt;- \\(x) c(mean = mean(x), sd = sd(x))\npooled &lt;- sapply(1:5, \\(i) stats(complete(imp, i)$steps))\n\nrbind(truth           = stats(steps_sim$steps_true),\n      `drop rows`     = stats(na.omit(steps_sim$steps)),\n      `mean imputed`  = stats(mean_imp$steps),\n      `mice (pooled)` = rowMeans(pooled)) |&gt; round()\n\n#&gt;               mean   sd\n#&gt; truth         7419 2564\n#&gt; drop rows     7791 2536\n#&gt; mean imputed  7791 2193\n#&gt; mice (pooled) 7404 2604\n\n\nDropping rows overstates the mean (the legacy users, who walk less, are missing most). Mean imputation keeps that biased mean and shrinks the spread. mice recovers both.\nBy group:\n\nby_device &lt;- function(d, nm) d |&gt; summarize(mean = mean(steps), .by = device) |&gt; mutate(version = nm)\nbind_rows(\n  by_device(steps_sim |&gt; mutate(steps = steps_true), \"truth\"),\n  by_device(steps_sim |&gt; filter(!is.na(steps)), \"drop rows\"),\n  by_device(mean_imp, \"mean imputed\"),\n  by_device(complete(imp, 1) |&gt; as_tibble() |&gt; mutate(device = as.character(device)), \"mice (1 of 5)\")\n) |&gt;\n  pivot_wider(names_from = device, values_from = mean) |&gt;\n  mutate(across(c(legacy, new), round))\n\n#&gt; # A tibble: 4 x 3\n#&gt;   version         new legacy\n#&gt;   &lt;chr&gt;         &lt;dbl&gt;  &lt;dbl&gt;\n#&gt; 1 truth          8573   5676\n#&gt; 2 drop rows      8587   5527\n#&gt; 3 mean imputed   8523   6686\n#&gt; 4 mice (1 of 5)  8594   5575\n\n\nMean imputation gives legacy users the overall average, which is far above what they actually walk, and pulls the two groups toward each other.\n\n\n\n\n\n\nWith real data there is no truth column\n\n\n\nHere we scored against steps_true. Real data never has it. What you can do instead:\n\nCompare the distribution before and after imputation (same shape, same spread?).\nCompare group means before and after: does any group move a lot?\nCompare imputed values with observed ones: are they plausible for that group?\nRun the analysis on several imputed datasets: does the answer change a lot between them?\n\nYou can never check a single imputed value against the truth. You can check whether the distribution recovered.\n\n\n\n\n\n\n\n\nAudit it: a complete column is not a correct column\n\n\n\nAn AI asked to “fill in the missing steps so the column is complete” returned this:\n\nsteps_sim |&gt;\n  mutate(steps = if_else(is.na(steps), mean(steps, na.rm = TRUE), steps)) |&gt;\n  summarize(mean = mean(steps), sd = sd(steps), missing = sum(is.na(steps)))\n\n#&gt; # A tibble: 1 x 3\n#&gt;    mean    sd missing\n#&gt;   &lt;dbl&gt; &lt;dbl&gt;   &lt;int&gt;\n#&gt; 1 7791. 2193.       0\n\n\nand then wrote: “No missing values remain, and the mean is unchanged, so no bias was introduced.” Apply the Audit Loop:\n\n“The mean is unchanged” is guaranteed by the method, so it proves nothing. And that mean is already biased: legacy users, who walk less, are under-represented among the observed values.\nThe spread shrinks (the standard deviation falls well below the true one), so later intervals will be too narrow.\nLegacy users are filled with the average of mostly new-device users.\nThe claim sounds like a check, but it is not one.\n\nA better prompt: “Steps are missing more often for legacy devices. Use mice with device and age as predictors, five imputations, pmm. Then compare the mean and standard deviation of steps, overall and by device, before and after, and report any group whose mean moves by more than 5%.”"
+  },
+  {
+    "objectID": "W08L15_handout.html",
+    "href": "W08L15_handout.html",
+    "title": "Session 5 Handout: Strings, Unicode, and Categories",
+    "section": "",
+    "text": "The slides move fast. This handout is the slow, complete version: read it before class, and return to it when you clean a column.\nCoding session 5 is the first of two sessions on data cleaning. Today covers text: files whose shape is wrong, strings whose content is wrong, and categories that should be one thing and are several. Session 6 covers dates, sentinels, outliers, and missing values.\nCleaning has a hazard that earlier sessions did not: an AI assistant can make a column look clean in one line while it quietly throws information away. Audit it boxes show these mistakes. The habit to build is: count before, count after.\n\n\n\n\n\n\nThe Audit Loop, for cleaning\n\n\n\n\nRead the code. What does each pattern match, and what could it also match?\nRun it on the hard rows (empty, odd, unexpected), not only the easy ones.\nRestate what changed: how many rows, which values, and what was lost.\nRefine it or Reject it. Log the decision.\n\n\n\nSetup. Examples use small inline data, so you can run everything without a download. You need tidyverse (which includes stringr, forcats, and dplyr) and stringi, which stringr installs for you. separate_wider_regex() needs tidyr 1.3.0 or newer, and case_match() needs dplyr 1.1.0 or newer.\n\nlibrary(tidyverse)"
+  },
+  {
+    "objectID": "W08L15_handout.html#three-rules-for-cleaning-code",
+    "href": "W08L15_handout.html#three-rules-for-cleaning-code",
+    "title": "Session 5 Handout: Strings, Unicode, and Categories",
+    "section": "2.1 Three rules for cleaning code",
+    "text": "2.1 Three rules for cleaning code\n\nCode, not clicks. A hand edit in a spreadsheet cannot be repeated or checked.\nRe-runnable. Running the whole script twice from raw data gives the same result (this is called an idempotent pipeline).\nEvery fix is logged. What changed, how many rows, and why.\n\n\n\n\n\n\n\nKey idea\n\n\n\nEvery cleaning step is a decision that changes what a model will learn. If you cannot say what a step removed or changed, you have not finished the step."
+  },
+  {
+    "objectID": "W08L15_handout.html#structural-and-content-grime",
+    "href": "W08L15_handout.html#structural-and-content-grime",
+    "title": "Session 5 Handout: Strings, Unicode, and Categories",
+    "section": "2.2 Structural and content grime",
+    "text": "2.2 Structural and content grime\n\n\n\n\n\n\n\nStructural\nContent\n\n\n\n\nThe shape of the file is wrong\nThe values in cells are wrong\n\n\nShows up at import\nShows up at inspection\n\n\nExtra or missing fields, bad delimiters, encoding\nTypos, mixed units, sentinels, lookalikes\n\n\nOften needs a manual rule\nOften needs a lookup table\n\n\n\nHandle structural problems first: content checks assume a clean grid."
+  },
+  {
+    "objectID": "W08L15_handout.html#versioning-data-as-you-work",
+    "href": "W08L15_handout.html#versioning-data-as-you-work",
+    "title": "Session 5 Handout: Strings, Unicode, and Categories",
+    "section": "2.3 Versioning data as you work",
+    "text": "2.3 Versioning data as you work\nHow you keep track of changes depends on size.\n\n\n\n\n\n\n\nSize of data\nApproach\n\n\n\n\nFits easily in memory\nCreate a new object at each step; the script is the history\n\n\nLarge\nEdit in place and log each change in a text column or file\n\n\nMassive\nDo not load it all; sample, process in chunks, or push computation to the database (see arrow in Session 2)"
+  },
+  {
+    "objectID": "W08L15_handout.html#the-building-blocks",
+    "href": "W08L15_handout.html#the-building-blocks",
+    "title": "Session 5 Handout: Strings, Unicode, and Categories",
+    "section": "4.1 The building blocks",
+    "text": "4.1 The building blocks\n\n\n\n\n\n\n\n\nPiece\nMeaning\nExample\n\n\n\n\n\\\\d \\\\w \\\\s\na digit, a word character, a whitespace\n\\\\d{5} is five digits\n\n\n.\nany one character\na.c matches abc, a-c\n\n\n+ * ?\none or more, zero or more, optional\n\\\\d+ is a run of digits\n\n\n{3} {2,4}\nexactly 3, between 2 and 4\n\\\\d{3}-\\\\d{4}\n\n\n^ $\nstart, end of the string\n^\\\\d+$ is only digits\n\n\n( ) \\|\ngroup, alternatives\nkg\\|lbs?\n\n\n[abc] [^abc]\none of these, none of these\n[^0-9] is a non-digit\n\n\n\nIn an R string the backslash must be doubled: \"\\\\d+\". A raw string avoids the doubling: r\"(\\d+)\".\n\n# These two patterns are the same\nstr_extract(\"room 204\", \"\\\\d+\")\n\n#&gt; [1] \"204\"\n\nstr_extract(\"room 204\", r\"(\\d+)\")\n\n#&gt; [1] \"204\""
+  },
+  {
+    "objectID": "W08L15_handout.html#see-what-a-pattern-matches",
+    "href": "W08L15_handout.html#see-what-a-pattern-matches",
+    "title": "Session 5 Handout: Strings, Unicode, and Categories",
+    "section": "4.2 See what a pattern matches",
+    "text": "4.2 See what a pattern matches\nstr_view() highlights the match, which makes patterns much easier to debug.\n\nstr_view(body$weight_raw, \"\\\\d+\\\\.?\\\\d*\")\n\n#&gt; [1] | &lt;165&gt; lb\n#&gt; [2] | &lt;72&gt;kg\n#&gt; [3] | &lt;80&gt; KG\n#&gt; [4] | &lt;170&gt;\n#&gt; [6] | &lt;154.5&gt; lbs\n#&gt; [7] | &lt;68&gt; kg"
+  },
+  {
+    "objectID": "W08L15_handout.html#our-messy-column",
+    "href": "W08L15_handout.html#our-messy-column",
+    "title": "Session 5 Handout: Strings, Unicode, and Categories",
+    "section": "4.3 Our messy column",
+    "text": "4.3 Our messy column\n\nbody\n\n#&gt; # A tibble: 7 x 2\n#&gt;      id weight_raw\n#&gt;   &lt;int&gt; &lt;chr&gt;     \n#&gt; 1     1 165 lb    \n#&gt; 2     2 72kg      \n#&gt; 3     3 80 KG     \n#&gt; 4     4 170       \n#&gt; 5     5 n/a       \n#&gt; 6     6 154.5 lbs \n#&gt; 7     7 68 kg\n\n\nThese weights were typed by humans: different units (lb, lbs, kg, KG), different spacing, one row with a number and no unit, and one with no number at all.\n\n4.3.1 Which rows: str_detect()\n\nbody |&gt;\n  mutate(has_lb = str_detect(weight_raw, regex(\"lbs?\", ignore_case = TRUE)))\n\n#&gt; # A tibble: 7 x 3\n#&gt;      id weight_raw has_lb\n#&gt;   &lt;int&gt; &lt;chr&gt;      &lt;lgl&gt; \n#&gt; 1     1 165 lb     TRUE  \n#&gt; 2     2 72kg       FALSE \n#&gt; 3     3 80 KG      FALSE \n#&gt; 4     4 170        FALSE \n#&gt; 5     5 n/a        FALSE \n#&gt; 6     6 154.5 lbs  TRUE  \n#&gt; 7     7 68 kg      FALSE\n\n\nstr_detect() returns TRUE or FALSE. Use it inside filter() to keep rows, or in mutate() to flag them. regex(..., ignore_case = TRUE) makes the match case-insensitive.\n\n\n4.3.2 What is in them: str_extract()\n\nbody |&gt;\n  mutate(\n    num = as.numeric(str_extract(weight_raw, \"\\\\d+\\\\.?\\\\d*\")),\n    unit = str_extract(str_to_lower(weight_raw), \"kg|lbs?\")\n  )\n\n#&gt; # A tibble: 7 x 4\n#&gt;      id weight_raw   num unit \n#&gt;   &lt;int&gt; &lt;chr&gt;      &lt;dbl&gt; &lt;chr&gt;\n#&gt; 1     1 165 lb      165  lb   \n#&gt; 2     2 72kg         72  kg   \n#&gt; 3     3 80 KG        80  kg   \n#&gt; 4     4 170         170  &lt;NA&gt; \n#&gt; 5     5 n/a          NA  &lt;NA&gt; \n#&gt; 6     6 154.5 lbs   154. lbs  \n#&gt; 7     7 68 kg        68  kg\n\n\nRead the number pattern aloud: “one or more digits, then an optional dot, then zero or more digits”. When nothing matches, you get NA, not an error. Row 4 has a number (170) and no unit, and row 5 has neither.\n\n\n4.3.3 Convert, and leave the unknown unknown\n\nbody |&gt;\n  mutate(\n    num = as.numeric(str_extract(weight_raw, \"\\\\d+\\\\.?\\\\d*\")),\n    unit = str_extract(str_to_lower(weight_raw), \"kg|lbs?\"),\n    kg = case_when(unit == \"kg\" ~ num, str_detect(unit, \"lb\") ~ num * 0.453592)\n  )\n\n#&gt; # A tibble: 7 x 5\n#&gt;      id weight_raw   num unit     kg\n#&gt;   &lt;int&gt; &lt;chr&gt;      &lt;dbl&gt; &lt;chr&gt; &lt;dbl&gt;\n#&gt; 1     1 165 lb      165  lb     74.8\n#&gt; 2     2 72kg         72  kg     72  \n#&gt; 3     3 80 KG        80  kg     80  \n#&gt; 4     4 170         170  &lt;NA&gt;   NA  \n#&gt; 5     5 n/a          NA  &lt;NA&gt;   NA  \n#&gt; 6     6 154.5 lbs   154. lbs    70.1\n#&gt; 7     7 68 kg        68  kg     68\n\n\ncase_when() with no default returns NA for rows that match no condition. Here that is the right behavior: 170 could be pounds or kilograms, and a regex cannot know which. Staying NA (and flagged) is better than a guess that is hidden inside a pattern.\n\n\n\n\n\n\nAudit it: parse_number() ignores units\n\n\n\nparse_number() is tempting because it is one line.\n\nbody |&gt; mutate(shortcut = c(parse_number(weight_raw)))\n\n#&gt; # A tibble: 7 x 3\n#&gt;      id weight_raw shortcut\n#&gt;   &lt;int&gt; &lt;chr&gt;         &lt;dbl&gt;\n#&gt; 1     1 165 lb         165 \n#&gt; 2     2 72kg            72 \n#&gt; 3     3 80 KG           80 \n#&gt; 4     4 170            170 \n#&gt; 5     5 n/a             NA \n#&gt; 6     6 154.5 lbs      154.\n#&gt; 7     7 68 kg           68\n\n\nIt returns 165, 72, 80 and 170 as if they shared a unit. Pounds and kilograms are now mixed in one numeric column, and nothing warns you (the one warning is for n/a). Extract the unit as well as the number, and decide about the rows without a unit.\n\n\n\n\n4.3.4 Replace and tidy: str_replace() and friends\n\nc(\"  Portland \", \"Portland,  OR\", \"portland\") |&gt;\n  str_squish() |&gt;\n  str_remove(\",\\\\s*OR$\") |&gt;\n  str_to_title()\n\n#&gt; [1] \"Portland\" \"Portland\" \"Portland\"\n\n\n\nstr_squish() trims both ends and collapses runs of spaces inside.\nstr_remove(x, pattern) is str_replace(x, pattern, \"\").\nstr_replace() changes the first match, str_replace_all() changes every match.\nstr_to_lower(), str_to_upper(), str_to_title() change case.\n\n\n\n\n\n\n\nAudit it: the dot matches anything\n\n\n\nAn AI asked to “remove the dots from a phone number” may write:\n\nstr_replace_all(\"503.555.0142\", \".\", \"\")\n\n#&gt; [1] \"\"\n\n\nThe result is an empty string. In a regex, . means “any character”, so every character was removed. Escape it (\"\\\\.\"), put it in a class (\"[.]\"), or match it literally with fixed(\".\").\n\nstr_replace_all(\"503.555.0142\", fixed(\".\"), \"\")\n\n#&gt; [1] \"5035550142\"\n\n\n\n\n\n\n\n\n\n\nAudit it: str_extract() returns only the first match\n\n\n\n“Pull the numbers out of 5 ft 11 in” with str_extract(x, \"\\\\d+\") returns \"5\" and drops the 11. Use str_extract_all() (which returns a list) or capture each piece on purpose, as below."
+  },
+  {
+    "objectID": "W08L15_handout.html#capture-groups-separate_wider_regex",
+    "href": "W08L15_handout.html#capture-groups-separate_wider_regex",
+    "title": "Session 5 Handout: Strings, Unicode, and Categories",
+    "section": "4.4 Capture groups: separate_wider_regex()",
+    "text": "4.4 Capture groups: separate_wider_regex()\nWhen a string has several parts, name each one. Unnamed pieces are matched and dropped; named pieces become columns.\n\ntibble(height_raw = c(\"5 ft 11 in\", \"5ft 7in\", \"6 ft 0 in\")) |&gt;\n  separate_wider_regex(\n    height_raw,\n    c(ft = \"\\\\d\", \"\\\\s*ft\\\\s*\", inch = \"\\\\d+\", \".*\")\n  )\n\n#&gt; # A tibble: 3 x 2\n#&gt;   ft    inch \n#&gt;   &lt;chr&gt; &lt;chr&gt;\n#&gt; 1 5     11   \n#&gt; 2 5     7    \n#&gt; 3 6     0\n\n\nIf a string does not fit the pattern, the function stops with an error by default. That is a feature: it tells you the pattern is incomplete. Options such as too_few = \"align_start\" let rows through when you decide that is acceptable."
+  },
+  {
+    "objectID": "W08L15_handout.html#lookarounds-optional",
+    "href": "W08L15_handout.html#lookarounds-optional",
+    "title": "Session 5 Handout: Strings, Unicode, and Categories",
+    "section": "4.5 Lookarounds (optional)",
+    "text": "4.5 Lookarounds (optional)\nA lookahead checks what comes next without consuming it. The pattern \"^1(?=\\\\d{10}$)\" means “a leading 1, but only if exactly ten digits follow”. It is how clean_phone() below strips a US country code without breaking a seven-digit number that happens to start with 1.\n\nstr_remove(\"15035550142\", \"^1(?=\\\\d{10}$)\")\n\n#&gt; [1] \"5035550142\"\n\nstr_remove(\"1503555\", \"^1(?=\\\\d{10}$)\")\n\n#&gt; [1] \"1503555\""
+  },
+  {
+    "objectID": "W08L15_handout.html#detect",
+    "href": "W08L15_handout.html#detect",
+    "title": "Session 5 Handout: Strings, Unicode, and Categories",
+    "section": "5.1 Detect",
+    "text": "5.1 Detect\nAny character outside plain ASCII (code points 0 to 127) matches [^\\\\x00-\\\\x7F].\n\nstr_detect(c(good, bad), \"[^\\\\x00-\\\\x7F]\")\n\n#&gt; [1] FALSE  TRUE\n\nstringi::stri_escape_unicode(bad)\n\n#&gt; [1] \"gr\\\\u0435\\\\u0435n\"\n\n\nstri_escape_unicode() shows each non-ASCII character as its \\uXXXX code. To find every offending row in a table:\n\ntibble(city = c(\"Portland\", \"\\u0420ortland\", \"Beaverton\")) |&gt;\n  filter(str_detect(city, \"[^\\\\x00-\\\\x7F]\"))\n\n#&gt; # A tibble: 1 x 1\n#&gt;   city    \n#&gt;   &lt;chr&gt;   \n#&gt; 1 Рortland\n\n\n\n\n\n\n\n\nAudit it: look-alikes break joins without an error\n\n\n\n\nlookup &lt;- tibble(\n  color = c(\"blue\", \"red\", \"green\"),\n  hex = c(\"#00f\", \"#f00\", \"#0a0\")\n)\n\ntibble(color = c(\"blue\", \"green\", bad)) |&gt;\n  anti_join(lookup, by = \"color\")\n\n#&gt; # A tibble: 1 x 1\n#&gt;   color\n#&gt;   &lt;chr&gt;\n#&gt; 1 grееn\n\n\nThe join does not fail. The lookalike simply does not match, and it will be missing from every result built on that join. Run anti_join() against your lookup tables as a routine check (Session 2)."
+  },
+  {
+    "objectID": "W08L15_handout.html#decide-whether-to-normalize",
+    "href": "W08L15_handout.html#decide-whether-to-normalize",
+    "title": "Session 5 Handout: Strings, Unicode, and Categories",
+    "section": "5.2 Decide whether to normalize",
+    "text": "5.2 Decide whether to normalize\nstringi::stri_trans_general() can transliterate text.\n\nstringi::stri_trans_general(c(bad, \"caf\\u00e9\"), \"Any-Latin; Latin-ASCII\")\n\n#&gt; [1] \"green\" \"cafe\"\n\n\nThe Cyrillic е became a Latin e, which is what we wanted. But café also became cafe. Whether that is acceptable depends on the column: for a color, yes; for a person’s name, ask first. Detect first, then decide. Real data also contains legitimate non-ASCII text (José, Zoë), so “non-ASCII” is a flag for review, not proof of an error."
+  },
+  {
+    "objectID": "W08L15_handout.html#invisible-characters",
+    "href": "W08L15_handout.html#invisible-characters",
+    "title": "Session 5 Handout: Strings, Unicode, and Categories",
+    "section": "5.3 Invisible characters",
+    "text": "5.3 Invisible characters\n\nx &lt;- c(\"blue\", \"blue\\u00a0\", \"blue\\u200b\")\nnchar(x)\n\n#&gt; [1] 4 5 5\n\nnchar(str_squish(x))\n\n#&gt; [1] 4 4 5\n\n\nstr_squish() removes the non-breaking space (\\u00a0) but not the zero-width space (\\u200b), which has length but no width. If two strings look identical and are not equal, compare nchar() and stri_escape_unicode()."
+  },
+  {
+    "objectID": "W08L15_handout.html#case-fold-and-trim",
+    "href": "W08L15_handout.html#case-fold-and-trim",
+    "title": "Session 5 Handout: Strings, Unicode, and Categories",
+    "section": "6.1 Case-fold and trim",
+    "text": "6.1 Case-fold and trim\n\nhumans |&gt;\n  mutate(favorite = str_to_lower(str_squish(favorite))) |&gt;\n  count(favorite, sort = TRUE)\n\n#&gt; # A tibble: 7 x 2\n#&gt;   favorite       n\n#&gt;   &lt;chr&gt;      &lt;int&gt;\n#&gt; 1 blue          42\n#&gt; 2 red           33\n#&gt; 3 green         25\n#&gt; 4 gray           4\n#&gt; 5 blüe           1\n#&gt; 6 chartreuse     1\n#&gt; 7 grееn          1\n\n\nTwo problems are gone: Red merged with red, and \" blue\" merged with blue. What is left: blüe, the Cyrillic green, and chartreuse.\n\n\n\n\n\n\nCase folding is not always safe\n\n\n\nCase carries no meaning for a color, but it might for an identifier.\n\nids &lt;- c(\"ab12\", \"AB12\")\nn_distinct(ids)\n\n#&gt; [1] 2\n\nn_distinct(str_to_lower(ids))\n\n#&gt; [1] 1\n\n\nFold case only where case carries no meaning, and say so in your log."
+  },
+  {
+    "objectID": "W08L15_handout.html#fix-known-variants-with-a-lookup-table",
+    "href": "W08L15_handout.html#fix-known-variants-with-a-lookup-table",
+    "title": "Session 5 Handout: Strings, Unicode, and Categories",
+    "section": "6.2 Fix known variants with a lookup table",
+    "text": "6.2 Fix known variants with a lookup table\n\nfixes &lt;- tribble(\n  ~raw              , ~clean  ,\n  \"bl\\u00fce\"       , \"blue\"  ,\n  \"gr\\u0435\\u0435n\" , \"green\"\n)\n\nhumans |&gt;\n  mutate(favorite = str_to_lower(str_squish(favorite))) |&gt;\n  left_join(fixes, by = c(\"favorite\" = \"raw\")) |&gt;\n  mutate(favorite = coalesce(clean, favorite)) |&gt;\n  count(favorite, sort = TRUE)\n\n#&gt; # A tibble: 5 x 2\n#&gt;   favorite       n\n#&gt;   &lt;chr&gt;      &lt;int&gt;\n#&gt; 1 blue          43\n#&gt; 2 red           33\n#&gt; 3 green         26\n#&gt; 4 gray           4\n#&gt; 5 chartreuse     1\n\n\nWhy a table and not a chain of ifelse() calls:\n\nA reviewer can read it in ten seconds.\nIt is data: you can version it, diff it, and extend it.\nanti_join() shows what is still unmapped.\nIt works on next month’s file.\n\nFor a few mappings, case_match() is a compact alternative:\n\nhumans |&gt;\n  mutate(\n    favorite = str_to_lower(str_squish(favorite)),\n    favorite = case_match(\n      favorite,\n      \"bl\\u00fce\" ~ \"blue\",\n      \"gr\\u0435\\u0435n\" ~ \"green\",\n      .default = favorite\n    )\n  ) |&gt;\n  count(favorite, sort = TRUE)\n\n#&gt; # A tibble: 5 x 2\n#&gt;   favorite       n\n#&gt;   &lt;chr&gt;      &lt;int&gt;\n#&gt; 1 blue          43\n#&gt; 2 red           33\n#&gt; 3 green         26\n#&gt; 4 gray           4\n#&gt; 5 chartreuse     1\n\n\nThe .default = favorite keeps every value you did not mention. Without it, unmatched values silently become NA."
+  },
+  {
+    "objectID": "W08L15_handout.html#rare-is-not-wrong",
+    "href": "W08L15_handout.html#rare-is-not-wrong",
+    "title": "Session 5 Handout: Strings, Unicode, and Categories",
+    "section": "6.3 Rare is not wrong",
+    "text": "6.3 Rare is not wrong\nAfter folding, three values occur only once: blüe, the Cyrillic green, and chartreuse. Two of them are errors that a lookup table can fix, and one (chartreuse) is a real color. Rarity alone cannot tell them apart, so flag rare values and look at each one in context. Do not delete them because they are rare.\n\nhumans |&gt;\n  mutate(favorite = str_to_lower(str_squish(favorite))) |&gt;\n  add_count(favorite, name = \"n\") |&gt;\n  mutate(rare = n &lt; 2) |&gt;\n  filter(rare) |&gt;\n  distinct(favorite, n)\n\n#&gt; # A tibble: 3 x 2\n#&gt;   favorite       n\n#&gt;   &lt;chr&gt;      &lt;int&gt;\n#&gt; 1 blüe           1\n#&gt; 2 grееn          1\n#&gt; 3 chartreuse     1"
+  },
+  {
+    "objectID": "W08L15_handout.html#grouping-valid-levels-fct_collapse",
+    "href": "W08L15_handout.html#grouping-valid-levels-fct_collapse",
+    "title": "Session 5 Handout: Strings, Unicode, and Categories",
+    "section": "6.4 Grouping valid levels: fct_collapse()",
+    "text": "6.4 Grouping valid levels: fct_collapse()\n\nhumans |&gt;\n  mutate(\n    favorite = str_to_lower(str_squish(favorite)),\n    group = fct_collapse(\n      favorite,\n      cool = c(\"blue\", \"green\"),\n      warm = \"red\",\n      other_level = \"other\"\n    )\n  ) |&gt;\n  count(group)\n\n#&gt; # A tibble: 3 x 2\n#&gt;   group     n\n#&gt;   &lt;fct&gt; &lt;int&gt;\n#&gt; 1 cool     67\n#&gt; 2 warm     33\n#&gt; 3 other     7\n\n\nfct_collapse() and fct_lump_*() are for grouping valid levels when you want fewer categories for analysis. They are not repair tools: they hide the very values you needed to look at.\n\n\n\n\n\n\nAudit it: fct_lump_min() makes a table shorter, not cleaner\n\n\n\nAn AI asked to “standardize the favorite color column” returned this:\n\nhumans |&gt;\n  mutate(favorite = str_to_lower(favorite)) |&gt;\n  mutate(favorite = fct_lump_min(favorite, min = 2, other_level = \"other\")) |&gt;\n  count(favorite, sort = TRUE)\n\n#&gt; # A tibble: 6 x 2\n#&gt;   favorite     n\n#&gt;   &lt;fct&gt;    &lt;int&gt;\n#&gt; 1 \"blue\"      40\n#&gt; 2 \"red\"       33\n#&gt; 3 \"green\"     25\n#&gt; 4 \"gray\"       4\n#&gt; 5 \"other\"      3\n#&gt; 6 \" blue\"      2\n\n\nCompare with the counts at the start of this section:\n\nLost counts: 43 people said blue (blue, \" blue\", blüe), but blue shows 40. Green shows 25, not 26.\n\"other\" (3) hides three different things: a typo (blüe), a lookalike (grееn), and a real rare color (chartreuse).\nNo str_squish(): \" blue\" is still its own level.\nNo log: nothing says what moved where.\n\nThe AI cleaned the output, not the data. The better prompt asks for trimming, lowercasing, a lookup table of known fixes, and a list of every value still outside the valid set, with the instruction not to lump or delete."
+  },
+  {
+    "objectID": "W08L15_handout.html#prompting-from-a-spec",
+    "href": "W08L15_handout.html#prompting-from-a-spec",
+    "title": "Session 5 Handout: Strings, Unicode, and Categories",
+    "section": "7.1 Prompting from a spec",
+    "text": "7.1 Prompting from a spec\nA good prompt for code like this:\n\nPastes the spec table in as text.\nSays what the function takes and returns (“a character vector in, a character vector of the same length out”).\nForbids guessing: “return NA when the input does not match, never a default”.\nAsks for tidyverse code only, and no extra packages.\n\nThen run the spec. A failing row is a gift: add it to the spec (and fix the function). The spec grows with every surprise in real data."
+  },
+  {
+    "objectID": "W08L15_slides.html#recall-30-seconds-silent",
+    "href": "W08L15_slides.html#recall-30-seconds-silent",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Recall (30 seconds, silent)",
+    "text": "Recall (30 seconds, silent)\n\nHow do you know a left_join() did not duplicate rows?\nmean(x) is NA. What are your options?\nLab 1: which problem surprised you most?\n\n\n\nRow count before and after\nna.rm = TRUE, or fix the NAs, and say how many rows it ignored\nHold on to it: today we start fixing\n\n\nDo not collect answers for more than 30 seconds each. This is retrieval practice: the effort of recalling is the point. If the room is quiet on question 3, name two from the lab reports you read (timestamps, weight units)."
+  },
+  {
+    "objectID": "W08L15_slides.html#todays-route",
+    "href": "W08L15_slides.html#todays-route",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Today’s route",
+    "text": "Today’s route\n\nThe pipeline: flag first, fix second\nRegex with stringr: find and extract patterns\nUnicode: strings that look the same and are not\nCategories: recode with a lookup table, not a long ifelse\nSpec first: tests judge the AI’s code, not your eyes\n\nHands-on today: code it, prompt it, assess it."
+  },
+  {
+    "objectID": "W08L15_slides.html#set-up-for-the-three-tasks",
+    "href": "W08L15_slides.html#set-up-for-the-three-tasks",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Set up for the three tasks",
+    "text": "Set up for the three tasks\n\nlibrary(tidyverse)\nw &lt;- c(\"165 lb\", \"72kg\", \"80 KG\", \"170\", \"n/a\", \"154.5 lbs\", \"68 kg\")\nbody &lt;- tibble(weight_raw = w)\nf &lt;- c(rep(\"blue\", 40), \"bl\\u00fce\", rep(\" blue\", 2), rep(\"red\", 30))\nf &lt;- c(f, rep(\"Red\", 3), rep(\"green\", 25), \"gr\\u0435\\u0435n\")\nhumans &lt;- tibble(favorite = c(f, \"chartreuse\", rep(\"gray\", 4)))\nc1 &lt;- c(\"Portland\", \"portland \", \"PORTLAND\", \"Portland, OR\")\ncities &lt;- c(c1, \"Portlnd\", \"Beaverton\", \"beaverton\", \"Port land\")\n\nRun this now in your R session (Positron or RStudio). Have your AI assistant open too."
+  },
+  {
+    "objectID": "W08L15_slides.html#where-we-left-off",
+    "href": "W08L15_slides.html#where-we-left-off",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Where we left off",
+    "text": "Where we left off\nLab 1 found the grime and counted it.\nCleaning is different: every fix is a decision that changes the data a model will learn from.\nAI will happily “clean” a column in one line. It will not tell you what it threw away. That is your job as navigator."
+  },
+  {
+    "objectID": "W08L15_slides.html#five-steps",
+    "href": "W08L15_slides.html#five-steps",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Five steps",
+    "text": "Five steps\n\nImport: get the data in, control the types\nInspect: structure, missingness, oddities\nTidy: reshape, recode, harmonize\nValidate: assert ranges and consistency\nDocument: decisions become code\n\n\nOrder inside the work: flag the problem, remediate patterns, only then impute or drop."
+  },
+  {
+    "objectID": "W08L15_slides.html#three-rules-for-cleaning-code",
+    "href": "W08L15_slides.html#three-rules-for-cleaning-code",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Three rules for cleaning code",
+    "text": "Three rules for cleaning code\n\nCode, not clicks. No hand edits in a spreadsheet.\nRe-runnable. Run the whole script twice: same result.\nEvery fix is logged. What changed, how many rows, why.\n\n\nBug: “I fixed a few cells by hand.” Nobody, including you, can redo or check that."
+  },
+  {
+    "objectID": "W08L15_slides.html#two-kinds-of-grime",
+    "href": "W08L15_slides.html#two-kinds-of-grime",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Two kinds of grime",
+    "text": "Two kinds of grime\n\n\n\nStructural\nContent\n\n\n\n\nShape of the file is wrong\nValues in cells are wrong\n\n\nShows up at import\nShows up at inspect\n\n\nExtra or missing fields\nTypos, units, sentinels\n\n\nOften needs a manual rule\nOften needs a lookup\n\n\n\nStructural first, because content checks assume a clean grid."
+  },
+  {
+    "objectID": "W08L15_slides.html#a-ragged-csv",
+    "href": "W08L15_slides.html#a-ragged-csv",
+    "title": "Strings, Unicode, and Categories",
+    "section": "A ragged CSV",
+    "text": "A ragged CSV\n\nraw_lines\n\n#&gt; [1] \"id,name,score\"    \"1,Mia,88\"         \"2,Liam,91\"       \n#&gt; [4] \"3,Lopez, Liam,79\" \"4,Mason,\"         \"5,Olivia\"        \n#&gt; [7] \"6,,,Sophia,85\"\n\n\nExpected: 3 fields (id,name,score). Count the commas."
+  },
+  {
+    "objectID": "W08L15_slides.html#count-fields-per-line",
+    "href": "W08L15_slides.html#count-fields-per-line",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Count fields per line",
+    "text": "Count fields per line\n\nfields &lt;- str_count(raw_lines, \",\") + 1\ntable(fields)\n\n#&gt; fields\n#&gt; 2 3 4 5 \n#&gt; 1 4 1 1\n\nraw_lines[fields != 3]\n\n#&gt; [1] \"3,Lopez, Liam,79\" \"5,Olivia\"         \"6,,,Sophia,85\"\n\n\n\n\nBug: three bad lines, three different causes. No rule fixes all of them. Flag them, then ask the source."
+  },
+  {
+    "objectID": "W08L15_slides.html#version-your-data-as-you-work-flex",
+    "href": "W08L15_slides.html#version-your-data-as-you-work-flex",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Version your data as you work (FLEX)",
+    "text": "Version your data as you work (FLEX)\n\n\n\n\n\n\n\nSize\nWhat to do\n\n\n\n\nFits easily in memory\nNew object per step; script is the history\n\n\nLarge\nEdit in place; log each change in a text column or file\n\n\nMassive\nDo not load it all: sample, chunk, or push work to the database\n\n\n\n\nFLEX: skip if behind (saves about 1.5 min). Tie to arrow from Session 2."
+  },
+  {
+    "objectID": "W08L15_slides.html#a-pattern-not-a-literal",
+    "href": "W08L15_slides.html#a-pattern-not-a-literal",
+    "title": "Strings, Unicode, and Categories",
+    "section": "A pattern, not a literal",
+    "text": "A pattern, not a literal\n\n\n\nPiece\nMeaning\n\n\n\n\n\\\\d \\\\w \\\\s\ndigit, word character, space\n\n\n+ * ?\none or more, zero or more, optional\n\n\n{3} {2,4}\nexactly 3, between 2 and 4\n\n\n^ $\nstart, end of the string\n\n\n( ) \\|\ngroup, or\n\n\n[^...]\nanything except these\n\n\n\nIn R strings the backslash doubles: \"\\\\d+\". Or use a raw string: r\"(\\d+)\"."
+  },
+  {
+    "objectID": "W08L15_slides.html#our-messy-column",
+    "href": "W08L15_slides.html#our-messy-column",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Our messy column",
+    "text": "Our messy column\n\nbody\n\n#&gt; # A tibble: 7 x 2\n#&gt;      id weight_raw\n#&gt;   &lt;int&gt; &lt;chr&gt;     \n#&gt; 1     1 165 lb    \n#&gt; 2     2 72kg      \n#&gt; 3     3 80 KG     \n#&gt; 4     4 170       \n#&gt; 5     5 n/a       \n#&gt; 6     6 154.5 lbs \n#&gt; 7     7 68 kg\n\n\nWeights typed by humans. Different units, different spacing."
+  },
+  {
+    "objectID": "W08L15_slides.html#which-rows-str_detect",
+    "href": "W08L15_slides.html#which-rows-str_detect",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Which rows? str_detect()",
+    "text": "Which rows? str_detect()\n\nbody |&gt;\n  mutate(has_lb = str_detect(weight_raw, regex(\"lbs?\", ignore_case = TRUE)))\n\n#&gt; # A tibble: 7 x 3\n#&gt;      id weight_raw has_lb\n#&gt;   &lt;int&gt; &lt;chr&gt;      &lt;lgl&gt; \n#&gt; 1     1 165 lb     TRUE  \n#&gt; 2     2 72kg       FALSE \n#&gt; 3     3 80 KG      FALSE \n#&gt; 4     4 170        FALSE \n#&gt; 5     5 n/a        FALSE \n#&gt; 6     6 154.5 lbs  TRUE  \n#&gt; 7     7 68 kg      FALSE\n\n\nReturns TRUE/FALSE. Use inside filter() or mutate()."
+  },
+  {
+    "objectID": "W08L15_slides.html#what-is-in-them-str_extract",
+    "href": "W08L15_slides.html#what-is-in-them-str_extract",
+    "title": "Strings, Unicode, and Categories",
+    "section": "What is in them? str_extract()",
+    "text": "What is in them? str_extract()\n\nbody |&gt;\n  mutate(\n    num = as.numeric(str_extract(weight_raw, \"\\\\d+\\\\.?\\\\d*\")),\n    unit = str_extract(str_to_lower(weight_raw), \"kg|lbs?\")\n  )\n\n#&gt; # A tibble: 7 x 4\n#&gt;      id weight_raw   num unit \n#&gt;   &lt;int&gt; &lt;chr&gt;      &lt;dbl&gt; &lt;chr&gt;\n#&gt; 1     1 165 lb      165  lb   \n#&gt; 2     2 72kg         72  kg   \n#&gt; 3     3 80 KG        80  kg   \n#&gt; 4     4 170         170  &lt;NA&gt; \n#&gt; 5     5 n/a          NA  &lt;NA&gt; \n#&gt; 6     6 154.5 lbs   154. lbs  \n#&gt; 7     7 68 kg        68  kg\n\n\nNo match gives NA, not an error. Row 4 has a number and no unit."
+  },
+  {
+    "objectID": "W08L15_slides.html#replace-and-tidy-str_replace",
+    "href": "W08L15_slides.html#replace-and-tidy-str_replace",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Replace and tidy: str_replace()",
+    "text": "Replace and tidy: str_replace()\n\nc(\"  Portland \", \"Portland,  OR\", \"portland\") |&gt;\n  str_squish() |&gt;\n  str_remove(\",\\\\s*OR$\") |&gt;\n  str_to_title()\n\n#&gt; [1] \"Portland\" \"Portland\" \"Portland\"\n\n\nstr_squish() trims the ends and collapses inner runs of spaces."
+  },
+  {
+    "objectID": "W08L15_slides.html#capture-groups-flex",
+    "href": "W08L15_slides.html#capture-groups-flex",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Capture groups (FLEX)",
+    "text": "Capture groups (FLEX)\n\ntibble(height_raw = c(\"5 ft 11 in\", \"5ft 7in\", \"6 ft 0 in\")) |&gt;\n  separate_wider_regex(\n    height_raw,\n    c(ft = \"\\\\d\", \"\\\\s*ft\\\\s*\", inch = \"\\\\d+\", \".*\")\n  )\n\n#&gt; # A tibble: 3 x 2\n#&gt;   ft    inch \n#&gt;   &lt;chr&gt; &lt;chr&gt;\n#&gt; 1 5     11   \n#&gt; 2 5     7    \n#&gt; 3 6     0\n\n\nUnnamed pieces are matched and dropped; named ones become columns.\n\nFLEX: skip if behind (saves about 1.5 min). Needs tidyr 1.3.0 or newer."
+  },
+  {
+    "objectID": "W08L15_slides.html#task-1-code-it",
+    "href": "W08L15_slides.html#task-1-code-it",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Task 1: code it",
+    "text": "Task 1: code it\nConvert weight_raw to kilograms. Pounds times 0.453592.\n\nCode it (5 min). Add a column kg. Rows with no unit must stay NA, not be guessed. Check all 7 rows.\n\n\nbody |&gt;\n  mutate(num = ..., unit = ..., kg = ...)\n\n\nTASK 1 of 3 (CODE IT). Give 5 minutes; walk the room. Expected: num &lt;- as.numeric(str_extract(weight_raw, “\\d+\\.?\\d”)); unit &lt;- str_extract(str_to_lower(weight_raw), ”kg|lbs?”); kg &lt;- case_when(unit == ”kg” ~ num, str_detect(unit, ”lb”) ~ num  0.453592). Result: 74.8, 72, 80, NA, NA, 70.1, 68. Common stuck points: forgetting str_to_lower so”KG” fails to match, regex written “” with one backslash, case_when with no default (NA is the right default here, say so), str_detect(NA, …) returning NA. Early finishers: add a column flag that says why a row is NA (“no unit”, “no number”). Key point to land: the row “170” is NOT 170 kg and NOT 170 lb. We do not know, so it stays NA and is flagged. A guess would be a decision hidden inside a regex."
+  },
+  {
+    "objectID": "W08L15_slides.html#one-way-to-finish-it",
+    "href": "W08L15_slides.html#one-way-to-finish-it",
+    "title": "Strings, Unicode, and Categories",
+    "section": "One way to finish it",
+    "text": "One way to finish it\n\nbody |&gt;\n  mutate(\n    num = as.numeric(str_extract(weight_raw, \"\\\\d+\\\\.?\\\\d*\")),\n    unit = str_extract(str_to_lower(weight_raw), \"kg|lbs?\"),\n    kg = case_when(unit == \"kg\" ~ num, str_detect(unit, \"lb\") ~ num * 0.453592)\n  )\n\n#&gt; # A tibble: 7 x 5\n#&gt;      id weight_raw   num unit     kg\n#&gt;   &lt;int&gt; &lt;chr&gt;      &lt;dbl&gt; &lt;chr&gt; &lt;dbl&gt;\n#&gt; 1     1 165 lb      165  lb     74.8\n#&gt; 2     2 72kg         72  kg     72  \n#&gt; 3     3 80 KG        80  kg     80  \n#&gt; 4     4 170         170  &lt;NA&gt;   NA  \n#&gt; 5     5 n/a          NA  &lt;NA&gt;   NA  \n#&gt; 6     6 154.5 lbs   154. lbs    70.1\n#&gt; 7     7 68 kg        68  kg     68"
+  },
+  {
+    "objectID": "W08L15_slides.html#the-tempting-shortcut",
+    "href": "W08L15_slides.html#the-tempting-shortcut",
+    "title": "Strings, Unicode, and Categories",
+    "section": "The tempting shortcut",
+    "text": "The tempting shortcut\n\nbody |&gt; mutate(shortcut = c(parse_number(weight_raw)))\n\n#&gt; # A tibble: 7 x 3\n#&gt;      id weight_raw shortcut\n#&gt;   &lt;int&gt; &lt;chr&gt;         &lt;dbl&gt;\n#&gt; 1     1 165 lb         165 \n#&gt; 2     2 72kg            72 \n#&gt; 3     3 80 KG           80 \n#&gt; 4     4 170            170 \n#&gt; 5     5 n/a             NA \n#&gt; 6     6 154.5 lbs      154.\n#&gt; 7     7 68 kg           68\n\n\n\nBug: parse_number() keeps 165 and 72 and 170 as if they shared a unit. It mixes pounds and kilograms silently."
+  },
+  {
+    "objectID": "W08L15_slides.html#same-look-different-string",
+    "href": "W08L15_slides.html#same-look-different-string",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Same look, different string",
+    "text": "Same look, different string\n\ngood &lt;- \"green\"\nbad &lt;- \"gr\\u0435\\u0435n\" # two Cyrillic letters that look like e\nc(good, bad)\n\n#&gt; [1] \"green\" \"grееn\"\n\ngood == bad\n\n#&gt; [1] FALSE\n\nc(nchar(good), nchar(bad))\n\n#&gt; [1] 5 5\n\n\nSame length, same look, not equal."
+  },
+  {
+    "objectID": "W08L15_slides.html#find-them",
+    "href": "W08L15_slides.html#find-them",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Find them",
+    "text": "Find them\n\nstr_detect(c(good, bad), \"[^\\\\x00-\\\\x7F]\")\n\n#&gt; [1] FALSE  TRUE\n\nstringi::stri_escape_unicode(bad)\n\n#&gt; [1] \"gr\\\\u0435\\\\u0435n\"\n\n\n[^\\x00-\\x7F] means “any character outside plain ASCII”.\n\nReal names contain non-ASCII letters too (José). Detect first, then decide."
+  },
+  {
+    "objectID": "W08L15_slides.html#why-it-matters-silent-mismatches",
+    "href": "W08L15_slides.html#why-it-matters-silent-mismatches",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Why it matters: silent mismatches",
+    "text": "Why it matters: silent mismatches\n\nlookup &lt;- tibble(\n  color = c(\"blue\", \"red\", \"green\"),\n  hex = c(\"#00f\", \"#f00\", \"#0a0\")\n)\n\ntibble(color = c(\"blue\", \"green\", bad)) |&gt;\n  anti_join(lookup, by = \"color\")\n\n#&gt; # A tibble: 1 x 1\n#&gt;   color\n#&gt;   &lt;chr&gt;\n#&gt; 1 grееn\n\n\nThe join does not error. The lookalike just does not match."
+  },
+  {
+    "objectID": "W08L15_slides.html#normalize-on-purpose",
+    "href": "W08L15_slides.html#normalize-on-purpose",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Normalize, on purpose",
+    "text": "Normalize, on purpose\n\nstringi::stri_trans_general(c(bad, \"caf\\u00e9\"), \"Any-Latin; Latin-ASCII\")\n\n#&gt; [1] \"green\" \"cafe\"\n\n\nThe Cyrillic е became e. But café became cafe too.\n\nDecide: is that acceptable for this column? For a color: yes. For a person’s name: ask first."
+  },
+  {
+    "objectID": "W08L15_slides.html#invisible-characters-flex",
+    "href": "W08L15_slides.html#invisible-characters-flex",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Invisible characters (FLEX)",
+    "text": "Invisible characters (FLEX)\n\nx &lt;- c(\"blue\", \"blue\\u00a0\", \"blue\\u200b\")\nnchar(x)\n\n#&gt; [1] 4 5 5\n\nnchar(str_squish(x))\n\n#&gt; [1] 4 4 5\n\n\nThe non-breaking space is trimmed by str_squish(). The zero-width space is not.\n\nFLEX: skip if behind (saves about 1 min). Teaching point: if two strings print the same and are not equal, check nchar() and stri_escape_unicode()."
+  },
+  {
+    "objectID": "W08L15_slides.html#count-first",
+    "href": "W08L15_slides.html#count-first",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Count first",
+    "text": "Count first\n\nhumans |&gt; count(favorite, sort = TRUE)\n\n#&gt; # A tibble: 9 x 2\n#&gt;   favorite     n\n#&gt;   &lt;chr&gt;    &lt;int&gt;\n#&gt; 1 \"blue\"      40\n#&gt; 2 \"red\"       30\n#&gt; 3 \"green\"     25\n#&gt; 4 \"gray\"       4\n#&gt; 5 \"Red\"        3\n#&gt; 6 \" blue\"      2\n#&gt; 7 \"blüe\"       1\n#&gt; # i 2 more rows\n\n\nNine “colors” for five real ones."
+  },
+  {
+    "objectID": "W08L15_slides.html#case-fold-and-trim",
+    "href": "W08L15_slides.html#case-fold-and-trim",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Case-fold and trim",
+    "text": "Case-fold and trim\n\nhumans |&gt;\n  mutate(favorite = str_to_lower(str_squish(favorite))) |&gt;\n  count(favorite, sort = TRUE)\n\n#&gt; # A tibble: 7 x 2\n#&gt;   favorite       n\n#&gt;   &lt;chr&gt;      &lt;int&gt;\n#&gt; 1 blue          42\n#&gt; 2 red           33\n#&gt; 3 green         25\n#&gt; 4 gray           4\n#&gt; 5 blüe           1\n#&gt; 6 chartreuse     1\n#&gt; 7 grееn          1\n\n\nLeft: blüe, the Cyrillic green, and the rare but real chartreuse."
+  },
+  {
+    "objectID": "W08L15_slides.html#careful-case-folding",
+    "href": "W08L15_slides.html#careful-case-folding",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Careful: case folding",
+    "text": "Careful: case folding\n\nids &lt;- c(\"ab12\", \"AB12\")\nn_distinct(ids)\n\n#&gt; [1] 2\n\nn_distinct(str_to_lower(ids))\n\n#&gt; [1] 1\n\n\n\nBug: fine for colors. In an ID column, ab12 and AB12 may be two different things. Fold only where case carries no meaning."
+  },
+  {
+    "objectID": "W08L15_slides.html#a-lookup-table-is-the-fix",
+    "href": "W08L15_slides.html#a-lookup-table-is-the-fix",
+    "title": "Strings, Unicode, and Categories",
+    "section": "A lookup table is the fix",
+    "text": "A lookup table is the fix\n\nfixes &lt;- tribble(\n  ~raw              , ~clean  ,\n  \"bl\\u00fce\"       , \"blue\"  ,\n  \"gr\\u0435\\u0435n\" , \"green\"\n)\n\nOne row per known variant: raw value, clean value. A reviewer can read it in ten seconds."
+  },
+  {
+    "objectID": "W08L15_slides.html#apply-the-table",
+    "href": "W08L15_slides.html#apply-the-table",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Apply the table",
+    "text": "Apply the table\n\nhumans |&gt;\n  mutate(favorite = str_to_lower(str_squish(favorite))) |&gt;\n  left_join(fixes, by = c(\"favorite\" = \"raw\")) |&gt;\n  mutate(favorite = coalesce(clean, favorite)) |&gt;\n  count(favorite, sort = TRUE)\n\n#&gt; # A tibble: 5 x 2\n#&gt;   favorite       n\n#&gt;   &lt;chr&gt;      &lt;int&gt;\n#&gt; 1 blue          43\n#&gt; 2 red           33\n#&gt; 3 green         26\n#&gt; 4 gray           4\n#&gt; 5 chartreuse     1"
+  },
+  {
+    "objectID": "W08L15_slides.html#why-a-table-not-an-ifelse-chain",
+    "href": "W08L15_slides.html#why-a-table-not-an-ifelse-chain",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Why a table, not an ifelse chain",
+    "text": "Why a table, not an ifelse chain\n\nA reviewer can read it in ten seconds\nIt is data: version it, diff it, extend it\nanti_join() shows what is still unmapped\nSame table works on next month’s file\n\n\nRare real values (chartreuse): flag, do not delete. Rare is not wrong."
+  },
+  {
+    "objectID": "W08L15_slides.html#fct_collapse-flex",
+    "href": "W08L15_slides.html#fct_collapse-flex",
+    "title": "Strings, Unicode, and Categories",
+    "section": "fct_collapse() (FLEX)",
+    "text": "fct_collapse() (FLEX)\n\nhumans |&gt;\n  mutate(\n    favorite = str_to_lower(str_squish(favorite)),\n    group = fct_collapse(\n      favorite,\n      cool = c(\"blue\", \"green\"),\n      warm = \"red\",\n      other_level = \"other\"\n    )\n  ) |&gt;\n  count(group)\n\n#&gt; # A tibble: 3 x 2\n#&gt;   group     n\n#&gt;   &lt;fct&gt; &lt;int&gt;\n#&gt; 1 cool     67\n#&gt; 2 warm     33\n#&gt; 3 other     7\n\n\nUse it to group valid levels, not to repair invalid ones.\n\nFLEX: skip if behind (saves about 1 min)."
+  },
+  {
+    "objectID": "W08L15_slides.html#write-the-spec-before-the-code",
+    "href": "W08L15_slides.html#write-the-spec-before-the-code",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Write the spec before the code",
+    "text": "Write the spec before the code\nA spec is a table: input and expected output.\n\nspec &lt;- tribble(\n  ~input            , ~expected      ,\n  \"(503) 555-0142\"  , \"503-555-0142\" ,\n  \"503.555.0142\"    , \"503-555-0142\" ,\n  \"5035550142\"      , \"503-555-0142\" ,\n  \"+1 503 555 0142\" , \"503-555-0142\" ,\n  \"555-0142\"        , NA             ,\n  \"call me\"         , NA\n)\n\nIncluding the rows that should come back NA."
+  },
+  {
+    "objectID": "W08L15_slides.html#let-the-table-judge",
+    "href": "W08L15_slides.html#let-the-table-judge",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Let the table judge",
+    "text": "Let the table judge\n\nspec |&gt;\n  mutate(\n    got = clean_phone(input),\n    pass = coalesce(got == expected, is.na(got) & is.na(expected))\n  )\n\n#&gt; # A tibble: 6 x 4\n#&gt;   input           expected     got          pass \n#&gt;   &lt;chr&gt;           &lt;chr&gt;        &lt;chr&gt;        &lt;lgl&gt;\n#&gt; 1 (503) 555-0142  503-555-0142 503-555-0142 TRUE \n#&gt; 2 503.555.0142    503-555-0142 503-555-0142 TRUE \n#&gt; 3 5035550142      503-555-0142 503-555-0142 TRUE \n#&gt; 4 +1 503 555 0142 503-555-0142 503-555-0142 TRUE \n#&gt; 5 555-0142        &lt;NA&gt;         &lt;NA&gt;         TRUE \n#&gt; 6 call me         &lt;NA&gt;         &lt;NA&gt;         TRUE\n\n\nAn AI wrote clean_phone(). The table judged it, not your eyes.\n\nFailing case in real data? Add it as a row."
+  },
+  {
+    "objectID": "W08L15_slides.html#task-2-prompt-it",
+    "href": "W08L15_slides.html#task-2-prompt-it",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Task 2: prompt it",
+    "text": "Task 2: prompt it\nRaw city values from a signup form:\n\"Portland\", \"portland \", \"PORTLAND\", \"Portland, OR\", \"Portlnd\", \"Beaverton\", \"beaverton\", \"Port land\"\n\nPrompt it (7 min). 1. Write the spec table: what should each become? 2. Prompt your AI for clean_city(). 3. Run your spec against it.\n\nDecide what Portlnd and Port land should become. Then say why in your prompt.\n\nTASK 2 of 3 (PROMPT IT). Give 7 minutes: about 2 for the spec table, 3 for prompting, 2 for running it. Expected from the room: the first four and the Beaverton pair become “Portland” and “Beaverton”. The hard rows are “Portlnd” and “Port land”: they need a LOOKUP of known cities (or fuzzy matching with a threshold) and a flag, not a guess. A good prompt includes the spec table pasted in, says the function takes and returns a character vector, forbids guessing (unmatched becomes NA), and asks for tidyverse code only. What often goes wrong: the AI returns a function that title-cases everything (so “Port land” becomes “Port Land” and nobody notices), or adds a fuzzy-matching package without being asked, or silently maps “Portlnd” with a default. All of these show up as failing spec rows, which is the point. Collect two spec tables that disagree about “Port land” and let the room argue: that disagreement IS the cleaning decision, and it belongs in the spec, written down, before any code."
+  },
+  {
+    "objectID": "W08L15_slides.html#task-3-the-ais-answer",
+    "href": "W08L15_slides.html#task-3-the-ais-answer",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Task 3: the AI’s answer",
+    "text": "Task 3: the AI’s answer\nAsked: “Standardize the favorite color column.”\n\nhumans |&gt;\n  mutate(favorite = str_to_lower(favorite)) |&gt;\n  mutate(favorite = fct_lump_min(favorite, min = 2, other_level = \"other\")) |&gt;\n  count(favorite, sort = TRUE)\n\n#&gt; # A tibble: 6 x 2\n#&gt;   favorite     n\n#&gt;   &lt;fct&gt;    &lt;int&gt;\n#&gt; 1 \"blue\"      40\n#&gt; 2 \"red\"       33\n#&gt; 3 \"green\"     25\n#&gt; 4 \"gray\"       4\n#&gt; 5 \"other\"      3\n#&gt; 6 \" blue\"      2"
+  },
+  {
+    "objectID": "W08L15_slides.html#task-3-assess-it",
+    "href": "W08L15_slides.html#task-3-assess-it",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Task 3: assess it",
+    "text": "Task 3: assess it\n\nAssess it (4 min). Run it. Compare with the count() from the start. Read, Run, Restate.\n\n\nHow many real blues and greens did we lose?\nWhat is in \"other\"?\nWhat is still wrong that the AI did not touch?\nWhat would you ask for instead?\n\n\nTASK 3 of 3 (ASSESS IT). Give 4 minutes. Findings: (1) blue shows 40 but there are 43 people who said blue (blüe and ” blue” are not merged); green shows 25 but there are 26. (2) “other” (3) is a mix of a typo (blüe), a lookalike (grееn) and a real rare color (chartreuse): fct_lump_min turned three different problems into one anonymous bucket. (3) ” blue” with a leading space is still its own level because there was no str_squish; the table looks tidy but the grime is still there, just renamed. (4) Better prompt: “Trim, lowercase, then apply this lookup table of known fixes; list every value that is still not in the valid set; do not lump or delete.” Restate: the AI cleaned the OUTPUT, not the DATA: the table is shorter, and information was destroyed."
+  },
+  {
+    "objectID": "W08L15_slides.html#what-was-wrong",
+    "href": "W08L15_slides.html#what-was-wrong",
+    "title": "Strings, Unicode, and Categories",
+    "section": "What was wrong",
+    "text": "What was wrong\n\nLost counts: blüe, grееn and \" blue\" never reached their real group\n\"other\" hides a typo, a lookalike, and a real rare color\nNo str_squish(): \" blue\" is still a level\nNo log: nothing says what moved where\n\n\nA shorter table is not a cleaner dataset. Count before, count after."
+  },
+  {
+    "objectID": "W08L15_slides.html#four-things-to-remember",
+    "href": "W08L15_slides.html#four-things-to-remember",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Four things to remember",
+    "text": "Four things to remember\n\nFlag, then fix. Every fix is a decision; log it.\nRegex: read it aloud, and test it on the rows that look wrong. NA means “no match”, not “no problem”.\nLook-alikes are real. Detect non-ASCII, then decide whether to normalize.\nSpec first. Write inputs and expected outputs, then let the table judge the AI."
+  },
+  {
+    "objectID": "W08L15_slides.html#next-up",
+    "href": "W08L15_slides.html#next-up",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Next up",
+    "text": "Next up\nWed 11/18, Session 6: types, anomalies, and missingness. Dates in mixed formats, sentinels, outliers, and what to do about missing values.\nThe handout has the full explanations, extra practice, and the janitor appendix."
+  },
+  {
+    "objectID": "W08L15_slides.html#stringr-quick-reference",
+    "href": "W08L15_slides.html#stringr-quick-reference",
+    "title": "Strings, Unicode, and Categories",
+    "section": "stringr quick reference",
+    "text": "stringr quick reference\n\nstr_detect(x, pattern) # TRUE/FALSE per element\nstr_extract(x, pattern) # first match, or NA\nstr_extract_all(x, pattern) # every match (a list)\nstr_replace(x, pattern, new) # replace the first match\nstr_replace_all(x, pattern, new)\nstr_remove(x, pattern) # replace with nothing\nstr_squish(x) # trim and collapse spaces\nstr_to_lower(x)\nstr_to_title(x)\nstr_count(x, pattern) # how many matches\nstr_view(x, pattern) # see matches (debugging)"
+  },
+  {
+    "objectID": "W08L15_slides.html#lookaheads-1d10",
+    "href": "W08L15_slides.html#lookaheads-1d10",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Lookaheads (\"^1(?=\\\\d{10}$)\")",
+    "text": "Lookaheads (\"^1(?=\\\\d{10}$)\")\n\n# \"A leading 1, but only if exactly 10 digits follow it\"\nstr_remove(\"15035550142\", \"^1(?=\\\\d{10}$)\") # \"5035550142\"\nstr_remove(\"1503555\", \"^1(?=\\\\d{10}$)\") # unchanged\n\n(?=...) checks what comes next without consuming it."
+  },
+  {
+    "objectID": "W08L15_slides.html#helper-package-janitor-not-run",
+    "href": "W08L15_slides.html#helper-package-janitor-not-run",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Helper package: janitor (not run)",
+    "text": "Helper package: janitor (not run)\n\n# install.packages(\"janitor\")  # once\nlibrary(janitor)\nclean_names(df) # snake_case column names\nget_dupes(df, id) # rows sharing the same id\ntabyl(df, favorite) # counts with percentages"
   }
 ]

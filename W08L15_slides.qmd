@@ -1,19 +1,651 @@
 ---
-title: "Session 5 Slides: Data Cleaning 1: Strings and Categories"
-description: "Regex, stringr, Unicode handling, forcats, and janitor"
+title: "Strings, Unicode, and Categories"
+subtitle: "Data cleaning 1 · Session 5"
+author: "DTR"
+description: "The cleaning pipeline, regex with stringr, invisible Unicode traps, recoding categories with a lookup table, and writing a spec before asking an AI for code"
 date: 2026-11-16
 categories: [Slides]
-format: revealjs
-draft: true
+format:
+  revealjs:
+    fig-width: 10.5
+    fig-height: 2.8
+    fig-align: center
+    fig-dpi: 96
+    auto-stretch: false
 ---
 
-## Planned outline
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE,
+  fig.retina = 2
+)
+library(tidyverse)
+options(
+  tibble.print_max = 7,
+  tibble.print_min = 7,
+  width = 72,
+  cli.unicode = FALSE
+)
 
-- 10-minute retrieval warm-up
-- Regex fundamentals: classes, quantifiers, anchors, groups; str_view() for debugging
-- str_detect / str_extract / str_replace / str_squish, separate_wider_regex, parse_number
-- Unicode: non-ASCII detection and normalization (homoglyphs)
-- forcats and janitor (clean_names, get_dupes, tabyl)
-- Spec-first exercise: students write input/output tables, AI writes the regex, tests judge it
+raw_lines <- c(
+  "id,name,score",
+  "1,Mia,88",
+  "2,Liam,91",
+  "3,Lopez, Liam,79",
+  "4,Mason,",
+  "5,Olivia",
+  "6,,,Sophia,85"
+)
 
-*Draft: remove `draft: true` from the top of this file to publish it.*
+body <- tibble(
+  id = 1:7,
+  weight_raw = c("165 lb", "72kg", "80 KG", "170", "n/a", "154.5 lbs", "68 kg")
+)
+
+humans <- tibble(
+  favorite = c(
+    rep("blue", 40),
+    "bl\u00fce",
+    rep(" blue", 2),
+    rep("red", 30),
+    rep("Red", 3),
+    rep("green", 25),
+    "gr\u0435\u0435n",
+    "chartreuse",
+    rep("gray", 4)
+  )
+)
+
+clean_phone <- function(x) {
+  digits <- str_remove_all(x, "\\D")
+  digits <- str_remove(digits, "^1(?=\\d{10}$)")
+  if_else(
+    str_detect(digits, "^\\d{10}$"),
+    str_replace(digits, "(\\d{3})(\\d{3})(\\d{4})", "\\1-\\2-\\3"),
+    NA_character_
+  )
+}
+```
+
+# Welcome {background-color="#f3f6ea"}
+
+::: {.notes}
+TARGET CLOCK (core ends at 1:05; FLEX slides add up to 5 minutes, skip them if behind): Welcome 0:00-0:05 | The cleaning pipeline 0:05-0:13 | Regex and stringr 0:13-0:31 (Task 1) | Unicode 0:31-0:38 | Categories 0:38-0:47 | Spec first, with AI 0:47-0:56 (Task 2) | Assess it 0:56-1:02 (Task 3) | Wrap-up 1:02-1:05.
+
+This session was trimmed on purpose: about 13% less than a full 75 minutes, so there is room for questions and for tasks that run long. Cut material (data hygiene by size, invisible characters, fct_collapse, separate_wider_regex) lives in FLEX slides, the handout, and the Appendix.
+
+Exactly THREE hands-on tasks (blue boxes): Task 1 CODE IT (regex for weights, about 5 min), Task 2 PROMPT IT (spec-first, about 7 min), Task 3 ASSESS IT (about 4 min). Everything else is teaching. The opening Recall slide is silent thinking, not a task. Students need R and an AI assistant open.
+
+FLEX slides, skip if behind: "Version your data as you work", "Capture groups: separate_wider_regex", "Invisible characters", "fct_collapse".
+
+Press S for speaker view.
+:::
+
+## Recall (30 seconds, silent)
+
+1. How do you know a `left_join()` did not duplicate rows?
+2. `mean(x)` is `NA`. What are your options?
+3. Lab 1: which problem surprised you most?
+
+. . .
+
+1. **Row count** before and after
+2. `na.rm = TRUE`, or fix the `NA`s, and **say how many** rows it ignored
+3. Hold on to it: today we start **fixing**
+
+::: {.notes}
+Do not collect answers for more than 30 seconds each. This is retrieval practice: the effort of recalling is the point. If the room is quiet on question 3, name two from the lab reports you read (timestamps, weight units).
+:::
+
+## Today's route
+
+- **The pipeline**: flag first, fix second
+- **Regex with `stringr`**: find and extract patterns
+- **Unicode**: strings that look the same and are not
+- **Categories**: recode with a lookup table, not a long `ifelse`
+- **Spec first**: tests judge the AI's code, not your eyes
+
+Hands-on today: **code it**, **prompt it**, **assess it**.
+
+## Set up for the three tasks
+
+```{r}
+#| eval: false
+library(tidyverse)
+w <- c("165 lb", "72kg", "80 KG", "170", "n/a", "154.5 lbs", "68 kg")
+body <- tibble(weight_raw = w)
+f <- c(rep("blue", 40), "bl\u00fce", rep(" blue", 2), rep("red", 30))
+f <- c(f, rep("Red", 3), rep("green", 25), "gr\u0435\u0435n")
+humans <- tibble(favorite = c(f, "chartreuse", rep("gray", 4)))
+c1 <- c("Portland", "portland ", "PORTLAND", "Portland, OR")
+cities <- c(c1, "Portlnd", "Beaverton", "beaverton", "Port land")
+```
+
+Run this now in your R session (Positron or RStudio). Have your AI assistant open too.
+
+## Where we left off
+
+Lab 1 **found** the grime and counted it.
+
+Cleaning is different: every fix is a **decision** that changes the data a model will learn from.
+
+AI will happily "clean" a column in one line. It will not tell you what it threw away. That is your job as navigator.
+
+# The cleaning pipeline {background-color="#f3f6ea"}
+
+::: {.notes}
+Target: 0:05 to 0:13. Adapted from the old Part 1 opening. Keep it fast: pipeline, three rules, then one concrete structural example.
+:::
+
+## Five steps
+
+1. **Import**: get the data in, control the types
+2. **Inspect**: structure, missingness, oddities
+3. **Tidy**: reshape, recode, harmonize
+4. **Validate**: assert ranges and consistency
+5. **Document**: decisions become code
+
+. . .
+
+Order inside the work: **flag** the problem, **remediate** patterns, only then **impute or drop**.
+
+## Three rules for cleaning code
+
+- **Code, not clicks.** No hand edits in a spreadsheet.
+- **Re-runnable.** Run the whole script twice: same result.
+- **Every fix is logged.** What changed, how many rows, why.
+
+::: {.bug}
+**Bug:** "I fixed a few cells by hand." Nobody, including you, can redo or check that.
+:::
+
+## Two kinds of grime
+
+| Structural | Content |
+|:--|:--|
+| Shape of the file is wrong | Values in cells are wrong |
+| Shows up at **import** | Shows up at **inspect** |
+| Extra or missing fields | Typos, units, sentinels |
+| Often needs a manual rule | Often needs a lookup |
+
+Structural first, because content checks assume a clean grid.
+
+## A ragged CSV
+
+```{r}
+raw_lines
+```
+
+Expected: 3 fields (`id,name,score`). Count the commas.
+
+## Count fields per line
+
+```{r}
+fields <- str_count(raw_lines, ",") + 1
+table(fields)
+raw_lines[fields != 3]
+```
+
+. . .
+
+::: {.bug}
+**Bug:** three bad lines, three different causes. No rule fixes all of them. **Flag them, then ask the source.**
+:::
+
+## Version your data as you work (FLEX)
+
+| Size | What to do |
+|:--|:--|
+| Fits easily in memory | New object per step; script is the history |
+| Large | Edit in place; log each change in a text column or file |
+| Massive | Do not load it all: sample, chunk, or push work to the database |
+
+::: {.notes}
+FLEX: skip if behind (saves about 1.5 min). Tie to arrow from Session 2.
+:::
+
+# Regex and stringr {background-color="#f3f6ea"}
+
+::: {.notes}
+Target: 0:13 to 0:31. Regex is the part AI writes fastest and gets wrong most quietly, so students learn to read patterns and to test them on tricky rows. Interaction 1 (Task 1) is at the end.
+:::
+
+## A pattern, not a literal
+
+| Piece | Meaning |
+|:--|:--|
+| `\\d` `\\w` `\\s` | digit, word character, space |
+| `+` `*` `?` | one or more, zero or more, optional |
+| `{3}` `{2,4}` | exactly 3, between 2 and 4 |
+| `^` `$` | start, end of the string |
+| `( )` `\|` | group, or |
+| `[^...]` | anything **except** these |
+
+In R strings the backslash doubles: `"\\d+"`. Or use a raw string: `r"(\d+)"`.
+
+## Our messy column
+
+```{r}
+body
+```
+
+Weights typed by humans. Different units, different spacing.
+
+## Which rows? `str_detect()`
+
+```{r}
+body |>
+  mutate(has_lb = str_detect(weight_raw, regex("lbs?", ignore_case = TRUE)))
+```
+
+Returns `TRUE`/`FALSE`. Use inside `filter()` or `mutate()`.
+
+## What is in them? `str_extract()`
+
+```{r}
+body |>
+  mutate(
+    num = as.numeric(str_extract(weight_raw, "\\d+\\.?\\d*")),
+    unit = str_extract(str_to_lower(weight_raw), "kg|lbs?")
+  )
+```
+
+No match gives `NA`, not an error. Row 4 has a number and **no unit**.
+
+## Replace and tidy: `str_replace()`
+
+```{r}
+c("  Portland ", "Portland,  OR", "portland") |>
+  str_squish() |>
+  str_remove(",\\s*OR$") |>
+  str_to_title()
+```
+
+`str_squish()` trims the ends and collapses inner runs of spaces.
+
+## Capture groups (FLEX)
+
+```{r}
+tibble(height_raw = c("5 ft 11 in", "5ft 7in", "6 ft 0 in")) |>
+  separate_wider_regex(
+    height_raw,
+    c(ft = "\\d", "\\s*ft\\s*", inch = "\\d+", ".*")
+  )
+```
+
+Unnamed pieces are matched and dropped; named ones become columns.
+
+::: {.notes}
+FLEX: skip if behind (saves about 1.5 min). Needs tidyr 1.3.0 or newer.
+:::
+
+## Task 1: code it
+
+Convert `weight_raw` to kilograms. Pounds times `0.453592`.
+
+::: {.vote}
+**Code it (5 min).** Add a column `kg`. Rows with **no unit** must stay `NA`, not be guessed. Check all 7 rows.
+:::
+
+```{r}
+#| eval: false
+body |>
+  mutate(num = ..., unit = ..., kg = ...)
+```
+
+::: {.notes}
+TASK 1 of 3 (CODE IT). Give 5 minutes; walk the room.
+Expected: num <- as.numeric(str_extract(weight_raw, "\\d+\\.?\\d*")); unit <- str_extract(str_to_lower(weight_raw), "kg|lbs?"); kg <- case_when(unit == "kg" ~ num, str_detect(unit, "lb") ~ num * 0.453592). Result: 74.8, 72, 80, NA, NA, 70.1, 68.
+Common stuck points: forgetting str_to_lower so "KG" fails to match, regex written "\d+" with one backslash, case_when with no default (NA is the right default here, say so), str_detect(NA, ...) returning NA. Early finishers: add a column `flag` that says why a row is NA ("no unit", "no number").
+Key point to land: the row "170" is NOT 170 kg and NOT 170 lb. We do not know, so it stays NA and is flagged. A guess would be a decision hidden inside a regex.
+:::
+
+## One way to finish it
+
+```{r}
+body |>
+  mutate(
+    num = as.numeric(str_extract(weight_raw, "\\d+\\.?\\d*")),
+    unit = str_extract(str_to_lower(weight_raw), "kg|lbs?"),
+    kg = case_when(unit == "kg" ~ num, str_detect(unit, "lb") ~ num * 0.453592)
+  )
+```
+
+## The tempting shortcut
+
+```{r}
+body |> mutate(shortcut = c(parse_number(weight_raw)))
+```
+
+::: {.bug}
+**Bug:** `parse_number()` keeps `165` and `72` and `170` as if they shared a unit. It mixes pounds and kilograms silently.
+:::
+
+# Unicode {background-color="#f3f6ea"}
+
+::: {.notes}
+Target: 0:31 to 0:38. The homoglyph example is the one from the old Part 1 deck. Students should leave knowing how to DETECT, and that normalizing is a decision.
+:::
+
+## Same look, different string
+
+```{r}
+good <- "green"
+bad <- "gr\u0435\u0435n" # two Cyrillic letters that look like e
+c(good, bad)
+good == bad
+c(nchar(good), nchar(bad))
+```
+
+Same length, same look, **not equal**.
+
+## Find them
+
+```{r}
+str_detect(c(good, bad), "[^\\x00-\\x7F]")
+stringi::stri_escape_unicode(bad)
+```
+
+`[^\x00-\x7F]` means "any character outside plain ASCII".
+
+. . .
+
+Real names contain non-ASCII letters too (`José`). **Detect first**, then decide.
+
+## Why it matters: silent mismatches
+
+```{r}
+lookup <- tibble(
+  color = c("blue", "red", "green"),
+  hex = c("#00f", "#f00", "#0a0")
+)
+
+tibble(color = c("blue", "green", bad)) |>
+  anti_join(lookup, by = "color")
+```
+
+The join does not error. The lookalike just does not match.
+
+## Normalize, on purpose
+
+```{r}
+stringi::stri_trans_general(c(bad, "caf\u00e9"), "Any-Latin; Latin-ASCII")
+```
+
+The Cyrillic `е` became `e`. But `café` became `cafe` too.
+
+::: {.swap}
+**Decide:** is that acceptable for **this** column? For a color: yes. For a person's name: ask first.
+:::
+
+## Invisible characters (FLEX)
+
+```{r}
+x <- c("blue", "blue\u00a0", "blue\u200b")
+nchar(x)
+nchar(str_squish(x))
+```
+
+The non-breaking space is trimmed by `str_squish()`. The **zero-width space** is not.
+
+::: {.notes}
+FLEX: skip if behind (saves about 1 min). Teaching point: if two strings print the same and are not equal, check nchar() and stri_escape_unicode().
+:::
+
+# Categories {background-color="#f3f6ea"}
+
+::: {.notes}
+Target: 0:38 to 0:47. Count first, recode with a lookup table, flag rare values instead of deleting. The table is the documentation.
+:::
+
+## Count first
+
+```{r}
+humans |> count(favorite, sort = TRUE)
+```
+
+Nine "colors" for five real ones.
+
+## Case-fold and trim
+
+```{r}
+humans |>
+  mutate(favorite = str_to_lower(str_squish(favorite))) |>
+  count(favorite, sort = TRUE)
+```
+
+Left: `blüe`, the Cyrillic `green`, and the rare but real `chartreuse`.
+
+## Careful: case folding
+
+```{r}
+ids <- c("ab12", "AB12")
+n_distinct(ids)
+n_distinct(str_to_lower(ids))
+```
+
+::: {.bug}
+**Bug:** fine for colors. In an ID column, `ab12` and `AB12` may be two different things. Fold only where case carries no meaning.
+:::
+
+## A lookup table is the fix
+
+```{r}
+fixes <- tribble(
+  ~raw              , ~clean  ,
+  "bl\u00fce"       , "blue"  ,
+  "gr\u0435\u0435n" , "green"
+)
+```
+
+One row per known variant: **raw** value, **clean** value. A reviewer can read it in ten seconds.
+
+## Apply the table
+
+```{r}
+humans |>
+  mutate(favorite = str_to_lower(str_squish(favorite))) |>
+  left_join(fixes, by = c("favorite" = "raw")) |>
+  mutate(favorite = coalesce(clean, favorite)) |>
+  count(favorite, sort = TRUE)
+```
+
+## Why a table, not an `ifelse` chain
+
+- A reviewer can **read** it in ten seconds
+- It is **data**: version it, diff it, extend it
+- `anti_join()` shows what is **still unmapped**
+- Same table works on next month's file
+
+. . .
+
+Rare real values (`chartreuse`): **flag**, do not delete. Rare is not wrong.
+
+## `fct_collapse()` (FLEX)
+
+```{r}
+humans |>
+  mutate(
+    favorite = str_to_lower(str_squish(favorite)),
+    group = fct_collapse(
+      favorite,
+      cool = c("blue", "green"),
+      warm = "red",
+      other_level = "other"
+    )
+  ) |>
+  count(group)
+```
+
+Use it to **group** valid levels, not to repair invalid ones.
+
+::: {.notes}
+FLEX: skip if behind (saves about 1 min).
+:::
+
+# Spec first, with AI {background-color="#f3f6ea"}
+
+::: {.notes}
+Target: 0:47 to 0:56. The idea: students write the table of inputs and expected outputs BEFORE prompting. Then the table judges the AI. Interaction 2 (Task 2, PROMPT IT) is on the last slide of this section.
+:::
+
+## Write the spec before the code
+
+A spec is a table: **input** and **expected output**.
+
+```{r}
+spec <- tribble(
+  ~input            , ~expected      ,
+  "(503) 555-0142"  , "503-555-0142" ,
+  "503.555.0142"    , "503-555-0142" ,
+  "5035550142"      , "503-555-0142" ,
+  "+1 503 555 0142" , "503-555-0142" ,
+  "555-0142"        , NA             ,
+  "call me"         , NA
+)
+```
+
+Including the rows that should come back `NA`.
+
+## Let the table judge
+
+```{r}
+spec |>
+  mutate(
+    got = clean_phone(input),
+    pass = coalesce(got == expected, is.na(got) & is.na(expected))
+  )
+```
+
+An AI wrote `clean_phone()`. The **table** judged it, not your eyes.
+
+. . .
+
+Failing case in real data? **Add it as a row.**
+
+## Task 2: prompt it
+
+Raw `city` values from a signup form:
+
+`"Portland"`, `"portland "`, `"PORTLAND"`, `"Portland, OR"`, `"Portlnd"`, `"Beaverton"`, `"beaverton"`, `"Port land"`
+
+::: {.vote}
+**Prompt it (7 min).** 1. Write the spec table: what should each become? 2. Prompt your AI for `clean_city()`. 3. Run your spec against it.
+:::
+
+Decide what `Portlnd` and `Port land` should become. Then **say why in your prompt**.
+
+::: {.notes}
+TASK 2 of 3 (PROMPT IT). Give 7 minutes: about 2 for the spec table, 3 for prompting, 2 for running it.
+Expected from the room: the first four and the Beaverton pair become "Portland" and "Beaverton". The hard rows are "Portlnd" and "Port land": they need a LOOKUP of known cities (or fuzzy matching with a threshold) and a flag, not a guess. A good prompt includes the spec table pasted in, says the function takes and returns a character vector, forbids guessing (unmatched becomes NA), and asks for tidyverse code only.
+What often goes wrong: the AI returns a function that title-cases everything (so "Port land" becomes "Port Land" and nobody notices), or adds a fuzzy-matching package without being asked, or silently maps "Portlnd" with a default. All of these show up as failing spec rows, which is the point.
+Collect two spec tables that disagree about "Port land" and let the room argue: that disagreement IS the cleaning decision, and it belongs in the spec, written down, before any code.
+:::
+
+# Assess it {background-color="#f3f6ea"}
+
+::: {.notes}
+Target: 0:56 to 1:02. Interaction 3 (Task 3, ASSESS IT). The AI's output looks clean, but the counts tell another story.
+:::
+
+## Task 3: the AI's answer
+
+Asked: "Standardize the favorite color column."
+
+```{r}
+humans |>
+  mutate(favorite = str_to_lower(favorite)) |>
+  mutate(favorite = fct_lump_min(favorite, min = 2, other_level = "other")) |>
+  count(favorite, sort = TRUE)
+```
+
+## Task 3: assess it
+
+::: {.vote}
+**Assess it (4 min).** Run it. Compare with the `count()` from the start. **Read**, **Run**, **Restate**.
+:::
+
+1. How many **real** blues and greens did we lose?
+2. What is in `"other"`?
+3. What is still wrong that the AI did not touch?
+4. What would you ask for instead?
+
+::: {.notes}
+TASK 3 of 3 (ASSESS IT). Give 4 minutes.
+Findings: (1) blue shows 40 but there are 43 people who said blue (blüe and " blue" are not merged); green shows 25 but there are 26. (2) "other" (3) is a mix of a typo (blüe), a lookalike (grееn) and a real rare color (chartreuse): fct_lump_min turned three different problems into one anonymous bucket. (3) " blue" with a leading space is still its own level because there was no str_squish; the table looks tidy but the grime is still there, just renamed. (4) Better prompt: "Trim, lowercase, then apply this lookup table of known fixes; list every value that is still not in the valid set; do not lump or delete."
+Restate: the AI cleaned the OUTPUT, not the DATA: the table is shorter, and information was destroyed.
+:::
+
+## What was wrong
+
+- **Lost counts**: `blüe`, `grееn` and `" blue"` never reached their real group
+- **`"other"`** hides a typo, a lookalike, and a real rare color
+- **No `str_squish()`**: `" blue"` is still a level
+- **No log**: nothing says what moved where
+
+. . .
+
+A shorter table is not a cleaner dataset. **Count before, count after.**
+
+# Wrap-up {background-color="#f3f6ea"}
+
+::: {.notes}
+Target: 1:02 to 1:05.
+:::
+
+## Four things to remember
+
+1. **Flag, then fix.** Every fix is a decision; log it.
+2. **Regex**: read it aloud, and test it on the rows that look wrong. `NA` means "no match", not "no problem".
+3. **Look-alikes are real.** Detect non-ASCII, then decide whether to normalize.
+4. **Spec first.** Write inputs and expected outputs, then let the table judge the AI.
+
+## Next up
+
+Wed 11/18, Session 6: **types, anomalies, and missingness**. Dates in mixed formats, sentinels, outliers, and what to do about missing values.
+
+The **handout** has the full explanations, extra practice, and the `janitor` appendix.
+
+# Appendix {background-color="#f3f6ea"}
+
+## stringr quick reference
+
+```{r}
+#| eval: false
+str_detect(x, pattern) # TRUE/FALSE per element
+str_extract(x, pattern) # first match, or NA
+str_extract_all(x, pattern) # every match (a list)
+str_replace(x, pattern, new) # replace the first match
+str_replace_all(x, pattern, new)
+str_remove(x, pattern) # replace with nothing
+str_squish(x) # trim and collapse spaces
+str_to_lower(x)
+str_to_title(x)
+str_count(x, pattern) # how many matches
+str_view(x, pattern) # see matches (debugging)
+```
+
+## Lookaheads (`"^1(?=\\d{10}$)"`)
+
+```{r}
+#| eval: false
+# "A leading 1, but only if exactly 10 digits follow it"
+str_remove("15035550142", "^1(?=\\d{10}$)") # "5035550142"
+str_remove("1503555", "^1(?=\\d{10}$)") # unchanged
+```
+
+`(?=...)` checks what comes next without consuming it.
+
+## Helper package: `janitor` (not run)
+
+```{r}
+#| eval: false
+# install.packages("janitor")  # once
+library(janitor)
+clean_names(df) # snake_case column names
+get_dupes(df, id) # rows sharing the same id
+tabyl(df, favorite) # counts with percentages
+```

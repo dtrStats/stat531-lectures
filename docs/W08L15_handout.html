@@ -1,0 +1,1765 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.34">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="DTR">
+<meta name="dcterms.date" content="2026-11-16">
+<meta name="description" content="Full reference for the first half of data cleaning: the cleaning pipeline, ragged files, regex with stringr, Unicode look-alikes, recoding categories with a lookup table, and writing a spec before asking an AI for code, with Audit it boxes and practice">
+
+<title>Session 5 Handout: Strings, Unicode, and Categories – STAT 531: R in the AI Era</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-c8ad9e5dbd60b7b70b38521ab19b7da4.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-d7294beede67a4f0c1d75a160eaed9e1.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+<style>
+
+      .quarto-title-block .quarto-title-banner h1,
+      .quarto-title-block .quarto-title-banner h2,
+      .quarto-title-block .quarto-title-banner h3,
+      .quarto-title-block .quarto-title-banner h4,
+      .quarto-title-block .quarto-title-banner h5,
+      .quarto-title-block .quarto-title-banner h6
+      {
+        color: #ffffff;
+      }
+
+      .quarto-title-block .quarto-title-banner {
+        color: #ffffff;
+background: #213921;
+      }
+</style>
+
+
+</head>
+
+<body class="floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">STAT 531: R in the AI Era</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default toc-left page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Session 5 Handout: Strings, Unicode, and Categories</h1>
+            <p class="subtitle lead">Reference companion to the Session 5 slides</p>
+                  <div>
+        <div class="description">
+          Full reference for the first half of data cleaning: the cleaning pipeline, ragged files, regex with stringr, Unicode look-alikes, recoding categories with a lookup table, and writing a spec before asking an AI for code, with Audit it boxes and practice
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">Handout</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>DTR </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">November 16, 2026</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Contents</h2>
+   
+  <ul class="collapse">
+  <li><a href="#how-to-use-this-handout" id="toc-how-to-use-this-handout" class="nav-link active" data-scroll-target="#how-to-use-this-handout"><span class="header-section-number">1</span> How to use this handout</a></li>
+  <li><a href="#the-cleaning-pipeline" id="toc-the-cleaning-pipeline" class="nav-link" data-scroll-target="#the-cleaning-pipeline"><span class="header-section-number">2</span> The cleaning pipeline</a>
+  <ul class="collapse">
+  <li><a href="#three-rules-for-cleaning-code" id="toc-three-rules-for-cleaning-code" class="nav-link" data-scroll-target="#three-rules-for-cleaning-code"><span class="header-section-number">2.1</span> Three rules for cleaning code</a></li>
+  <li><a href="#structural-and-content-grime" id="toc-structural-and-content-grime" class="nav-link" data-scroll-target="#structural-and-content-grime"><span class="header-section-number">2.2</span> Structural and content grime</a></li>
+  <li><a href="#versioning-data-as-you-work" id="toc-versioning-data-as-you-work" class="nav-link" data-scroll-target="#versioning-data-as-you-work"><span class="header-section-number">2.3</span> Versioning data as you work</a></li>
+  </ul></li>
+  <li><a href="#ragged-files-structural-grime" id="toc-ragged-files-structural-grime" class="nav-link" data-scroll-target="#ragged-files-structural-grime"><span class="header-section-number">3</span> Ragged files: structural grime</a></li>
+  <li><a href="#regex-and-stringr" id="toc-regex-and-stringr" class="nav-link" data-scroll-target="#regex-and-stringr"><span class="header-section-number">4</span> Regex and stringr</a>
+  <ul class="collapse">
+  <li><a href="#the-building-blocks" id="toc-the-building-blocks" class="nav-link" data-scroll-target="#the-building-blocks"><span class="header-section-number">4.1</span> The building blocks</a></li>
+  <li><a href="#see-what-a-pattern-matches" id="toc-see-what-a-pattern-matches" class="nav-link" data-scroll-target="#see-what-a-pattern-matches"><span class="header-section-number">4.2</span> See what a pattern matches</a></li>
+  <li><a href="#our-messy-column" id="toc-our-messy-column" class="nav-link" data-scroll-target="#our-messy-column"><span class="header-section-number">4.3</span> Our messy column</a></li>
+  <li><a href="#capture-groups-separate_wider_regex" id="toc-capture-groups-separate_wider_regex" class="nav-link" data-scroll-target="#capture-groups-separate_wider_regex"><span class="header-section-number">4.4</span> Capture groups: <code>separate_wider_regex()</code></a></li>
+  <li><a href="#lookarounds-optional" id="toc-lookarounds-optional" class="nav-link" data-scroll-target="#lookarounds-optional"><span class="header-section-number">4.5</span> Lookarounds (optional)</a></li>
+  </ul></li>
+  <li><a href="#unicode-strings-that-look-the-same" id="toc-unicode-strings-that-look-the-same" class="nav-link" data-scroll-target="#unicode-strings-that-look-the-same"><span class="header-section-number">5</span> Unicode: strings that look the same</a>
+  <ul class="collapse">
+  <li><a href="#detect" id="toc-detect" class="nav-link" data-scroll-target="#detect"><span class="header-section-number">5.1</span> Detect</a></li>
+  <li><a href="#decide-whether-to-normalize" id="toc-decide-whether-to-normalize" class="nav-link" data-scroll-target="#decide-whether-to-normalize"><span class="header-section-number">5.2</span> Decide whether to normalize</a></li>
+  <li><a href="#invisible-characters" id="toc-invisible-characters" class="nav-link" data-scroll-target="#invisible-characters"><span class="header-section-number">5.3</span> Invisible characters</a></li>
+  </ul></li>
+  <li><a href="#categories" id="toc-categories" class="nav-link" data-scroll-target="#categories"><span class="header-section-number">6</span> Categories</a>
+  <ul class="collapse">
+  <li><a href="#case-fold-and-trim" id="toc-case-fold-and-trim" class="nav-link" data-scroll-target="#case-fold-and-trim"><span class="header-section-number">6.1</span> Case-fold and trim</a></li>
+  <li><a href="#fix-known-variants-with-a-lookup-table" id="toc-fix-known-variants-with-a-lookup-table" class="nav-link" data-scroll-target="#fix-known-variants-with-a-lookup-table"><span class="header-section-number">6.2</span> Fix known variants with a lookup table</a></li>
+  <li><a href="#rare-is-not-wrong" id="toc-rare-is-not-wrong" class="nav-link" data-scroll-target="#rare-is-not-wrong"><span class="header-section-number">6.3</span> Rare is not wrong</a></li>
+  <li><a href="#grouping-valid-levels-fct_collapse" id="toc-grouping-valid-levels-fct_collapse" class="nav-link" data-scroll-target="#grouping-valid-levels-fct_collapse"><span class="header-section-number">6.4</span> Grouping valid levels: <code>fct_collapse()</code></a></li>
+  </ul></li>
+  <li><a href="#spec-first-with-ai" id="toc-spec-first-with-ai" class="nav-link" data-scroll-target="#spec-first-with-ai"><span class="header-section-number">7</span> Spec first, with AI</a>
+  <ul class="collapse">
+  <li><a href="#prompting-from-a-spec" id="toc-prompting-from-a-spec" class="nav-link" data-scroll-target="#prompting-from-a-spec"><span class="header-section-number">7.1</span> Prompting from a spec</a></li>
+  </ul></li>
+  <li><a href="#assessing-what-comes-back" id="toc-assessing-what-comes-back" class="nav-link" data-scroll-target="#assessing-what-comes-back"><span class="header-section-number">8</span> Assessing what comes back</a></li>
+  <li><a href="#practice-problems" id="toc-practice-problems" class="nav-link" data-scroll-target="#practice-problems"><span class="header-section-number">9</span> Practice problems</a></li>
+  <li><a href="#appendix-a-a-helper-package-janitor" id="toc-appendix-a-a-helper-package-janitor" class="nav-link" data-scroll-target="#appendix-a-a-helper-package-janitor"><span class="header-section-number">10</span> Appendix A: A helper package, <code>janitor</code></a></li>
+  <li><a href="#appendix-b-quick-reference" id="toc-appendix-b-quick-reference" class="nav-link" data-scroll-target="#appendix-b-quick-reference"><span class="header-section-number">11</span> Appendix B: Quick reference</a></li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+<section id="how-to-use-this-handout" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> How to use this handout</h1>
+<p>The slides move fast. This handout is the slow, complete version: read it before class, and return to it when you clean a column.</p>
+<p>Coding session 5 is the first of two sessions on <strong>data cleaning</strong>. Today covers <strong>text</strong>: files whose shape is wrong, strings whose content is wrong, and categories that should be one thing and are several. Session 6 covers dates, sentinels, outliers, and missing values.</p>
+<p>Cleaning has a hazard that earlier sessions did not: an AI assistant can make a column <strong>look</strong> clean in one line while it quietly throws information away. <strong>Audit it</strong> boxes show these mistakes. The habit to build is: <strong>count before, count after.</strong></p>
+<div class="callout callout-style-default callout-note callout-titled" title="The Audit Loop, for cleaning">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+The Audit Loop, for cleaning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>Read</strong> the code. What does each pattern match, and what could it also match?</li>
+<li><strong>Run</strong> it on the <strong>hard rows</strong> (empty, odd, unexpected), not only the easy ones.</li>
+<li><strong>Restate</strong> what changed: how many rows, which values, and what was lost.</li>
+<li><strong>Refine</strong> it or <strong>Reject</strong> it. Log the decision.</li>
+</ol>
+</div>
+</div>
+<p><strong>Setup.</strong> Examples use small inline data, so you can run everything without a download. You need <code>tidyverse</code> (which includes <code>stringr</code>, <code>forcats</code>, and <code>dplyr</code>) and <code>stringi</code>, which <code>stringr</code> installs for you. <code>separate_wider_regex()</code> needs <code>tidyr</code> 1.3.0 or newer, and <code>case_match()</code> needs <code>dplyr</code> 1.1.0 or newer.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="the-cleaning-pipeline" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> The cleaning pipeline</h1>
+<p>Cleaning is a sequence, and the order matters.</p>
+<ol type="1">
+<li><strong>Import</strong>: get the data in and control the column types.</li>
+<li><strong>Inspect</strong>: structure, missingness, oddities. (This was Lab 1.)</li>
+<li><strong>Tidy</strong>: reshape, recode, harmonize.</li>
+<li><strong>Validate</strong>: assert expected ranges and consistency.</li>
+<li><strong>Document</strong>: decisions become code.</li>
+</ol>
+<p>Inside the cleaning work itself, the order is: <strong>flag</strong> problems first, then <strong>remediate</strong> broad patterns, and only then <strong>impute or drop</strong>. Flagging first keeps the evidence: you can always count what you changed.</p>
+<section id="three-rules-for-cleaning-code" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="three-rules-for-cleaning-code"><span class="header-section-number">2.1</span> Three rules for cleaning code</h2>
+<ul>
+<li><strong>Code, not clicks.</strong> A hand edit in a spreadsheet cannot be repeated or checked.</li>
+<li><strong>Re-runnable.</strong> Running the whole script twice from raw data gives the same result (this is called an <em>idempotent</em> pipeline).</li>
+<li><strong>Every fix is logged.</strong> What changed, how many rows, and why.</li>
+</ul>
+<div class="callout callout-style-default callout-tip callout-titled" title="Key idea">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Key idea
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Every cleaning step is a <strong>decision</strong> that changes what a model will learn. If you cannot say what a step removed or changed, you have not finished the step.</p>
+</div>
+</div>
+</section>
+<section id="structural-and-content-grime" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="structural-and-content-grime"><span class="header-section-number">2.2</span> Structural and content grime</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Structural</th>
+<th style="text-align: left;">Content</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">The <strong>shape</strong> of the file is wrong</td>
+<td style="text-align: left;">The <strong>values</strong> in cells are wrong</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Shows up at import</td>
+<td style="text-align: left;">Shows up at inspection</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Extra or missing fields, bad delimiters, encoding</td>
+<td style="text-align: left;">Typos, mixed units, sentinels, lookalikes</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Often needs a manual rule</td>
+<td style="text-align: left;">Often needs a lookup table</td>
+</tr>
+</tbody>
+</table>
+<p>Handle structural problems first: content checks assume a clean grid.</p>
+</section>
+<section id="versioning-data-as-you-work" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="versioning-data-as-you-work"><span class="header-section-number">2.3</span> Versioning data as you work</h2>
+<p>How you keep track of changes depends on size.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Size of data</th>
+<th style="text-align: left;">Approach</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Fits easily in memory</td>
+<td style="text-align: left;">Create a new object at each step; the script is the history</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Large</td>
+<td style="text-align: left;">Edit in place and log each change in a text column or file</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Massive</td>
+<td style="text-align: left;">Do not load it all; sample, process in chunks, or push computation to the database (see <code>arrow</code> in Session 2)</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="ragged-files-structural-grime" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Ragged files: structural grime</h1>
+<p>A CSV has no schema. Nothing stops line 4 from having more fields than line 2. Read the file as <strong>raw lines</strong> first, and count.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>raw_lines</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "id,name,score"    "1,Mia,88"         "2,Liam,91"        "3,Lopez, Liam,79"
+#&gt; [5] "4,Mason,"         "5,Olivia"         "6,,,Sophia,85"</code></pre>
+</div>
+</div>
+<p>The header says three fields: <code>id</code>, <code>name</code>, <code>score</code>. Counting commas and adding one gives the number of fields per line.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fields <span class="ot">&lt;-</span> <span class="fu">str_count</span>(raw_lines, <span class="st">","</span>) <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(fields)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; fields
+#&gt; 2 3 4 5 
+#&gt; 1 4 1 1</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>raw_lines[fields <span class="sc">!=</span> <span class="dv">3</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "3,Lopez, Liam,79" "5,Olivia"         "6,,,Sophia,85"</code></pre>
+</div>
+</div>
+<p>Three lines break the rule, each for a different reason:</p>
+<ul>
+<li><code>"3,Lopez, Liam,79"</code>: a comma inside a name (the source forgot to quote it).</li>
+<li><code>"5,Olivia"</code>: a missing field.</li>
+<li><code>"6,,,Sophia,85"</code>: doubled delimiters.</li>
+</ul>
+<p>No single rule fixes all three. Without the source, you cannot know whether line 3 is <code>Lopez Liam</code> or two people. The honest move is to <strong>flag the lines and ask</strong>.</p>
+<div class="callout callout-style-default callout-warning callout-titled" title="Audit it: a parser that guesses quietly">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Audit it: a parser that guesses quietly
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>An AI may suggest <code>read_csv(..., col_names = FALSE, skip_empty_rows = TRUE)</code> or <code>fill = TRUE</code> options “to make it load”. Loading without error is not the same as loading correctly. After any import, run <code>problems()</code> on the result, compare <code>nrow()</code> with the number of raw lines minus the header, and count how many fields were filled or truncated.</p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"messy.csv"</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">problems</span>(df) <span class="co"># rows readr could not parse as expected</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(df) <span class="sc">==</span> <span class="fu">length</span>(<span class="fu">readLines</span>(<span class="st">"messy.csv"</span>)) <span class="sc">-</span> <span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="regex-and-stringr" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Regex and stringr</h1>
+<p>A <strong>regular expression</strong> (regex) describes a <em>pattern</em> of text, instead of one literal string. The <code>stringr</code> package applies patterns to character vectors.</p>
+<section id="the-building-blocks" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="the-building-blocks"><span class="header-section-number">4.1</span> The building blocks</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Piece</th>
+<th style="text-align: left;">Meaning</th>
+<th style="text-align: left;">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>\\d</code> <code>\\w</code> <code>\\s</code></td>
+<td style="text-align: left;">a digit, a word character, a whitespace</td>
+<td style="text-align: left;"><code>\\d{5}</code> is five digits</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>.</code></td>
+<td style="text-align: left;"><strong>any</strong> one character</td>
+<td style="text-align: left;"><code>a.c</code> matches <code>abc</code>, <code>a-c</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>+</code> <code>*</code> <code>?</code></td>
+<td style="text-align: left;">one or more, zero or more, optional</td>
+<td style="text-align: left;"><code>\\d+</code> is a run of digits</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>{3}</code> <code>{2,4}</code></td>
+<td style="text-align: left;">exactly 3, between 2 and 4</td>
+<td style="text-align: left;"><code>\\d{3}-\\d{4}</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>^</code> <code>$</code></td>
+<td style="text-align: left;">start, end of the string</td>
+<td style="text-align: left;"><code>^\\d+$</code> is <strong>only</strong> digits</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>( )</code> <code>\|</code></td>
+<td style="text-align: left;">group, alternatives</td>
+<td style="text-align: left;"><code>kg\|lbs?</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>[abc]</code> <code>[^abc]</code></td>
+<td style="text-align: left;">one of these, <strong>none</strong> of these</td>
+<td style="text-align: left;"><code>[^0-9]</code> is a non-digit</td>
+</tr>
+</tbody>
+</table>
+<p>In an R string the backslash must be doubled: <code>"\\d+"</code>. A <strong>raw string</strong> avoids the doubling: <code>r"(\d+)"</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># These two patterns are the same</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str_extract</span>(<span class="st">"room 204"</span>, <span class="st">"</span><span class="sc">\\</span><span class="st">d+"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "204"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str_extract</span>(<span class="st">"room 204"</span>, r<span class="st">"(\d+)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "204"</code></pre>
+</div>
+</div>
+</section>
+<section id="see-what-a-pattern-matches" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="see-what-a-pattern-matches"><span class="header-section-number">4.2</span> See what a pattern matches</h2>
+<p><code>str_view()</code> highlights the match, which makes patterns much easier to debug.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str_view</span>(body<span class="sc">$</span>weight_raw, <span class="st">"</span><span class="sc">\\</span><span class="st">d+</span><span class="sc">\\</span><span class="st">.?</span><span class="sc">\\</span><span class="st">d*"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] | &lt;165&gt; lb
+#&gt; [2] | &lt;72&gt;kg
+#&gt; [3] | &lt;80&gt; KG
+#&gt; [4] | &lt;170&gt;
+#&gt; [6] | &lt;154.5&gt; lbs
+#&gt; [7] | &lt;68&gt; kg</code></pre>
+</div>
+</div>
+</section>
+<section id="our-messy-column" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="our-messy-column"><span class="header-section-number">4.3</span> Our messy column</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>body</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 7 x 2
+#&gt;      id weight_raw
+#&gt;   &lt;int&gt; &lt;chr&gt;     
+#&gt; 1     1 165 lb    
+#&gt; 2     2 72kg      
+#&gt; 3     3 80 KG     
+#&gt; 4     4 170       
+#&gt; 5     5 n/a       
+#&gt; 6     6 154.5 lbs 
+#&gt; 7     7 68 kg</code></pre>
+</div>
+</div>
+<p>These weights were typed by humans: different units (<code>lb</code>, <code>lbs</code>, <code>kg</code>, <code>KG</code>), different spacing, one row with a number and <strong>no unit</strong>, and one with no number at all.</p>
+<section id="which-rows-str_detect" class="level3" data-number="4.3.1">
+<h3 data-number="4.3.1" class="anchored" data-anchor-id="which-rows-str_detect"><span class="header-section-number">4.3.1</span> Which rows: <code>str_detect()</code></h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>body <span class="sc">|&gt;</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">has_lb =</span> <span class="fu">str_detect</span>(weight_raw, <span class="fu">regex</span>(<span class="st">"lbs?"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 7 x 3
+#&gt;      id weight_raw has_lb
+#&gt;   &lt;int&gt; &lt;chr&gt;      &lt;lgl&gt; 
+#&gt; 1     1 165 lb     TRUE  
+#&gt; 2     2 72kg       FALSE 
+#&gt; 3     3 80 KG      FALSE 
+#&gt; 4     4 170        FALSE 
+#&gt; 5     5 n/a        FALSE 
+#&gt; 6     6 154.5 lbs  TRUE  
+#&gt; 7     7 68 kg      FALSE</code></pre>
+</div>
+</div>
+<p><code>str_detect()</code> returns <code>TRUE</code> or <code>FALSE</code>. Use it inside <code>filter()</code> to keep rows, or in <code>mutate()</code> to flag them. <code>regex(..., ignore_case = TRUE)</code> makes the match case-insensitive.</p>
+</section>
+<section id="what-is-in-them-str_extract" class="level3" data-number="4.3.2">
+<h3 data-number="4.3.2" class="anchored" data-anchor-id="what-is-in-them-str_extract"><span class="header-section-number">4.3.2</span> What is in them: <code>str_extract()</code></h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>body <span class="sc">|&gt;</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">num =</span> <span class="fu">as.numeric</span>(<span class="fu">str_extract</span>(weight_raw, <span class="st">"</span><span class="sc">\\</span><span class="st">d+</span><span class="sc">\\</span><span class="st">.?</span><span class="sc">\\</span><span class="st">d*"</span>)),</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">unit =</span> <span class="fu">str_extract</span>(<span class="fu">str_to_lower</span>(weight_raw), <span class="st">"kg|lbs?"</span>)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 7 x 4
+#&gt;      id weight_raw   num unit 
+#&gt;   &lt;int&gt; &lt;chr&gt;      &lt;dbl&gt; &lt;chr&gt;
+#&gt; 1     1 165 lb      165  lb   
+#&gt; 2     2 72kg         72  kg   
+#&gt; 3     3 80 KG        80  kg   
+#&gt; 4     4 170         170  &lt;NA&gt; 
+#&gt; 5     5 n/a          NA  &lt;NA&gt; 
+#&gt; 6     6 154.5 lbs   154. lbs  
+#&gt; 7     7 68 kg        68  kg</code></pre>
+</div>
+</div>
+<p>Read the number pattern aloud: “one or more digits, then an optional dot, then zero or more digits”. When nothing matches, you get <code>NA</code>, not an error. Row 4 has a number (<code>170</code>) and <strong>no unit</strong>, and row 5 has neither.</p>
+</section>
+<section id="convert-and-leave-the-unknown-unknown" class="level3" data-number="4.3.3">
+<h3 data-number="4.3.3" class="anchored" data-anchor-id="convert-and-leave-the-unknown-unknown"><span class="header-section-number">4.3.3</span> Convert, and leave the unknown unknown</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>body <span class="sc">|&gt;</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">num =</span> <span class="fu">as.numeric</span>(<span class="fu">str_extract</span>(weight_raw, <span class="st">"</span><span class="sc">\\</span><span class="st">d+</span><span class="sc">\\</span><span class="st">.?</span><span class="sc">\\</span><span class="st">d*"</span>)),</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">unit =</span> <span class="fu">str_extract</span>(<span class="fu">str_to_lower</span>(weight_raw), <span class="st">"kg|lbs?"</span>),</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">kg =</span> <span class="fu">case_when</span>(unit <span class="sc">==</span> <span class="st">"kg"</span> <span class="sc">~</span> num, <span class="fu">str_detect</span>(unit, <span class="st">"lb"</span>) <span class="sc">~</span> num <span class="sc">*</span> <span class="fl">0.453592</span>)</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 7 x 5
+#&gt;      id weight_raw   num unit     kg
+#&gt;   &lt;int&gt; &lt;chr&gt;      &lt;dbl&gt; &lt;chr&gt; &lt;dbl&gt;
+#&gt; 1     1 165 lb      165  lb     74.8
+#&gt; 2     2 72kg         72  kg     72  
+#&gt; 3     3 80 KG        80  kg     80  
+#&gt; 4     4 170         170  &lt;NA&gt;   NA  
+#&gt; 5     5 n/a          NA  &lt;NA&gt;   NA  
+#&gt; 6     6 154.5 lbs   154. lbs    70.1
+#&gt; 7     7 68 kg        68  kg     68</code></pre>
+</div>
+</div>
+<p><code>case_when()</code> with no default returns <code>NA</code> for rows that match no condition. Here that is the right behavior: <code>170</code> could be pounds or kilograms, and a regex cannot know which. Staying <code>NA</code> (and flagged) is better than a guess that is hidden inside a pattern.</p>
+<div class="callout callout-style-default callout-warning callout-titled" title="Audit it: `parse_number()` ignores units">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Audit it: <code>parse_number()</code> ignores units
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>parse_number()</code> is tempting because it is one line.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>body <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">shortcut =</span> <span class="fu">c</span>(<span class="fu">parse_number</span>(weight_raw)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 7 x 3
+#&gt;      id weight_raw shortcut
+#&gt;   &lt;int&gt; &lt;chr&gt;         &lt;dbl&gt;
+#&gt; 1     1 165 lb         165 
+#&gt; 2     2 72kg            72 
+#&gt; 3     3 80 KG           80 
+#&gt; 4     4 170            170 
+#&gt; 5     5 n/a             NA 
+#&gt; 6     6 154.5 lbs      154.
+#&gt; 7     7 68 kg           68</code></pre>
+</div>
+</div>
+<p>It returns <code>165</code>, <code>72</code>, <code>80</code> and <code>170</code> as if they shared a unit. Pounds and kilograms are now mixed in one numeric column, and nothing warns you (the one warning is for <code>n/a</code>). Extract the unit as well as the number, and decide about the rows without a unit.</p>
+</div>
+</div>
+</section>
+<section id="replace-and-tidy-str_replace-and-friends" class="level3" data-number="4.3.4">
+<h3 data-number="4.3.4" class="anchored" data-anchor-id="replace-and-tidy-str_replace-and-friends"><span class="header-section-number">4.3.4</span> Replace and tidy: <code>str_replace()</code> and friends</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="st">"  Portland "</span>, <span class="st">"Portland,  OR"</span>, <span class="st">"portland"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">str_squish</span>() <span class="sc">|&gt;</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">str_remove</span>(<span class="st">",</span><span class="sc">\\</span><span class="st">s*OR$"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">str_to_title</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "Portland" "Portland" "Portland"</code></pre>
+</div>
+</div>
+<ul>
+<li><code>str_squish()</code> trims both ends and collapses runs of spaces inside.</li>
+<li><code>str_remove(x, pattern)</code> is <code>str_replace(x, pattern, "")</code>.</li>
+<li><code>str_replace()</code> changes the <strong>first</strong> match, <code>str_replace_all()</code> changes <strong>every</strong> match.</li>
+<li><code>str_to_lower()</code>, <code>str_to_upper()</code>, <code>str_to_title()</code> change case.</li>
+</ul>
+<div class="callout callout-style-default callout-warning callout-titled" title="Audit it: the dot matches anything">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Audit it: the dot matches anything
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>An AI asked to “remove the dots from a phone number” may write:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str_replace_all</span>(<span class="st">"503.555.0142"</span>, <span class="st">"."</span>, <span class="st">""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] ""</code></pre>
+</div>
+</div>
+<p>The result is an empty string. In a regex, <code>.</code> means “any character”, so every character was removed. Escape it (<code>"\\."</code>), put it in a class (<code>"[.]"</code>), or match it literally with <code>fixed(".")</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str_replace_all</span>(<span class="st">"503.555.0142"</span>, <span class="fu">fixed</span>(<span class="st">"."</span>), <span class="st">""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "5035550142"</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled" title="Audit it: `str_extract()` returns only the first match">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Audit it: <code>str_extract()</code> returns only the first match
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>“Pull the numbers out of <code>5 ft 11 in</code>” with <code>str_extract(x, "\\d+")</code> returns <code>"5"</code> and drops the <code>11</code>. Use <code>str_extract_all()</code> (which returns a list) or capture each piece on purpose, as below.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="capture-groups-separate_wider_regex" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="capture-groups-separate_wider_regex"><span class="header-section-number">4.4</span> Capture groups: <code>separate_wider_regex()</code></h2>
+<p>When a string has several parts, name each one. Unnamed pieces are matched and dropped; named pieces become columns.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(<span class="at">height_raw =</span> <span class="fu">c</span>(<span class="st">"5 ft 11 in"</span>, <span class="st">"5ft 7in"</span>, <span class="st">"6 ft 0 in"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">separate_wider_regex</span>(</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    height_raw,</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(<span class="at">ft =</span> <span class="st">"</span><span class="sc">\\</span><span class="st">d"</span>, <span class="st">"</span><span class="sc">\\</span><span class="st">s*ft</span><span class="sc">\\</span><span class="st">s*"</span>, <span class="at">inch =</span> <span class="st">"</span><span class="sc">\\</span><span class="st">d+"</span>, <span class="st">".*"</span>)</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 3 x 2
+#&gt;   ft    inch 
+#&gt;   &lt;chr&gt; &lt;chr&gt;
+#&gt; 1 5     11   
+#&gt; 2 5     7    
+#&gt; 3 6     0</code></pre>
+</div>
+</div>
+<p>If a string does not fit the pattern, the function stops with an error by default. That is a feature: it tells you the pattern is incomplete. Options such as <code>too_few = "align_start"</code> let rows through when you decide that is acceptable.</p>
+</section>
+<section id="lookarounds-optional" class="level2" data-number="4.5">
+<h2 data-number="4.5" class="anchored" data-anchor-id="lookarounds-optional"><span class="header-section-number">4.5</span> Lookarounds (optional)</h2>
+<p>A <strong>lookahead</strong> checks what comes next without consuming it. The pattern <code>"^1(?=\\d{10}$)"</code> means “a leading <code>1</code>, but only if exactly ten digits follow”. It is how <code>clean_phone()</code> below strips a US country code without breaking a seven-digit number that happens to start with 1.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str_remove</span>(<span class="st">"15035550142"</span>, <span class="st">"^1(?=</span><span class="sc">\\</span><span class="st">d{10}$)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "5035550142"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str_remove</span>(<span class="st">"1503555"</span>, <span class="st">"^1(?=</span><span class="sc">\\</span><span class="st">d{10}$)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "1503555"</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="unicode-strings-that-look-the-same" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Unicode: strings that look the same</h1>
+<p>Computers store text as <strong>code points</strong>, and many different code points look alike on screen.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>good <span class="ot">&lt;-</span> <span class="st">"green"</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>bad <span class="ot">&lt;-</span> <span class="st">"gr\u0435\u0435n"</span> <span class="co"># two Cyrillic letters that look like Latin e</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(good, bad)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "green" "grееn"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>good <span class="sc">==</span> bad</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] FALSE</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="fu">nchar</span>(good), <span class="fu">nchar</span>(bad))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 5 5</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">utf8ToInt</span>(bad)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1]  103  114 1077 1077  110</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">utf8ToInt</span>(good)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 103 114 101 101 110</code></pre>
+</div>
+</div>
+<p>The two strings print the same and have the same length, yet they are not equal. In <code>bad</code>, the two <code>е</code> are code point 1077 (Cyrillic) instead of 101 (Latin). This might be an innocent copy-paste from another system, or it might be deliberate. Either way, it is invisible to the eye.</p>
+<section id="detect" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="detect"><span class="header-section-number">5.1</span> Detect</h2>
+<p>Any character outside plain ASCII (code points 0 to 127) matches <code>[^\\x00-\\x7F]</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str_detect</span>(<span class="fu">c</span>(good, bad), <span class="st">"[^</span><span class="sc">\\</span><span class="st">x00-</span><span class="sc">\\</span><span class="st">x7F]"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] FALSE  TRUE</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>stringi<span class="sc">::</span><span class="fu">stri_escape_unicode</span>(bad)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "gr\\u0435\\u0435n"</code></pre>
+</div>
+</div>
+<p><code>stri_escape_unicode()</code> shows each non-ASCII character as its <code>\uXXXX</code> code. To find every offending <strong>row</strong> in a table:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(<span class="at">city =</span> <span class="fu">c</span>(<span class="st">"Portland"</span>, <span class="st">"\u0420ortland"</span>, <span class="st">"Beaverton"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">str_detect</span>(city, <span class="st">"[^</span><span class="sc">\\</span><span class="st">x00-</span><span class="sc">\\</span><span class="st">x7F]"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 1 x 1
+#&gt;   city    
+#&gt;   &lt;chr&gt;   
+#&gt; 1 Рortland</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled" title="Audit it: look-alikes break joins without an error">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Audit it: look-alikes break joins without an error
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>lookup <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">color =</span> <span class="fu">c</span>(<span class="st">"blue"</span>, <span class="st">"red"</span>, <span class="st">"green"</span>),</span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">hex =</span> <span class="fu">c</span>(<span class="st">"#00f"</span>, <span class="st">"#f00"</span>, <span class="st">"#0a0"</span>)</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(<span class="at">color =</span> <span class="fu">c</span>(<span class="st">"blue"</span>, <span class="st">"green"</span>, bad)) <span class="sc">|&gt;</span></span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">anti_join</span>(lookup, <span class="at">by =</span> <span class="st">"color"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 1 x 1
+#&gt;   color
+#&gt;   &lt;chr&gt;
+#&gt; 1 grееn</code></pre>
+</div>
+</div>
+<p>The join does not fail. The lookalike simply does not match, and it will be missing from every result built on that join. Run <code>anti_join()</code> against your lookup tables as a routine check (Session 2).</p>
+</div>
+</div>
+</section>
+<section id="decide-whether-to-normalize" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="decide-whether-to-normalize"><span class="header-section-number">5.2</span> Decide whether to normalize</h2>
+<p><code>stringi::stri_trans_general()</code> can transliterate text.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>stringi<span class="sc">::</span><span class="fu">stri_trans_general</span>(<span class="fu">c</span>(bad, <span class="st">"caf\u00e9"</span>), <span class="st">"Any-Latin; Latin-ASCII"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "green" "cafe"</code></pre>
+</div>
+</div>
+<p>The Cyrillic <code>е</code> became a Latin <code>e</code>, which is what we wanted. But <code>café</code> also became <code>cafe</code>. Whether that is acceptable depends on the column: for a color, yes; for a person’s name, ask first. <strong>Detect first, then decide.</strong> Real data also contains legitimate non-ASCII text (<code>José</code>, <code>Zoë</code>), so “non-ASCII” is a flag for review, not proof of an error.</p>
+</section>
+<section id="invisible-characters" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="invisible-characters"><span class="header-section-number">5.3</span> Invisible characters</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"blue"</span>, <span class="st">"blue\u00a0"</span>, <span class="st">"blue\u200b"</span>)</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a><span class="fu">nchar</span>(x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 4 5 5</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nchar</span>(<span class="fu">str_squish</span>(x))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 4 4 5</code></pre>
+</div>
+</div>
+<p><code>str_squish()</code> removes the non-breaking space (<code>\u00a0</code>) but not the <strong>zero-width space</strong> (<code>\u200b</code>), which has length but no width. If two strings look identical and are not equal, compare <code>nchar()</code> and <code>stri_escape_unicode()</code>.</p>
+</section>
+</section>
+<section id="categories" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Categories</h1>
+<p>A categorical column should have a small set of valid values. Start by <strong>counting</strong> them.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>humans <span class="sc">|&gt;</span> <span class="fu">count</span>(favorite, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 9 x 2
+#&gt;   favorite         n
+#&gt;   &lt;chr&gt;        &lt;int&gt;
+#&gt; 1 "blue"          40
+#&gt; 2 "red"           30
+#&gt; 3 "green"         25
+#&gt; 4 "gray"           4
+#&gt; 5 "Red"            3
+#&gt; 6 " blue"          2
+#&gt; 7 "blüe"           1
+#&gt; 8 "chartreuse"     1
+#&gt; 9 "grееn"          1</code></pre>
+</div>
+</div>
+<p>Nine “colors” for what should be five. The counts help: a value with one occurrence next to a value with forty is probably a variant, not a separate category. (The counts alone cannot tell you which spelling is <em>correct</em>, though. Use the documentation, and do not be surprised if it does not match the data.)</p>
+<section id="case-fold-and-trim" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="case-fold-and-trim"><span class="header-section-number">6.1</span> Case-fold and trim</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>humans <span class="sc">|&gt;</span></span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">favorite =</span> <span class="fu">str_to_lower</span>(<span class="fu">str_squish</span>(favorite))) <span class="sc">|&gt;</span></span>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(favorite, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 7 x 2
+#&gt;   favorite       n
+#&gt;   &lt;chr&gt;      &lt;int&gt;
+#&gt; 1 blue          42
+#&gt; 2 red           33
+#&gt; 3 green         25
+#&gt; 4 gray           4
+#&gt; 5 blüe           1
+#&gt; 6 chartreuse     1
+#&gt; 7 grееn          1</code></pre>
+</div>
+</div>
+<p>Two problems are gone: <code>Red</code> merged with <code>red</code>, and <code>" blue"</code> merged with <code>blue</code>. What is left: <code>blüe</code>, the Cyrillic <code>green</code>, and <code>chartreuse</code>.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Case folding is not always safe">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Case folding is not always safe
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Case carries no meaning for a color, but it might for an identifier.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a>ids <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"ab12"</span>, <span class="st">"AB12"</span>)</span>
+<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a><span class="fu">n_distinct</span>(ids)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 2</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="fu">n_distinct</span>(<span class="fu">str_to_lower</span>(ids))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 1</code></pre>
+</div>
+</div>
+<p>Fold case only where case carries no meaning, and say so in your log.</p>
+</div>
+</div>
+</section>
+<section id="fix-known-variants-with-a-lookup-table" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="fix-known-variants-with-a-lookup-table"><span class="header-section-number">6.2</span> Fix known variants with a lookup table</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a>fixes <span class="ot">&lt;-</span> <span class="fu">tribble</span>(</span>
+<span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a>  <span class="sc">~</span>raw              , <span class="sc">~</span>clean  ,</span>
+<span id="cb69-3"><a href="#cb69-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"bl\u00fce"</span>       , <span class="st">"blue"</span>  ,</span>
+<span id="cb69-4"><a href="#cb69-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"gr\u0435\u0435n"</span> , <span class="st">"green"</span></span>
+<span id="cb69-5"><a href="#cb69-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb69-6"><a href="#cb69-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-7"><a href="#cb69-7" aria-hidden="true" tabindex="-1"></a>humans <span class="sc">|&gt;</span></span>
+<span id="cb69-8"><a href="#cb69-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">favorite =</span> <span class="fu">str_to_lower</span>(<span class="fu">str_squish</span>(favorite))) <span class="sc">|&gt;</span></span>
+<span id="cb69-9"><a href="#cb69-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(fixes, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"favorite"</span> <span class="ot">=</span> <span class="st">"raw"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb69-10"><a href="#cb69-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">favorite =</span> <span class="fu">coalesce</span>(clean, favorite)) <span class="sc">|&gt;</span></span>
+<span id="cb69-11"><a href="#cb69-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(favorite, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 5 x 2
+#&gt;   favorite       n
+#&gt;   &lt;chr&gt;      &lt;int&gt;
+#&gt; 1 blue          43
+#&gt; 2 red           33
+#&gt; 3 green         26
+#&gt; 4 gray           4
+#&gt; 5 chartreuse     1</code></pre>
+</div>
+</div>
+<p>Why a table and not a chain of <code>ifelse()</code> calls:</p>
+<ul>
+<li>A reviewer can <strong>read</strong> it in ten seconds.</li>
+<li>It is <strong>data</strong>: you can version it, diff it, and extend it.</li>
+<li><code>anti_join()</code> shows what is <strong>still unmapped</strong>.</li>
+<li>It works on next month’s file.</li>
+</ul>
+<p>For a few mappings, <code>case_match()</code> is a compact alternative:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a>humans <span class="sc">|&gt;</span></span>
+<span id="cb71-2"><a href="#cb71-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb71-3"><a href="#cb71-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">favorite =</span> <span class="fu">str_to_lower</span>(<span class="fu">str_squish</span>(favorite)),</span>
+<span id="cb71-4"><a href="#cb71-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">favorite =</span> <span class="fu">case_match</span>(</span>
+<span id="cb71-5"><a href="#cb71-5" aria-hidden="true" tabindex="-1"></a>      favorite,</span>
+<span id="cb71-6"><a href="#cb71-6" aria-hidden="true" tabindex="-1"></a>      <span class="st">"bl\u00fce"</span> <span class="sc">~</span> <span class="st">"blue"</span>,</span>
+<span id="cb71-7"><a href="#cb71-7" aria-hidden="true" tabindex="-1"></a>      <span class="st">"gr\u0435\u0435n"</span> <span class="sc">~</span> <span class="st">"green"</span>,</span>
+<span id="cb71-8"><a href="#cb71-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">.default =</span> favorite</span>
+<span id="cb71-9"><a href="#cb71-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb71-10"><a href="#cb71-10" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb71-11"><a href="#cb71-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(favorite, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 5 x 2
+#&gt;   favorite       n
+#&gt;   &lt;chr&gt;      &lt;int&gt;
+#&gt; 1 blue          43
+#&gt; 2 red           33
+#&gt; 3 green         26
+#&gt; 4 gray           4
+#&gt; 5 chartreuse     1</code></pre>
+</div>
+</div>
+<p>The <code>.default = favorite</code> keeps every value you did not mention. Without it, unmatched values silently become <code>NA</code>.</p>
+</section>
+<section id="rare-is-not-wrong" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="rare-is-not-wrong"><span class="header-section-number">6.3</span> Rare is not wrong</h2>
+<p>After folding, three values occur only once: <code>blüe</code>, the Cyrillic <code>green</code>, and <code>chartreuse</code>. Two of them are errors that a lookup table can fix, and one (<code>chartreuse</code>) is a real color. Rarity alone cannot tell them apart, so <strong>flag</strong> rare values and look at each one in context. Do not delete them because they are rare.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a>humans <span class="sc">|&gt;</span></span>
+<span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">favorite =</span> <span class="fu">str_to_lower</span>(<span class="fu">str_squish</span>(favorite))) <span class="sc">|&gt;</span></span>
+<span id="cb73-3"><a href="#cb73-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_count</span>(favorite, <span class="at">name =</span> <span class="st">"n"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb73-4"><a href="#cb73-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">rare =</span> n <span class="sc">&lt;</span> <span class="dv">2</span>) <span class="sc">|&gt;</span></span>
+<span id="cb73-5"><a href="#cb73-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(rare) <span class="sc">|&gt;</span></span>
+<span id="cb73-6"><a href="#cb73-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(favorite, n)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 3 x 2
+#&gt;   favorite       n
+#&gt;   &lt;chr&gt;      &lt;int&gt;
+#&gt; 1 blüe           1
+#&gt; 2 grееn          1
+#&gt; 3 chartreuse     1</code></pre>
+</div>
+</div>
+</section>
+<section id="grouping-valid-levels-fct_collapse" class="level2" data-number="6.4">
+<h2 data-number="6.4" class="anchored" data-anchor-id="grouping-valid-levels-fct_collapse"><span class="header-section-number">6.4</span> Grouping valid levels: <code>fct_collapse()</code></h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a>humans <span class="sc">|&gt;</span></span>
+<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb75-3"><a href="#cb75-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">favorite =</span> <span class="fu">str_to_lower</span>(<span class="fu">str_squish</span>(favorite)),</span>
+<span id="cb75-4"><a href="#cb75-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">group =</span> <span class="fu">fct_collapse</span>(</span>
+<span id="cb75-5"><a href="#cb75-5" aria-hidden="true" tabindex="-1"></a>      favorite,</span>
+<span id="cb75-6"><a href="#cb75-6" aria-hidden="true" tabindex="-1"></a>      <span class="at">cool =</span> <span class="fu">c</span>(<span class="st">"blue"</span>, <span class="st">"green"</span>),</span>
+<span id="cb75-7"><a href="#cb75-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">warm =</span> <span class="st">"red"</span>,</span>
+<span id="cb75-8"><a href="#cb75-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">other_level =</span> <span class="st">"other"</span></span>
+<span id="cb75-9"><a href="#cb75-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb75-10"><a href="#cb75-10" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb75-11"><a href="#cb75-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(group)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 3 x 2
+#&gt;   group     n
+#&gt;   &lt;fct&gt; &lt;int&gt;
+#&gt; 1 cool     67
+#&gt; 2 warm     33
+#&gt; 3 other     7</code></pre>
+</div>
+</div>
+<p><code>fct_collapse()</code> and <code>fct_lump_*()</code> are for <strong>grouping valid levels</strong> when you want fewer categories for analysis. They are not repair tools: they hide the very values you needed to look at.</p>
+<div class="callout callout-style-default callout-warning callout-titled" title="Audit it: `fct_lump_min()` makes a table shorter, not cleaner">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Audit it: <code>fct_lump_min()</code> makes a table shorter, not cleaner
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>An AI asked to “standardize the favorite color column” returned this:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a>humans <span class="sc">|&gt;</span></span>
+<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">favorite =</span> <span class="fu">str_to_lower</span>(favorite)) <span class="sc">|&gt;</span></span>
+<span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">favorite =</span> <span class="fu">fct_lump_min</span>(favorite, <span class="at">min =</span> <span class="dv">2</span>, <span class="at">other_level =</span> <span class="st">"other"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb77-4"><a href="#cb77-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(favorite, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 6 x 2
+#&gt;   favorite     n
+#&gt;   &lt;fct&gt;    &lt;int&gt;
+#&gt; 1 "blue"      40
+#&gt; 2 "red"       33
+#&gt; 3 "green"     25
+#&gt; 4 "gray"       4
+#&gt; 5 "other"      3
+#&gt; 6 " blue"      2</code></pre>
+</div>
+</div>
+<p>Compare with the counts at the start of this section:</p>
+<ul>
+<li><strong>Lost counts</strong>: 43 people said blue (<code>blue</code>, <code>" blue"</code>, <code>blüe</code>), but <code>blue</code> shows 40. Green shows 25, not 26.</li>
+<li><strong><code>"other"</code></strong> (3) hides three different things: a typo (<code>blüe</code>), a lookalike (<code>grееn</code>), and a real rare color (<code>chartreuse</code>).</li>
+<li><strong>No <code>str_squish()</code></strong>: <code>" blue"</code> is still its own level.</li>
+<li><strong>No log</strong>: nothing says what moved where.</li>
+</ul>
+<p>The AI cleaned the <strong>output</strong>, not the <strong>data</strong>. The better prompt asks for trimming, lowercasing, a lookup table of known fixes, and a list of every value still outside the valid set, with the instruction not to lump or delete.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="spec-first-with-ai" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Spec first, with AI</h1>
+<p>AI-written regex fails quietly: it runs, returns plausible text, and is wrong on the rows you did not think to test. The defense is to write the tests <strong>before</strong> the code.</p>
+<p>A <strong>spec</strong> is a table of inputs and the outputs you expect, including the rows that should come back <code>NA</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb79"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a>spec <span class="ot">&lt;-</span> <span class="fu">tribble</span>(</span>
+<span id="cb79-2"><a href="#cb79-2" aria-hidden="true" tabindex="-1"></a>  <span class="sc">~</span>input            , <span class="sc">~</span>expected      ,</span>
+<span id="cb79-3"><a href="#cb79-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"(503) 555-0142"</span>  , <span class="st">"503-555-0142"</span> ,</span>
+<span id="cb79-4"><a href="#cb79-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"503.555.0142"</span>    , <span class="st">"503-555-0142"</span> ,</span>
+<span id="cb79-5"><a href="#cb79-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"5035550142"</span>      , <span class="st">"503-555-0142"</span> ,</span>
+<span id="cb79-6"><a href="#cb79-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"+1 503 555 0142"</span> , <span class="st">"503-555-0142"</span> ,</span>
+<span id="cb79-7"><a href="#cb79-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"555-0142"</span>        , <span class="cn">NA</span>             ,</span>
+<span id="cb79-8"><a href="#cb79-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"call me"</span>         , <span class="cn">NA</span></span>
+<span id="cb79-9"><a href="#cb79-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Then let the table judge the function, whoever wrote it:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb80"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a>spec <span class="sc">|&gt;</span></span>
+<span id="cb80-2"><a href="#cb80-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb80-3"><a href="#cb80-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">got =</span> <span class="fu">clean_phone</span>(input),</span>
+<span id="cb80-4"><a href="#cb80-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">pass =</span> <span class="fu">coalesce</span>(got <span class="sc">==</span> expected, <span class="fu">is.na</span>(got) <span class="sc">&amp;</span> <span class="fu">is.na</span>(expected))</span>
+<span id="cb80-5"><a href="#cb80-5" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 6 x 4
+#&gt;   input           expected     got          pass 
+#&gt;   &lt;chr&gt;           &lt;chr&gt;        &lt;chr&gt;        &lt;lgl&gt;
+#&gt; 1 (503) 555-0142  503-555-0142 503-555-0142 TRUE 
+#&gt; 2 503.555.0142    503-555-0142 503-555-0142 TRUE 
+#&gt; 3 5035550142      503-555-0142 503-555-0142 TRUE 
+#&gt; 4 +1 503 555 0142 503-555-0142 503-555-0142 TRUE 
+#&gt; 5 555-0142        &lt;NA&gt;         &lt;NA&gt;         TRUE 
+#&gt; 6 call me         &lt;NA&gt;         &lt;NA&gt;         TRUE</code></pre>
+</div>
+</div>
+<p><code>coalesce()</code> handles the case where both values are <code>NA</code>: <code>NA == NA</code> is <code>NA</code>, not <code>TRUE</code>, so we treat “both <code>NA</code>” as a pass explicitly.</p>
+<p>For a check that stops a script, use the <code>testthat</code> package:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb82"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a>testthat<span class="sc">::</span><span class="fu">expect_equal</span>(<span class="fu">clean_phone</span>(spec<span class="sc">$</span>input), spec<span class="sc">$</span>expected)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Nothing printed means the test passed. If it fails, <code>testthat</code> shows exactly which values differ.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Writing the spec is the cleaning decision">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Writing the spec is the cleaning decision
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Writing <code>expected</code> forces you to decide what <code>"555-0142"</code> should become (<code>NA</code>, since it has no area code) <strong>before</strong> any code exists. That decision is the real work, and it belongs to you. When two teammates write different expected values for the same input, you have found a decision the team has not made yet.</p>
+</div>
+</div>
+<section id="prompting-from-a-spec" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="prompting-from-a-spec"><span class="header-section-number">7.1</span> Prompting from a spec</h2>
+<p>A good prompt for code like this:</p>
+<ol type="1">
+<li><strong>Pastes the spec table</strong> in as text.</li>
+<li>Says what the function takes and returns (“a character vector in, a character vector of the same length out”).</li>
+<li><strong>Forbids guessing</strong>: “return <code>NA</code> when the input does not match, never a default”.</li>
+<li>Asks for tidyverse code only, and no extra packages.</li>
+</ol>
+<p>Then run the spec. A failing row is a gift: <strong>add it to the spec</strong> (and fix the function). The spec grows with every surprise in real data.</p>
+</section>
+</section>
+<section id="assessing-what-comes-back" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> Assessing what comes back</h1>
+<p>Whatever the AI returns for a cleaning task, apply the Audit Loop from the start of this handout, and add two cleaning-specific checks:</p>
+<ol type="1">
+<li><strong>Count before, count after.</strong> For every column the code touched: how many rows changed, how many <code>NA</code>s appeared, how many distinct values remain?</li>
+<li><strong>Look at the hard rows.</strong> Empty strings, odd spacing, mixed case, non-ASCII characters, values that should come back <code>NA</code>.</li>
+</ol>
+<p>A good habit is to ask the AI for a <strong>change log</strong> along with the code, then verify it yourself.</p>
+</section>
+<section id="practice-problems" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> Practice problems</h1>
+<p>Try each one before opening the solution.</p>
+<p><strong>1. Fields per line.</strong> For <code>lines2 &lt;- c("a,b,c", "1,2,3", "4,5", "6,7,8,9", "10,11,12")</code>, which lines do not have three fields?</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Solution 1">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-11-contents" aria-controls="callout-11" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution 1
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-11" class="callout-11-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb83"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a>lines2 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"a,b,c"</span>, <span class="st">"1,2,3"</span>, <span class="st">"4,5"</span>, <span class="st">"6,7,8,9"</span>, <span class="st">"10,11,12"</span>)</span>
+<span id="cb83-2"><a href="#cb83-2" aria-hidden="true" tabindex="-1"></a>n_fields <span class="ot">&lt;-</span> <span class="fu">str_count</span>(lines2, <span class="st">","</span>) <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb83-3"><a href="#cb83-3" aria-hidden="true" tabindex="-1"></a><span class="fu">which</span>(n_fields <span class="sc">!=</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] 3 4</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb85"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a>lines2[n_fields <span class="sc">!=</span> <span class="dv">3</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "4,5"     "6,7,8,9"</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p><strong>2. Extract the ZIP.</strong> From <code>c("Portland OR 97201", "97201-1234", "ZIP: 9720", "97214")</code>, extract a five-digit ZIP. Which inputs should return <code>NA</code>, and does your pattern do that?</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Solution 2">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-12-contents" aria-controls="callout-12" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution 2
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-12" class="callout-12-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb87"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Portland OR 97201"</span>, <span class="st">"97201-1234"</span>, <span class="st">"ZIP: 9720"</span>, <span class="st">"97214"</span>)</span>
+<span id="cb87-2"><a href="#cb87-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str_extract</span>(x, <span class="st">"</span><span class="sc">\\</span><span class="st">b</span><span class="sc">\\</span><span class="st">d{5}</span><span class="sc">\\</span><span class="st">b"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "97201" "97201" NA      "97214"</code></pre>
+</div>
+</div>
+<p><code>\\b</code> is a word boundary, so a run of exactly five digits matches, and the four-digit <code>9720</code> returns <code>NA</code>. Without <code>\\b</code>, a six-digit number would give back its first five digits. Whether <code>97201-1234</code> should become <code>97201</code> is a decision for the owner of the data.</p>
+</div>
+</div>
+</div>
+<p><strong>3. Split heights.</strong> Turn <code>c("5 ft 9 in", "6ft 2in")</code> into numeric columns <code>ft</code> and <code>inch</code>, then into a single column <code>cm</code> (1 inch = 2.54 cm).</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Solution 3">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-13-contents" aria-controls="callout-13" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution 3
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-13" class="callout-13-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb89"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb89-1"><a href="#cb89-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(<span class="at">height_raw =</span> <span class="fu">c</span>(<span class="st">"5 ft 9 in"</span>, <span class="st">"6ft 2in"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb89-2"><a href="#cb89-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">separate_wider_regex</span>(</span>
+<span id="cb89-3"><a href="#cb89-3" aria-hidden="true" tabindex="-1"></a>    height_raw,</span>
+<span id="cb89-4"><a href="#cb89-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(<span class="at">ft =</span> <span class="st">"</span><span class="sc">\\</span><span class="st">d"</span>, <span class="st">"</span><span class="sc">\\</span><span class="st">s*ft</span><span class="sc">\\</span><span class="st">s*"</span>, <span class="at">inch =</span> <span class="st">"</span><span class="sc">\\</span><span class="st">d+"</span>, <span class="st">".*"</span>)</span>
+<span id="cb89-5"><a href="#cb89-5" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb89-6"><a href="#cb89-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(ft, inch), as.numeric), <span class="at">cm =</span> (ft <span class="sc">*</span> <span class="dv">12</span> <span class="sc">+</span> inch) <span class="sc">*</span> <span class="fl">2.54</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 2 x 3
+#&gt;      ft  inch    cm
+#&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+#&gt; 1     5     9  175.
+#&gt; 2     6     2  188.</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p><strong>4. Find the look-alike.</strong> In <code>cities &lt;- c("Portland", "\u0420ortland", "Beaverton", "Salem")</code>, which value contains a non-ASCII character, and which character is it?</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Solution 4">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-14-contents" aria-controls="callout-14" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution 4
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-14" class="callout-14-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb91"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a>cities <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Portland"</span>, <span class="st">"\u0420ortland"</span>, <span class="st">"Beaverton"</span>, <span class="st">"Salem"</span>)</span>
+<span id="cb91-2"><a href="#cb91-2" aria-hidden="true" tabindex="-1"></a>cities[<span class="fu">str_detect</span>(cities, <span class="st">"[^</span><span class="sc">\\</span><span class="st">x00-</span><span class="sc">\\</span><span class="st">x7F]"</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "Рortland"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb93"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb93-1"><a href="#cb93-1" aria-hidden="true" tabindex="-1"></a>stringi<span class="sc">::</span><span class="fu">stri_escape_unicode</span>(cities[<span class="dv">2</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; [1] "\\u0420ortland"</code></pre>
+</div>
+</div>
+<p>The first letter is <code>\u0420</code>, the Cyrillic capital Er, which looks like a Latin <code>P</code>.</p>
+</div>
+</div>
+</div>
+<p><strong>5. Unmapped values.</strong> Using <code>fixes</code> from the Categories section, find the values of <code>humans$favorite</code> (after trimming and lowercasing) that are in neither the valid set <code>c("blue", "red", "green", "gray")</code> nor <code>fixes$raw</code>.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Solution 5">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-15-contents" aria-controls="callout-15" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution 5
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-15" class="callout-15-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb95"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb95-1"><a href="#cb95-1" aria-hidden="true" tabindex="-1"></a>valid <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"blue"</span>, <span class="st">"red"</span>, <span class="st">"green"</span>, <span class="st">"gray"</span>)</span>
+<span id="cb95-2"><a href="#cb95-2" aria-hidden="true" tabindex="-1"></a>humans <span class="sc">|&gt;</span></span>
+<span id="cb95-3"><a href="#cb95-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">favorite =</span> <span class="fu">str_to_lower</span>(<span class="fu">str_squish</span>(favorite))) <span class="sc">|&gt;</span></span>
+<span id="cb95-4"><a href="#cb95-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>favorite <span class="sc">%in%</span> <span class="fu">c</span>(valid, fixes<span class="sc">$</span>raw)) <span class="sc">|&gt;</span></span>
+<span id="cb95-5"><a href="#cb95-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(favorite)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 1 x 2
+#&gt;   favorite       n
+#&gt;   &lt;chr&gt;      &lt;int&gt;
+#&gt; 1 chartreuse     1</code></pre>
+</div>
+</div>
+<p>Only <code>chartreuse</code> remains. It is not an error to fix; it is a value to <strong>flag</strong> and look at.</p>
+</div>
+</div>
+</div>
+<p><strong>6. A spec for ZIP codes.</strong> Write a spec table (at least six rows) for a function <code>clean_zip()</code> that returns a five-digit ZIP or <code>NA</code>. Include <code>"97201-1234"</code>, <code>"9720"</code>, and <code>"  97201 "</code>. Decide what each should become and <strong>why</strong>, then compare with a teammate.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Solution 6">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-16-contents" aria-controls="callout-16" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Solution 6
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-16" class="callout-16-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>There is no single right answer, which is the point. One reasonable spec:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb97"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb97-1"><a href="#cb97-1" aria-hidden="true" tabindex="-1"></a>spec_zip <span class="ot">&lt;-</span> <span class="fu">tribble</span>(</span>
+<span id="cb97-2"><a href="#cb97-2" aria-hidden="true" tabindex="-1"></a>  <span class="sc">~</span>input       , <span class="sc">~</span>expected ,</span>
+<span id="cb97-3"><a href="#cb97-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"97201"</span>      , <span class="st">"97201"</span>   ,</span>
+<span id="cb97-4"><a href="#cb97-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"  97201 "</span>   , <span class="st">"97201"</span>   ,</span>
+<span id="cb97-5"><a href="#cb97-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"97201-1234"</span> , <span class="st">"97201"</span>   ,</span>
+<span id="cb97-6"><a href="#cb97-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"9720"</span>       , <span class="cn">NA</span>        ,</span>
+<span id="cb97-7"><a href="#cb97-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"ZIP 97214"</span>  , <span class="st">"97214"</span>   ,</span>
+<span id="cb97-8"><a href="#cb97-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"none"</span>       , <span class="cn">NA</span></span>
+<span id="cb97-9"><a href="#cb97-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb97-10"><a href="#cb97-10" aria-hidden="true" tabindex="-1"></a>spec_zip</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 6 x 2
+#&gt;   input        expected
+#&gt;   &lt;chr&gt;        &lt;chr&gt;   
+#&gt; 1 "97201"      97201   
+#&gt; 2 "  97201 "   97201   
+#&gt; 3 "97201-1234" 97201   
+#&gt; 4 "9720"       &lt;NA&gt;    
+#&gt; 5 "ZIP 97214"  97214   
+#&gt; 6 "none"       &lt;NA&gt;</code></pre>
+</div>
+</div>
+<p>The hard row is <code>"9720"</code>. A four-digit value could be a ZIP that lost its last digit, or one that lost a leading zero, or an error. Padding it would be a guess; <code>NA</code> plus a flag is the honest answer, unless a lookup table can resolve it.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="appendix-a-a-helper-package-janitor" class="level1" data-number="10">
+<h1 data-number="10"><span class="header-section-number">10</span> Appendix A: A helper package, <code>janitor</code></h1>
+<p><code>janitor</code> is optional and is not installed with <code>tidyverse</code>. Install once with <code>install.packages("janitor")</code>. The code is shown but not run in this handout.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb99"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb99-1"><a href="#cb99-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(janitor)</span>
+<span id="cb99-2"><a href="#cb99-2" aria-hidden="true" tabindex="-1"></a><span class="fu">clean_names</span>(df) <span class="co"># snake_case column names</span></span>
+<span id="cb99-3"><a href="#cb99-3" aria-hidden="true" tabindex="-1"></a><span class="fu">get_dupes</span>(df, id) <span class="co"># rows that share the same id</span></span>
+<span id="cb99-4"><a href="#cb99-4" aria-hidden="true" tabindex="-1"></a><span class="fu">tabyl</span>(df, favorite) <span class="co"># counts with percentages</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The same jobs in the packages you already have:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb100"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb100-1"><a href="#cb100-1" aria-hidden="true" tabindex="-1"></a>df <span class="sc">|&gt;</span> <span class="fu">rename_with</span>(\(x) <span class="fu">str_to_lower</span>(<span class="fu">str_replace_all</span>(x, <span class="st">"</span><span class="sc">\\</span><span class="st">W+"</span>, <span class="st">"_"</span>))) <span class="co"># clean_names</span></span>
+<span id="cb100-2"><a href="#cb100-2" aria-hidden="true" tabindex="-1"></a>df <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="fu">n</span>() <span class="sc">&gt;</span> <span class="dv">1</span>, <span class="at">.by =</span> id) <span class="co"># get_dupes</span></span>
+<span id="cb100-3"><a href="#cb100-3" aria-hidden="true" tabindex="-1"></a>df <span class="sc">|&gt;</span> <span class="fu">count</span>(favorite) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">percent =</span> n <span class="sc">/</span> <span class="fu">sum</span>(n)) <span class="co"># tabyl</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="appendix-b-quick-reference" class="level1" data-number="11">
+<h1 data-number="11"><span class="header-section-number">11</span> Appendix B: Quick reference</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb101"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb101-1"><a href="#cb101-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str_detect</span>(x, pattern) <span class="co"># TRUE/FALSE per element</span></span>
+<span id="cb101-2"><a href="#cb101-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str_extract</span>(x, pattern) <span class="co"># first match, or NA</span></span>
+<span id="cb101-3"><a href="#cb101-3" aria-hidden="true" tabindex="-1"></a><span class="fu">str_extract_all</span>(x, pattern) <span class="co"># every match (a list)</span></span>
+<span id="cb101-4"><a href="#cb101-4" aria-hidden="true" tabindex="-1"></a><span class="fu">str_replace</span>(x, pattern, new) <span class="co"># replace the first match</span></span>
+<span id="cb101-5"><a href="#cb101-5" aria-hidden="true" tabindex="-1"></a><span class="fu">str_replace_all</span>(x, pattern, new) <span class="co"># replace every match</span></span>
+<span id="cb101-6"><a href="#cb101-6" aria-hidden="true" tabindex="-1"></a><span class="fu">str_remove</span>(x, pattern) <span class="co"># replace with nothing</span></span>
+<span id="cb101-7"><a href="#cb101-7" aria-hidden="true" tabindex="-1"></a><span class="fu">str_count</span>(x, pattern) <span class="co"># number of matches</span></span>
+<span id="cb101-8"><a href="#cb101-8" aria-hidden="true" tabindex="-1"></a><span class="fu">str_squish</span>(x) <span class="co"># trim and collapse spaces</span></span>
+<span id="cb101-9"><a href="#cb101-9" aria-hidden="true" tabindex="-1"></a><span class="fu">str_to_lower</span>(x)</span>
+<span id="cb101-10"><a href="#cb101-10" aria-hidden="true" tabindex="-1"></a><span class="fu">str_to_title</span>(x) <span class="co"># change case</span></span>
+<span id="cb101-11"><a href="#cb101-11" aria-hidden="true" tabindex="-1"></a><span class="fu">str_view</span>(x, pattern) <span class="co"># highlight matches (debugging)</span></span>
+<span id="cb101-12"><a href="#cb101-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb101-13"><a href="#cb101-13" aria-hidden="true" tabindex="-1"></a><span class="co"># A literal string instead of a pattern</span></span>
+<span id="cb101-14"><a href="#cb101-14" aria-hidden="true" tabindex="-1"></a><span class="fu">str_replace_all</span>(x, <span class="fu">fixed</span>(<span class="st">"."</span>), <span class="st">""</span>)</span>
+<span id="cb101-15"><a href="#cb101-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb101-16"><a href="#cb101-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Non-ASCII check</span></span>
+<span id="cb101-17"><a href="#cb101-17" aria-hidden="true" tabindex="-1"></a><span class="fu">str_detect</span>(x, <span class="st">"[^</span><span class="sc">\\</span><span class="st">x00-</span><span class="sc">\\</span><span class="st">x7F]"</span>)</span>
+<span id="cb101-18"><a href="#cb101-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb101-19"><a href="#cb101-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Recode with a lookup</span></span>
+<span id="cb101-20"><a href="#cb101-20" aria-hidden="true" tabindex="-1"></a><span class="fu">left_join</span>(df, fixes, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"col"</span> <span class="ot">=</span> <span class="st">"raw"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb101-21"><a href="#cb101-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">col =</span> <span class="fu">coalesce</span>(clean, col))</span>
+<span id="cb101-22"><a href="#cb101-22" aria-hidden="true" tabindex="-1"></a><span class="fu">case_match</span>(x, <span class="st">"old"</span> <span class="sc">~</span> <span class="st">"new"</span>, <span class="at">.default =</span> x)</span>
+<span id="cb101-23"><a href="#cb101-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb101-24"><a href="#cb101-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Test against a spec</span></span>
+<span id="cb101-25"><a href="#cb101-25" aria-hidden="true" tabindex="-1"></a>testthat<span class="sc">::</span><span class="fu">expect_equal</span>(<span class="fu">clean_fn</span>(spec<span class="sc">$</span>input), spec<span class="sc">$</span>expected)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>STAT 531: Ethics and Practice of Data Science</p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

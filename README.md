@@ -3,7 +3,7 @@
 Slides and handouts for the R, data wrangling, visualization, and data cleaning sessions.
 Labs live in the separate course project repo.
 
-Published site: https://dtrStats.github.io/stat531-lectures/
+Published site: https://YOUR-USERNAME.github.io/stat531-lectures/
 
 ## Layout
 
@@ -11,16 +11,17 @@ Published site: https://dtrStats.github.io/stat531-lectures/
 |:--|:--|
 | `NN_slides.qmd` | In-class slides for session NN (reveal.js) |
 | `NN_handout.qmd` | Detailed handout for session NN (HTML) |
-| `data/` | Datasets used in class examples |
+| `data/` | Datasets used in class examples (`movies.csv`, `studios.csv`, `movies.parquet`; `views.parquet` is generated, see below) |
 | `_quarto.yml` | Site settings (shared by every page) |
 | `theme.scss` | Handout theme (PSU colors) |
 | `slides.css` | Slide theme (PSU colors) |
 | `index.qmd` | Home page; the session table builds itself from the files |
 | `docs/` | Rendered site (GitHub Pages serves this folder) |
 | `_freeze/` | Cached R results; commit it so renders are reproducible |
+| `scripts/make-studios.R`, `scripts/make-views.R` | Rebuild `data/studios.csv` and the simulated `data/views.parquet` (Session 2) |
 | `scripts/prune-drafts.R` | Runs after each render and removes output for pages still marked `draft: true` |
 
-Sessions 2-7 are placeholders marked `draft: true`. Drafts are not built, linked, or listed.
+Sessions 4 and 7 are placeholders marked `draft: true`. Drafts are not built, linked, or listed.
 
 ## Publish a session
 
@@ -28,6 +29,10 @@ Sessions 2-7 are placeholders marked `draft: true`. Drafts are not built, linked
 2. Delete the `draft: true` line from the top of the file (and the "Planned outline" stub).
 3. `quarto render`
 4. `git add . && git commit -m "Publish session NN" && git push`
+
+## The big Parquet file
+
+`data/views.parquet` (about 45 MB, 4 million simulated rows) is **not committed** (it is in `.gitignore`). Install `arrow`, then run `Rscript scripts/make-views.R` once from the project root, or share the file with students another way.
 
 ## Build locally
 
