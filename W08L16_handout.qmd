@@ -20,11 +20,16 @@ format:
 knitr::opts_chunk$set(comment = "#>", message = FALSE, warning = FALSE)
 library(tidyverse)
 library(lubridate)
-options(tibble.print_max = 9, tibble.print_min = 9, width = 90, cli.unicode = FALSE)
+options(
+  tibble.print_max = 9,
+  tibble.print_min = 9,
+  width = 90,
+  cli.unicode = FALSE
+)
 theme_set(theme_grey(base_size = 12))
 
-vitals    <- read_csv("data/s6_vitals.csv", show_col_types = FALSE)
-users     <- read_csv("data/s6_users.csv", show_col_types = FALSE)
+vitals <- read_csv("data/s6_vitals.csv", show_col_types = FALSE)
+users <- read_csv("data/s6_users.csv", show_col_types = FALSE)
 steps_sim <- read_csv("data/s6_steps_sim.csv", show_col_types = FALSE)
 
 zs <- function(x) (x - mean(x, na.rm = TRUE)) / sd(x, na.rm = TRUE)
@@ -55,8 +60,8 @@ The pattern from Session 5 continues: an AI assistant can make a column **look**
 #| eval: false
 library(tidyverse)
 library(lubridate)
-vitals    <- read_csv("data/s6_vitals.csv")
-users     <- read_csv("data/s6_users.csv")
+vitals <- read_csv("data/s6_vitals.csv")
+users <- read_csv("data/s6_users.csv")
 steps_sim <- read_csv("data/s6_steps_sim.csv")
 ```
 
@@ -74,8 +79,14 @@ ISO dates (`2026-01-05`, year first, two-digit month and day) happen to sort cor
 ## One column, many formats
 
 ```{r}
-ts_raw <- c("2026-01-05 07:30", "01/05/2026 7:30 AM", "5 Jan 2026 07:30",
-            "2026-01-05T07:30:00Z", "Jan 5, 2026", "yesterday")
+ts_raw <- c(
+  "2026-01-05 07:30",
+  "01/05/2026 7:30 AM",
+  "5 Jan 2026 07:30",
+  "2026-01-05T07:30:00Z",
+  "Jan 5, 2026",
+  "yesterday"
+)
 ts_raw
 ```
 
@@ -97,8 +108,12 @@ An AI may write `mutate(ts = ymd_hms(ts_raw))`, run it, and move on. After **any
 `parse_date_time()` takes several **orders**, each a pattern of date and time pieces: `Y` year, `m` month number, `b` month abbreviation, `d` day, `H` hour (24-hour), `I` hour (12-hour), `M` minute, `p` AM/PM, `z` time zone offset.
 
 ```{r}
-parsed <- parse_date_time(ts_raw, tz = "UTC", quiet = TRUE,
-  orders = c("Ymd HM", "mdY IMp", "dbY HM", "YmdHMSz", "bdY"))
+parsed <- parse_date_time(
+  ts_raw,
+  tz = "UTC",
+  quiet = TRUE,
+  orders = c("Ymd HM", "mdY IMp", "dbY HM", "YmdHMSz", "bdY")
+)
 tibble(ts_raw, parsed, ok = !is.na(parsed))
 ```
 
@@ -245,17 +260,20 @@ A heart rate of **300** is impossible. A heart rate of **125** is unusual but po
 
 ```{r}
 vit <- vit_na |>
-  mutate(hr_flag = case_when(is.na(hr) ~ "missing",
-                             between(hr, 30, 220) ~ "ok",
-                             .default = "impossible"))
+  mutate(
+    hr_flag = case_when(
+      is.na(hr) ~ "missing",
+      between(hr, 30, 220) ~ "ok",
+      .default = "impossible"
+    )
+  )
 count(vit, hr_flag)
 ```
 
 Two details matter here. **The order of `case_when()` conditions matters**: the `is.na()` test must come first, because `between(NA, 30, 220)` is `NA`, not `FALSE`, and a row with an `NA` condition falls through to `.default`. And the row is **kept with a flag**: a later step decides what to do with `"impossible"` rows.
 
 ```{r}
-c(raw_mean = mean(vitals$hr),
-  clean_mean = mean(vit$hr[vit$hr_flag == "ok"]))
+c(raw_mean = mean(vitals$hr), clean_mean = mean(vit$hr[vit$hr_flag == "ok"]))
 ```
 
 The raw mean was off by about 30 beats per minute, from sentinels alone.
@@ -268,9 +286,11 @@ A z-score says how many standard deviations a value is from the mean. For roughl
 
 ```{r}
 hr_ok <- vit |> filter(hr_flag == "ok")
-c(n = nrow(hr_ok),
+c(
+  n = nrow(hr_ok),
   expected_beyond_3 = round(0.0027 * nrow(hr_ok), 1),
-  found = sum(abs(zs(hr_ok$hr)) > 3))
+  found = sum(abs(zs(hr_ok$hr)) > 3)
+)
 ```
 
 The count is close to what a bell curve gives, so nothing here is alarming. A z-score cutoff has to be read against the amount of data: with a million rows you **expect** about 2,700 values beyond 3.
@@ -289,10 +309,15 @@ ggplot(steps_ok, aes(x = steps)) +
 ## z or IQR? It depends on the shape
 
 ```{r}
-tibble(variable   = c("hr (bell-shaped)", "steps (skewed)"),
-       z_beyond_3 = c(sum(abs(zs(hr_ok$hr)) > 3), sum(abs(zs(steps_ok$steps)) > 3)),
-       iqr_rule   = c(sum(iqr_flag(hr_ok$hr)), sum(iqr_flag(steps_ok$steps))),
-       n          = c(nrow(hr_ok), nrow(steps_ok)))
+tibble(
+       variable = c("hr (bell-shaped)", "steps (skewed)"),
+       z_beyond_3 = c(
+              sum(abs(zs(hr_ok$hr)) > 3),
+              sum(abs(zs(steps_ok$steps)) > 3)
+       ),
+       iqr_rule = c(sum(iqr_flag(hr_ok$hr)), sum(iqr_flag(steps_ok$steps))),
+       n = c(nrow(hr_ok), nrow(steps_ok))
+)
 ```
 
 Steps are skewed: a few very active days stretch a long tail on the right. Both rules flag many of those days, and the IQR rule flags more, but these days are not errors. A z-score assumes a roughly symmetric, bell-shaped variable. For skewed data, look at the plot, and consider transforming (for example, with `log()`) before applying a rule.
@@ -320,9 +345,14 @@ set.seed(7)
 hw <- tibble(h = round(rnorm(500, 170, 9))) |>
   mutate(w = round(70 + 0.9 * (h - 170) + rnorm(500, 0, 9)))
 hw <- bind_rows(hw, tibble(h = 190, w = 45)) |>
-  mutate(id = row_number(), zh = zs(h), zw = zs(w),
-         bmi = w / (h / 100)^2, zb = zs(bmi),
-         md = mahalanobis(cbind(h, w), colMeans(cbind(h, w)), cov(cbind(h, w))))
+  mutate(
+    id = row_number(),
+    zh = zs(h),
+    zw = zs(w),
+    bmi = w / (h / 100)^2,
+    zb = zs(bmi),
+    md = mahalanobis(cbind(h, w), colMeans(cbind(h, w)), cov(cbind(h, w)))
+  )
 
 hw |> filter(id == 501) |> select(h, w, zh, zw, bmi, zb)
 ```
@@ -389,11 +419,11 @@ users
 ```{r}
 users |>
   summarize(
-    id_missing       = sum(is.na(id)),
-    id_duplicated    = sum(duplicated(id[!is.na(id)])),
-    age_range        = sum(!between(age, 0, 120), na.rm = TRUE),
-    device_set       = sum(!device %in% c("watch", "band", "ring")),
-    zip_pattern      = sum(!str_detect(zip, "^\\d{5}$"), na.rm = TRUE),
+    id_missing = sum(is.na(id)),
+    id_duplicated = sum(duplicated(id[!is.na(id)])),
+    age_range = sum(!between(age, 0, 120), na.rm = TRUE),
+    device_set = sum(!device %in% c("watch", "band", "ring")),
+    zip_pattern = sum(!str_detect(zip, "^\\d{5}$"), na.rm = TRUE),
     end_before_start = sum(end < start)
   ) |>
   pivot_longer(everything(), names_to = "rule", values_to = "failing")
@@ -467,8 +497,10 @@ A pattern across **observed** columns can support MAR (missing depends on `devic
 
 ```{r}
 steps_sim |>
-  summarize(all_rows = mean(device == "legacy"),
-            complete_rows = mean(device[!is.na(steps)] == "legacy"))
+  summarize(
+    all_rows = mean(device == "legacy"),
+    complete_rows = mean(device[!is.na(steps)] == "legacy")
+  )
 ```
 
 Legacy devices are about 40% of the users but only about 26% of the complete rows. Dropping rows with `NA` removes legacy users first, so any model then learns mostly from new-device users. This is a **fairness-relevant** effect: the people with older devices (often older, or lower income) are quietly underrepresented.
@@ -485,8 +517,8 @@ If heart rate goes missing **because** it was high (the sensor fails during inte
 #| eval: false
 # naniar (optional) gives ready-made missingness plots
 library(naniar)
-gg_miss_var(steps_sim)       # missing values per column
-vis_miss(steps_sim)          # every cell: present or missing
+gg_miss_var(steps_sim) # missing values per column
+vis_miss(steps_sim) # every cell: present or missing
 ```
 
 # Imputation
@@ -515,11 +547,14 @@ The mean of the column stays where it was, which looks reassuring and proves not
 
 ```{r}
 #| fig-height: 3
-bind_rows(truth = steps_sim |> transmute(steps = steps_true),
-          `mean imputed` = mean_imp |> select(steps), .id = "version") |>
-  ggplot(aes(x = steps, fill = version)) +
-  geom_density(alpha = 0.5, color = NA) +
-  scale_fill_manual(values = c("#6d8d24", "#f68b1f"), name = NULL)
+bind_rows(
+        truth = steps_sim |> transmute(steps = steps_true),
+        `mean imputed` = mean_imp |> select(steps),
+        .id = "version"
+) |>
+        ggplot(aes(x = steps, fill = version)) +
+        geom_density(alpha = 0.5, color = NA) +
+        scale_fill_manual(values = c("#6d8d24", "#f68b1f"), name = NULL)
 ```
 
 The mean-imputed version has a spike at the center and thin tails. Intervals computed from it will be too narrow, and correlations too weak.
@@ -530,8 +565,17 @@ The mean-imputed version has a spike at the center and thin tails. Intervals com
 
 ```{r}
 library(mice)
-dat <- steps_sim |> select(steps, device, age) |> mutate(device = factor(device))
-imp <- mice(dat, m = 5, method = "pmm", donors = 20, printFlag = FALSE, seed = 531)
+dat <- steps_sim |>
+  select(steps, device, age) |>
+  mutate(device = factor(device))
+imp <- mice(
+  dat,
+  m = 5,
+  method = "pmm",
+  donors = 20,
+  printFlag = FALSE,
+  seed = 531
+)
 ```
 
 - `m = 5`: five completed datasets.
@@ -556,10 +600,13 @@ In this simulation we know the true steps, so we can score each method.
 stats <- \(x) c(mean = mean(x), sd = sd(x))
 pooled <- sapply(1:5, \(i) stats(complete(imp, i)$steps))
 
-rbind(truth           = stats(steps_sim$steps_true),
-      `drop rows`     = stats(na.omit(steps_sim$steps)),
-      `mean imputed`  = stats(mean_imp$steps),
-      `mice (pooled)` = rowMeans(pooled)) |> round()
+rbind(
+      truth = stats(steps_sim$steps_true),
+      `drop rows` = stats(na.omit(steps_sim$steps)),
+      `mean imputed` = stats(mean_imp$steps),
+      `mice (pooled)` = rowMeans(pooled)
+) |>
+      round()
 ```
 
 Dropping rows overstates the mean (the legacy users, who walk less, are missing most). Mean imputation keeps that biased mean and shrinks the spread. `mice` recovers both.
@@ -567,12 +614,17 @@ Dropping rows overstates the mean (the legacy users, who walk less, are missing 
 By group:
 
 ```{r}
-by_device <- function(d, nm) d |> summarize(mean = mean(steps), .by = device) |> mutate(version = nm)
+by_device <- function(d, nm) {
+  d |> summarize(mean = mean(steps), .by = device) |> mutate(version = nm)
+}
 bind_rows(
   by_device(steps_sim |> mutate(steps = steps_true), "truth"),
   by_device(steps_sim |> filter(!is.na(steps)), "drop rows"),
   by_device(mean_imp, "mean imputed"),
-  by_device(complete(imp, 1) |> as_tibble() |> mutate(device = as.character(device)), "mice (1 of 5)")
+  by_device(
+    complete(imp, 1) |> as_tibble() |> mutate(device = as.character(device)),
+    "mice (1 of 5)"
+  )
 ) |>
   pivot_wider(names_from = device, values_from = mean) |>
   mutate(across(c(legacy, new), round))
@@ -628,8 +680,12 @@ Try each one before opening the solution.
 ::: {.callout-note collapse="true" title="Solution 1"}
 ```{r}
 x <- c("2026-03-01 08:15", "03/02/2026 9:00 PM", "Mar 3, 2026", "tomorrow")
-p <- parse_date_time(x, tz = "UTC", quiet = TRUE,
-                     orders = c("Ymd HM", "mdY IMp", "bdY"))
+p <- parse_date_time(
+  x,
+  tz = "UTC",
+  quiet = TRUE,
+  orders = c("Ymd HM", "mdY IMp", "bdY")
+)
 tibble(x, p)
 sum(is.na(p))
 ```
@@ -653,9 +709,13 @@ Once the sentinel is `NA`, `mean()` returns `NA`, because R refuses to guess. `n
 ::: {.callout-note collapse="true" title="Solution 3"}
 ```{r}
 users |>
-  mutate(age_flag = case_when(is.na(age) ~ "missing",
-                              between(age, 0, 120) ~ "ok",
-                              .default = "impossible")) |>
+  mutate(
+    age_flag = case_when(
+      is.na(age) ~ "missing",
+      between(age, 0, 120) ~ "ok",
+      .default = "impossible"
+    )
+  ) |>
   count(age_flag)
 ```
 The `is.na()` condition comes first, otherwise the `NA` age falls through to `"impossible"`.
@@ -677,8 +737,10 @@ Both flag the long right tail, and the IQR rule flags many more. Neither is "rig
 ::: {.callout-note collapse="true" title="Solution 5"}
 ```{r}
 users |>
-  summarize(zip_not_97 = sum(!str_starts(zip, "97"), na.rm = TRUE),
-            zip_missing = sum(is.na(zip)))
+  summarize(
+    zip_not_97 = sum(!str_starts(zip, "97"), na.rm = TRUE),
+    zip_missing = sum(is.na(zip))
+  )
 ```
 No ZIP fails this rule (all non-missing ones start with 97), and one is missing. Report the missing one under completeness, not under this rule. Whether `97` is a valid requirement at all is a question for the data owner.
 :::
@@ -689,13 +751,15 @@ No ZIP fails this rule (all non-missing ones start with 97), and one is missing.
 ```{r}
 #| fig-height: 3
 steps_sim |>
-  mutate(age_group = cut(age, c(0, 30, 40, 50, Inf)),
-         missing = is.na(steps)) |>
-  summarize(rate = mean(missing), .by = c(device, age_group)) |>
-  ggplot(aes(x = age_group, y = rate, fill = device)) +
-  geom_col(position = "dodge") +
-  scale_fill_manual(values = c("#f68b1f", "#6d8d24"), name = NULL) +
-  labs(x = "Age group", y = "Share of steps missing")
+       mutate(
+              age_group = cut(age, c(0, 30, 40, 50, Inf)),
+              missing = is.na(steps)
+       ) |>
+       summarize(rate = mean(missing), .by = c(device, age_group)) |>
+       ggplot(aes(x = age_group, y = rate, fill = device)) +
+       geom_col(position = "dodge") +
+       scale_fill_manual(values = c("#f68b1f", "#6d8d24"), name = NULL) +
+       labs(x = "Age group", y = "Share of steps missing")
 ```
 The rate depends on `device` (high for legacy in every age group) and hardly on age. That fits MAR given device.
 :::
@@ -707,7 +771,8 @@ Compare the distribution before and after, compare group means before and after,
 
 ```{r}
 #| fig-height: 3
-cd <- complete(imp, 1) |> as_tibble() |>
+cd <- complete(imp, 1) |>
+  as_tibble() |>
   mutate(imputed = is.na(steps_sim$steps), device = as.character(device))
 cd |>
   filter(device == "legacy") |>
@@ -742,24 +807,32 @@ It does the same job as the table of failing counts, with a formatted report, an
 #| eval: false
 # Dates
 parse_date_time(x, orders = c("Ymd HM", "mdY IMp"), tz = "UTC")
-sum(is.na(parsed)) - sum(is.na(x))      # how many failed to parse
-with_tz(t, "UTC"); force_tz(t, "UTC")   # display change vs repair
+sum(is.na(parsed)) - sum(is.na(x)) # how many failed to parse
+with_tz(t, "UTC")
+force_tz(t, "UTC") # display change vs repair
 
 # Sentinels
 na_if(x, -999)
 read_csv(path, na = c("", "NA", "-999"))
 
 # Flags, not deletes
-case_when(is.na(x) ~ "missing", between(x, lo, hi) ~ "ok", .default = "impossible")
+case_when(
+  is.na(x) ~ "missing",
+  between(x, lo, hi) ~ "ok",
+  .default = "impossible"
+)
 
 # Outliers
-z <- (x - mean(x, na.rm = TRUE)) / sd(x, na.rm = TRUE)   # abs(z) > 3
-q <- quantile(x, c(.25, .75), na.rm = TRUE)               # 1.5 * IQR rule
-mahalanobis(df, colMeans(df), cov(df))                    # several variables at once
+z <- (x - mean(x, na.rm = TRUE)) / sd(x, na.rm = TRUE) # abs(z) > 3
+q <- quantile(x, c(.25, .75), na.rm = TRUE) # 1.5 * IQR rule
+mahalanobis(df, colMeans(df), cov(df)) # several variables at once
 
 # Rules as counts
-summarize(df, rule1 = sum(!between(a, 0, 120), na.rm = TRUE),
-              rule2 = sum(!str_detect(b, "^\\d{5}$"), na.rm = TRUE))
+summarize(
+  df,
+  rule1 = sum(!between(a, 0, 120), na.rm = TRUE),
+  rule2 = sum(!str_detect(b, "^\\d{5}$"), na.rm = TRUE)
+)
 
 # Missingness
 summarize(df, missing = mean(is.na(x)), .by = group)
@@ -767,6 +840,6 @@ summarize(df, missing = mean(is.na(x)), .by = group)
 # Imputation
 library(mice)
 imp <- mice(df, m = 5, method = "pmm", seed = 531)
-complete(imp, 1)                                  # one completed dataset
-summary(pool(with(imp, lm(y ~ x))))               # pooled model
+complete(imp, 1) # one completed dataset
+summary(pool(with(imp, lm(y ~ x)))) # pooled model
 ```
