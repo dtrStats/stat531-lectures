@@ -15,19 +15,36 @@ format:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, comment = "#>", message = FALSE, warning = FALSE, fig.retina = 2)
+knitr::opts_chunk$set(
+  echo = TRUE,
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE,
+  fig.retina = 2
+)
 library(tidyverse)
 library(lubridate)
-options(tibble.print_max = 7, tibble.print_min = 7, width = 72,
-        pillar.max_footer_lines = 2, cli.unicode = FALSE)
+options(
+  tibble.print_max = 7,
+  tibble.print_min = 7,
+  width = 72,
+  pillar.max_footer_lines = 2,
+  cli.unicode = FALSE
+)
 theme_set(theme_grey(base_size = 15))
 
-vitals    <- read_csv("data/s6_vitals.csv", show_col_types = FALSE)
-users     <- read_csv("data/s6_users.csv", show_col_types = FALSE)
+vitals <- read_csv("data/s6_vitals.csv", show_col_types = FALSE)
+users <- read_csv("data/s6_users.csv", show_col_types = FALSE)
 steps_sim <- read_csv("data/s6_steps_sim.csv", show_col_types = FALSE)
 
-ts_raw <- c("2026-01-05 07:30", "01/05/2026 7:30 AM", "5 Jan 2026 07:30",
-            "2026-01-05T07:30:00Z", "Jan 5, 2026", "yesterday")
+ts_raw <- c(
+  "2026-01-05 07:30",
+  "01/05/2026 7:30 AM",
+  "5 Jan 2026 07:30",
+  "2026-01-05T07:30:00Z",
+  "Jan 5, 2026",
+  "yesterday"
+)
 
 zs <- function(x) (x - mean(x, na.rm = TRUE)) / sd(x, na.rm = TRUE)
 iqr_flag <- function(x) {
@@ -37,9 +54,13 @@ iqr_flag <- function(x) {
 
 vit_na <- vitals |> mutate(hr = na_if(hr, -999), steps = na_if(steps, -1))
 vit <- vit_na |>
-  mutate(hr_flag = case_when(is.na(hr) ~ "missing",
-                             between(hr, 30, 220) ~ "ok",
-                             .default = "impossible"))
+  mutate(
+    hr_flag = case_when(
+      is.na(hr) ~ "missing",
+      between(hr, 30, 220) ~ "ok",
+      .default = "impossible"
+    )
+  )
 hr_ok <- vit |> filter(hr_flag == "ok")
 steps_ok <- vit |> filter(!is.na(steps))
 
@@ -47,9 +68,14 @@ set.seed(7)
 hw <- tibble(h = round(rnorm(500, 170, 9))) |>
   mutate(w = round(70 + 0.9 * (h - 170) + rnorm(500, 0, 9)))
 hw <- bind_rows(hw, tibble(h = 190, w = 45)) |>
-  mutate(id = row_number(), zh = zs(h), zw = zs(w),
-         bmi = w / (h / 100)^2, zb = zs(bmi),
-         md = mahalanobis(cbind(h, w), colMeans(cbind(h, w)), cov(cbind(h, w))))
+  mutate(
+    id = row_number(),
+    zh = zs(h),
+    zw = zs(w),
+    bmi = w / (h / 100)^2,
+    zb = zs(bmi),
+    md = mahalanobis(cbind(h, w), colMeans(cbind(h, w)), cov(cbind(h, w)))
+  )
 ```
 
 # Welcome {background-color="#f3f6ea"}
@@ -100,8 +126,8 @@ Hands-on today: **code it**, **prompt it**, **assess it**.
 ```{r}
 #| eval: false
 library(tidyverse)
-vitals    <- read_csv("data/s6_vitals.csv")
-users     <- read_csv("data/s6_users.csv")
+vitals <- read_csv("data/s6_vitals.csv")
+users <- read_csv("data/s6_users.csv")
 steps_sim <- read_csv("data/s6_steps_sim.csv")
 ```
 
@@ -156,8 +182,12 @@ Five of six became `NA`. No error: the function did what you asked.
 ## Give it a list of orders
 
 ```{r}
-parsed <- parse_date_time(ts_raw, tz = "UTC", quiet = TRUE,
-  orders = c("Ymd HM", "mdY IMp", "dbY HM", "YmdHMSz", "bdY"))
+parsed <- parse_date_time(
+  ts_raw,
+  tz = "UTC",
+  quiet = TRUE,
+  orders = c("Ymd HM", "mdY IMp", "dbY HM", "YmdHMSz", "bdY")
+)
 tibble(ts_raw, parsed, ok = !is.na(parsed))
 ```
 
@@ -285,9 +315,13 @@ A heart rate of **300** is impossible. A heart rate of **125** is unusual. Diffe
 
 ```{r}
 vit_na |>
-  mutate(hr_flag = case_when(is.na(hr) ~ "missing",
-                             between(hr, 30, 220) ~ "ok",
-                             .default = "impossible")) |>
+  mutate(
+    hr_flag = case_when(
+      is.na(hr) ~ "missing",
+      between(hr, 30, 220) ~ "ok",
+      .default = "impossible"
+    )
+  ) |>
   count(hr_flag)
 ```
 
@@ -313,8 +347,7 @@ Land the point: three different problems share one column: a sentinel, an imposs
 ## The answer
 
 ```{r}
-c(raw = mean(vitals$hr),
-  clean = mean(hr_ok$hr))
+c(raw = mean(vitals$hr), clean = mean(hr_ok$hr))
 count(vit, hr_flag)
 ```
 
@@ -332,8 +365,7 @@ For roughly bell-shaped data, about **0.3%** of values are beyond $|z| > 3$.
 
 ```{r}
 nrow(hr_ok)
-c(expected = round(0.0027 * nrow(hr_ok), 1),
-  found    = sum(abs(zs(hr_ok$hr)) > 3))
+c(expected = round(0.0027 * nrow(hr_ok), 1), found = sum(abs(zs(hr_ok$hr)) > 3))
 ```
 
 Close to what a bell curve gives: nothing alarming here.
@@ -351,10 +383,15 @@ ggplot(steps_ok, aes(x = steps)) +
 ## z or IQR? It depends on the shape
 
 ```{r}
-tibble(variable = c("hr (bell-shaped)", "steps (skewed)"),
-       z_beyond_3 = c(sum(abs(zs(hr_ok$hr)) > 3), sum(abs(zs(steps_ok$steps)) > 3)),
-       iqr_rule   = c(sum(iqr_flag(hr_ok$hr)), sum(iqr_flag(steps_ok$steps))),
-       n          = c(nrow(hr_ok), nrow(steps_ok)))
+tibble(
+       variable = c("hr (bell-shaped)", "steps (skewed)"),
+       z_beyond_3 = c(
+              sum(abs(zs(hr_ok$hr)) > 3),
+              sum(abs(zs(steps_ok$steps)) > 3)
+       ),
+       iqr_rule = c(sum(iqr_flag(hr_ok$hr)), sum(iqr_flag(steps_ok$steps))),
+       n = c(nrow(hr_ok), nrow(steps_ok))
+)
 ```
 
 Skewed data flags many "outliers" on the long tail. Rare is **not** wrong.
@@ -428,9 +465,9 @@ A value can be **valid and still wrong**: `120` is a valid heart rate that may b
 ```{r}
 users |>
   summarize(
-    id_missing  = sum(is.na(id)),
-    age_range   = sum(!between(age, 0, 120), na.rm = TRUE),
-    device_set  = sum(!device %in% c("watch", "band", "ring")),
+    id_missing = sum(is.na(id)),
+    age_range = sum(!between(age, 0, 120), na.rm = TRUE),
+    device_set = sum(!device %in% c("watch", "band", "ring")),
     zip_pattern = sum(!str_detect(zip, "^\\d{5}$"), na.rm = TRUE)
   ) |>
   pivot_longer(everything(), names_to = "rule", values_to = "failing")
@@ -461,12 +498,12 @@ Land the point: when the counts differ, the DISAGREEMENT is the finding. Decide 
 ```{r}
 users |>
   summarize(
-    id_missing    = sum(is.na(id)),
+    id_missing = sum(is.na(id)),
     id_duplicated = sum(duplicated(id[!is.na(id)])),
-    age_range     = sum(!between(age, 0, 120), na.rm = TRUE),
-    device_set    = sum(!device %in% c("watch", "band", "ring")),
-    zip_pattern   = sum(!str_detect(zip, "^\\d{5}$"), na.rm = TRUE),
-    end_early     = sum(end < start)
+    age_range = sum(!between(age, 0, 120), na.rm = TRUE),
+    device_set = sum(!device %in% c("watch", "band", "ring")),
+    zip_pattern = sum(!str_detect(zip, "^\\d{5}$"), na.rm = TRUE),
+    end_early = sum(end < start)
   )
 ```
 
@@ -515,8 +552,10 @@ You can **describe** this pattern. You cannot **prove** the cause from the file.
 
 ```{r}
 steps_sim |>
-  summarize(all_rows = mean(device == "legacy"),
-            complete_rows = mean(device[!is.na(steps)] == "legacy"))
+  summarize(
+    all_rows = mean(device == "legacy"),
+    complete_rows = mean(device[!is.na(steps)] == "legacy")
+  )
 ```
 
 Legacy devices were **40%** of users, but only **26%** of complete rows.
@@ -569,19 +608,31 @@ The mean stays put. The **spread shrinks**, because one value now fills 25% of t
 
 ```{r}
 #| fig-height: 2.6
-bind_rows(truth = steps_sim |> transmute(steps = steps_true),
-          `mean imputed` = mean_imp |> select(steps), .id = "version") |>
-  ggplot(aes(x = steps, fill = version)) +
-  geom_density(alpha = 0.5, color = NA) +
-  scale_fill_manual(values = c("#6d8d24", "#f68b1f"), name = NULL)
+bind_rows(
+        truth = steps_sim |> transmute(steps = steps_true),
+        `mean imputed` = mean_imp |> select(steps),
+        .id = "version"
+) |>
+        ggplot(aes(x = steps, fill = version)) +
+        geom_density(alpha = 0.5, color = NA) +
+        scale_fill_manual(values = c("#6d8d24", "#f68b1f"), name = NULL)
 ```
 
 ## Multiple imputation with `mice`
 
 ```{r}
 library(mice)
-dat <- steps_sim |> select(steps, device, age) |> mutate(device = factor(device))
-imp <- mice(dat, m = 5, method = "pmm", donors = 20, printFlag = FALSE, seed = 531)
+dat <- steps_sim |>
+  select(steps, device, age) |>
+  mutate(device = factor(device))
+imp <- mice(
+  dat,
+  m = 5,
+  method = "pmm",
+  donors = 20,
+  printFlag = FALSE,
+  seed = 531
+)
 ```
 
 - `m = 5`: five completed datasets, to carry the **uncertainty**
@@ -594,10 +645,13 @@ imp <- mice(dat, m = 5, method = "pmm", donors = 20, printFlag = FALSE, seed = 5
 stats <- \(x) c(mean = mean(x), sd = sd(x))
 pooled <- sapply(1:5, \(i) stats(complete(imp, i)$steps))
 
-rbind(truth           = stats(steps_sim$steps_true),
-      `drop rows`     = stats(na.omit(steps_sim$steps)),
-      `mean imputed`  = stats(mean_imp$steps),
-      `mice (pooled)` = rowMeans(pooled)) |> round()
+rbind(
+      truth = stats(steps_sim$steps_true),
+      `drop rows` = stats(na.omit(steps_sim$steps)),
+      `mean imputed` = stats(mean_imp$steps),
+      `mice (pooled)` = rowMeans(pooled)
+) |>
+      round()
 ```
 
 . . .

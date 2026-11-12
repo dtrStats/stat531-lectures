@@ -2194,29 +2194,29 @@
     "objectID": "W08L16_slides.html#recall-30-seconds-silent",
     "href": "W08L16_slides.html#recall-30-seconds-silent",
     "title": "Types, Anomalies, and Missingness",
-    "section": "",
-    "text": "What does \"[^\\\\x00-\\\\x7F]\" find?\nWhy is parse_number() risky on \"165 lb\" and \"72 kg\"?\nWhy do we use a lookup table instead of a long ifelse()?\n\n. . .\n\nAny character outside plain ASCII: lookalikes, accents\nIt drops the unit, so pounds and kilograms mix\nA reviewer can read it, and anti_join() shows what is unmapped\n\n\nRetrieval practice from Session 5. 30 seconds of silent thinking, then reveal. Do not discuss at length."
+    "section": "Recall (30 seconds, silent)",
+    "text": "Recall (30 seconds, silent)\n\nWhat does \"[^\\\\x00-\\\\x7F]\" find?\nWhy is parse_number() risky on \"165 lb\" and \"72 kg\"?\nWhy do we use a lookup table instead of a long ifelse()?\n\n\n\nAny character outside plain ASCII: lookalikes, accents\nIt drops the unit, so pounds and kilograms mix\nA reviewer can read it, and anti_join() shows what is unmapped\n\n\nRetrieval practice from Session 5. 30 seconds of silent thinking, then reveal. Do not discuss at length."
   },
   {
     "objectID": "W08L16_slides.html#todays-route",
     "href": "W08L16_slides.html#todays-route",
     "title": "Types, Anomalies, and Missingness",
-    "section": "",
-    "text": "Types: dates arrive as text in many formats\nSentinels: numbers that mean “nothing”\nOutliers: domain rules first, plots second\nValidity rules: write them as code\nMissingness: who is missing, and why does it matter?\nImputation: judge it by the distribution\n\nHands-on today: code it, prompt it, assess it."
+    "section": "Today’s route",
+    "text": "Today’s route\n\nTypes: dates arrive as text in many formats\nSentinels: numbers that mean “nothing”\nOutliers: domain rules first, plots second\nValidity rules: write them as code\nMissingness: who is missing, and why does it matter?\nImputation: judge it by the distribution\n\nHands-on today: code it, prompt it, assess it."
   },
   {
     "objectID": "W08L16_slides.html#set-up-for-the-three-tasks",
     "href": "W08L16_slides.html#set-up-for-the-three-tasks",
     "title": "Types, Anomalies, and Missingness",
-    "section": "",
-    "text": "library(tidyverse)\nvitals    &lt;- read_csv(\"data/s6_vitals.csv\")\nusers     &lt;- read_csv(\"data/s6_users.csv\")\nsteps_sim &lt;- read_csv(\"data/s6_steps_sim.csv\")\n\nThe files are on the course site, in the data/ folder. Have your AI assistant open too."
+    "section": "Set up for the three tasks",
+    "text": "Set up for the three tasks\n\nlibrary(tidyverse)\nvitals &lt;- read_csv(\"data/s6_vitals.csv\")\nusers &lt;- read_csv(\"data/s6_users.csv\")\nsteps_sim &lt;- read_csv(\"data/s6_steps_sim.csv\")\n\nThe files are on the course site, in the data/ folder. Have your AI assistant open too."
   },
   {
     "objectID": "W08L16_slides.html#where-we-left-off",
     "href": "W08L16_slides.html#where-we-left-off",
     "title": "Types, Anomalies, and Missingness",
-    "section": "",
-    "text": "Session 5 fixed text: patterns, lookalikes, categories.\nToday is numbers, dates, and holes. The order is the same: flag first, remediate patterns, and only then impute or drop.\nAI can fill a hole in one line. It will not tell you who the hole belongs to. That is your job as navigator."
+    "section": "Where we left off",
+    "text": "Where we left off\nSession 5 fixed text: patterns, lookalikes, categories.\nToday is numbers, dates, and holes. The order is the same: flag first, remediate patterns, and only then impute or drop.\nAI can fill a hole in one line. It will not tell you who the hole belongs to. That is your job as navigator."
   },
   {
     "objectID": "W08L16_slides.html#text-is-not-a-date",
@@ -2237,14 +2237,14 @@
     "href": "W08L16_slides.html#ymd_hms-parses-only-what-it-knows",
     "title": "Types, Anomalies, and Missingness",
     "section": "ymd_hms() parses only what it knows",
-    "text": "ymd_hms() parses only what it knows\n\nymd_hms(ts_raw, quiet = TRUE)\n\n#&gt; [1] NA                        NA                       \n#&gt; [3] NA                        \"2026-01-05 07:30:00 UTC\"\n#&gt; [5] NA                        NA\n\nsum(is.na(ymd_hms(ts_raw, quiet = TRUE)))\n\n#&gt; [1] 5\n\n\nFive of six became NA. No error: the function did what you asked.\n. . .\n\nBug: an AI that stops here has just discarded 83% of the column."
+    "text": "ymd_hms() parses only what it knows\n\nymd_hms(ts_raw, quiet = TRUE)\n\n#&gt; [1] NA                        NA                       \n#&gt; [3] NA                        \"2026-01-05 07:30:00 UTC\"\n#&gt; [5] NA                        NA\n\nsum(is.na(ymd_hms(ts_raw, quiet = TRUE)))\n\n#&gt; [1] 5\n\n\nFive of six became NA. No error: the function did what you asked.\n\n\nBug: an AI that stops here has just discarded 83% of the column."
   },
   {
     "objectID": "W08L16_slides.html#give-it-a-list-of-orders",
     "href": "W08L16_slides.html#give-it-a-list-of-orders",
     "title": "Types, Anomalies, and Missingness",
     "section": "Give it a list of orders",
-    "text": "Give it a list of orders\n\nparsed &lt;- parse_date_time(ts_raw, tz = \"UTC\", quiet = TRUE,\n  orders = c(\"Ymd HM\", \"mdY IMp\", \"dbY HM\", \"YmdHMSz\", \"bdY\"))\ntibble(ts_raw, parsed, ok = !is.na(parsed))\n\n#&gt; # A tibble: 6 x 3\n#&gt;   ts_raw               parsed              ok   \n#&gt;   &lt;chr&gt;                &lt;dttm&gt;              &lt;lgl&gt;\n#&gt; 1 2026-01-05 07:30     2026-01-05 07:30:00 TRUE \n#&gt; 2 01/05/2026 7:30 AM   2026-01-05 07:30:00 TRUE \n#&gt; 3 5 Jan 2026 07:30     2026-01-05 07:30:00 TRUE \n#&gt; 4 2026-01-05T07:30:00Z 2026-01-05 07:30:00 TRUE \n#&gt; 5 Jan 5, 2026          2026-01-05 00:00:00 TRUE \n#&gt; 6 yesterday            NA                  FALSE\n\n\nEach order is a pattern: Y year, m month, d day, HM hour and minute, IMp 12-hour clock with AM/PM."
+    "text": "Give it a list of orders\n\nparsed &lt;- parse_date_time(\n  ts_raw,\n  tz = \"UTC\",\n  quiet = TRUE,\n  orders = c(\"Ymd HM\", \"mdY IMp\", \"dbY HM\", \"YmdHMSz\", \"bdY\")\n)\ntibble(ts_raw, parsed, ok = !is.na(parsed))\n\n#&gt; # A tibble: 6 x 3\n#&gt;   ts_raw               parsed              ok   \n#&gt;   &lt;chr&gt;                &lt;dttm&gt;              &lt;lgl&gt;\n#&gt; 1 2026-01-05 07:30     2026-01-05 07:30:00 TRUE \n#&gt; 2 01/05/2026 7:30 AM   2026-01-05 07:30:00 TRUE \n#&gt; 3 5 Jan 2026 07:30     2026-01-05 07:30:00 TRUE \n#&gt; 4 2026-01-05T07:30:00Z 2026-01-05 07:30:00 TRUE \n#&gt; 5 Jan 5, 2026          2026-01-05 00:00:00 TRUE \n#&gt; 6 yesterday            NA                  FALSE\n\n\nEach order is a pattern: Y year, m month, d day, HM hour and minute, IMp 12-hour clock with AM/PM."
   },
   {
     "objectID": "W08L16_slides.html#count-what-failed",
@@ -2293,7 +2293,7 @@
     "href": "W08L16_slides.html#turn-sentinels-into-na",
     "title": "Types, Anomalies, and Missingness",
     "section": "Turn sentinels into NA",
-    "text": "Turn sentinels into NA\n\nvit_na &lt;- vitals |&gt; mutate(hr = na_if(hr, -999), steps = na_if(steps, -1))\ncolSums(is.na(vit_na))\n\n#&gt;    hr steps \n#&gt;    29    25\n\n\nWhen reading a file: read_csv(path, na = c(\"\", \"NA\", \"-999\")).\n. . .\n\nBug: is -1 a sentinel? In steps, yes. In a temperature column, it is a real reading. The data dictionary decides, not a regex or an AI."
+    "text": "Turn sentinels into NA\n\nvit_na &lt;- vitals |&gt; mutate(hr = na_if(hr, -999), steps = na_if(steps, -1))\ncolSums(is.na(vit_na))\n\n#&gt;    hr steps \n#&gt;    29    25\n\n\nWhen reading a file: read_csv(path, na = c(\"\", \"NA\", \"-999\")).\n\n\nBug: is -1 a sentinel? In steps, yes. In a temperature column, it is a real reading. The data dictionary decides, not a regex or an AI."
   },
   {
     "objectID": "W08L16_slides.html#nan-is-not-na-flex",
@@ -2314,7 +2314,7 @@
     "href": "W08L16_slides.html#fixed-bounds-flag-do-not-delete",
     "title": "Types, Anomalies, and Missingness",
     "section": "Fixed bounds: flag, do not delete",
-    "text": "Fixed bounds: flag, do not delete\n\nvit_na |&gt;\n  mutate(hr_flag = case_when(is.na(hr) ~ \"missing\",\n                             between(hr, 30, 220) ~ \"ok\",\n                             .default = \"impossible\")) |&gt;\n  count(hr_flag)\n\n#&gt; # A tibble: 3 x 2\n#&gt;   hr_flag        n\n#&gt;   &lt;chr&gt;      &lt;int&gt;\n#&gt; 1 impossible    12\n#&gt; 2 missing       29\n#&gt; 3 ok           959\n\n\nKeep the row. Keep the flag. A later step decides what to do."
+    "text": "Fixed bounds: flag, do not delete\n\nvit_na |&gt;\n  mutate(\n    hr_flag = case_when(\n      is.na(hr) ~ \"missing\",\n      between(hr, 30, 220) ~ \"ok\",\n      .default = \"impossible\"\n    )\n  ) |&gt;\n  count(hr_flag)\n\n#&gt; # A tibble: 3 x 2\n#&gt;   hr_flag        n\n#&gt;   &lt;chr&gt;      &lt;int&gt;\n#&gt; 1 impossible    12\n#&gt; 2 missing       29\n#&gt; 3 ok           959\n\n\nKeep the row. Keep the flag. A later step decides what to do."
   },
   {
     "objectID": "W08L16_slides.html#task-1-code-it",
@@ -2328,14 +2328,14 @@
     "href": "W08L16_slides.html#the-answer",
     "title": "Types, Anomalies, and Missingness",
     "section": "The answer",
-    "text": "The answer\n\nc(raw = mean(vitals$hr),\n  clean = mean(hr_ok$hr))\n\n#&gt;      raw    clean \n#&gt; 41.20000 71.91971\n\ncount(vit, hr_flag)\n\n#&gt; # A tibble: 3 x 2\n#&gt;   hr_flag        n\n#&gt;   &lt;chr&gt;      &lt;int&gt;\n#&gt; 1 impossible    12\n#&gt; 2 missing       29\n#&gt; 3 ok           959\n\n\n. . .\n\nBug: the raw mean was off by 30 bpm, from sentinels alone."
+    "text": "The answer\n\nc(raw = mean(vitals$hr), clean = mean(hr_ok$hr))\n\n#&gt;      raw    clean \n#&gt; 41.20000 71.91971\n\ncount(vit, hr_flag)\n\n#&gt; # A tibble: 3 x 2\n#&gt;   hr_flag        n\n#&gt;   &lt;chr&gt;      &lt;int&gt;\n#&gt; 1 impossible    12\n#&gt; 2 missing       29\n#&gt; 3 ok           959\n\n\n\n\nBug: the raw mean was off by 30 bpm, from sentinels alone."
   },
   {
     "objectID": "W08L16_slides.html#z-scores-how-far-from-the-rest",
     "href": "W08L16_slides.html#z-scores-how-far-from-the-rest",
     "title": "Types, Anomalies, and Missingness",
     "section": "z-scores: how far from the rest?",
-    "text": "z-scores: how far from the rest?\n\\[z = \\frac{x - \\bar{x}}{s}\\]\nFor roughly bell-shaped data, about 0.3% of values are beyond \\(|z| &gt; 3\\).\n\nnrow(hr_ok)\n\n#&gt; [1] 959\n\nc(expected = round(0.0027 * nrow(hr_ok), 1),\n  found    = sum(abs(zs(hr_ok$hr)) &gt; 3))\n\n#&gt; expected    found \n#&gt;      2.6      5.0\n\n\nClose to what a bell curve gives: nothing alarming here."
+    "text": "z-scores: how far from the rest?\n\\[z = \\frac{x - \\bar{x}}{s}\\]\nFor roughly bell-shaped data, about 0.3% of values are beyond \\(|z| &gt; 3\\).\n\nnrow(hr_ok)\n\n#&gt; [1] 959\n\nc(expected = round(0.0027 * nrow(hr_ok), 1), found = sum(abs(zs(hr_ok$hr)) &gt; 3))\n\n#&gt; expected    found \n#&gt;      2.6      5.0\n\n\nClose to what a bell curve gives: nothing alarming here."
   },
   {
     "objectID": "W08L16_slides.html#the-iqr-rule",
@@ -2349,21 +2349,21 @@
     "href": "W08L16_slides.html#z-or-iqr-it-depends-on-the-shape",
     "title": "Types, Anomalies, and Missingness",
     "section": "z or IQR? It depends on the shape",
-    "text": "z or IQR? It depends on the shape\n\ntibble(variable = c(\"hr (bell-shaped)\", \"steps (skewed)\"),\n       z_beyond_3 = c(sum(abs(zs(hr_ok$hr)) &gt; 3), sum(abs(zs(steps_ok$steps)) &gt; 3)),\n       iqr_rule   = c(sum(iqr_flag(hr_ok$hr)), sum(iqr_flag(steps_ok$steps))),\n       n          = c(nrow(hr_ok), nrow(steps_ok)))\n\n#&gt; # A tibble: 2 x 4\n#&gt;   variable         z_beyond_3 iqr_rule     n\n#&gt;   &lt;chr&gt;                 &lt;int&gt;    &lt;int&gt; &lt;int&gt;\n#&gt; 1 hr (bell-shaped)          5        8   959\n#&gt; 2 steps (skewed)           14       32   975\n\n\nSkewed data flags many “outliers” on the long tail. Rare is not wrong."
+    "text": "z or IQR? It depends on the shape\n\ntibble(\n       variable = c(\"hr (bell-shaped)\", \"steps (skewed)\"),\n       z_beyond_3 = c(\n              sum(abs(zs(hr_ok$hr)) &gt; 3),\n              sum(abs(zs(steps_ok$steps)) &gt; 3)\n       ),\n       iqr_rule = c(sum(iqr_flag(hr_ok$hr)), sum(iqr_flag(steps_ok$steps))),\n       n = c(nrow(hr_ok), nrow(steps_ok))\n)\n\n#&gt; # A tibble: 2 x 4\n#&gt;   variable         z_beyond_3 iqr_rule     n\n#&gt;   &lt;chr&gt;                 &lt;int&gt;    &lt;int&gt; &lt;int&gt;\n#&gt; 1 hr (bell-shaped)          5        8   959\n#&gt; 2 steps (skewed)           14       32   975\n\n\nSkewed data flags many “outliers” on the long tail. Rare is not wrong."
   },
   {
     "objectID": "W08L16_slides.html#look-in-context",
     "href": "W08L16_slides.html#look-in-context",
     "title": "Types, Anomalies, and Missingness",
     "section": "Look in context",
-    "text": "Look in context\n\nImpossible? A bound says so: flag as an error.\nPlausible but extreme? Keep it: it may be your most interesting data.\nRepeated? The same odd value many times: look for a code, not a person.\n\n. . .\nOutliers are questions, not verdicts. Flag, look, document."
+    "text": "Look in context\n\nImpossible? A bound says so: flag as an error.\nPlausible but extreme? Keep it: it may be your most interesting data.\nRepeated? The same odd value many times: look for a code, not a person.\n\n\nOutliers are questions, not verdicts. Flag, look, document."
   },
   {
     "objectID": "W08L16_slides.html#odd-only-in-combination",
     "href": "W08L16_slides.html#odd-only-in-combination",
     "title": "Types, Anomalies, and Missingness",
     "section": "Odd only in combination",
-    "text": "Odd only in combination\n\nhw |&gt; filter(id == 501) |&gt; select(h, w, zh, zw, bmi, zb)\n\n#&gt; # A tibble: 1 x 6\n#&gt;       h     w    zh    zw   bmi    zb\n#&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;\n#&gt; 1   190    45  2.17 -2.07  12.5 -3.73\n\n\nHeight and weight each look normal: \\(|z| &lt; 3\\). But BMI is 12.5, far below normal.\n. . .\nA derived feature can catch what each column alone cannot."
+    "text": "Odd only in combination\n\nhw |&gt; filter(id == 501) |&gt; select(h, w, zh, zw, bmi, zb)\n\n#&gt; # A tibble: 1 x 6\n#&gt;       h     w    zh    zw   bmi    zb\n#&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;\n#&gt; 1   190    45  2.17 -2.07  12.5 -3.73\n\n\nHeight and weight each look normal: \\(|z| &lt; 3\\). But BMI is 12.5, far below normal.\n\nA derived feature can catch what each column alone cannot."
   },
   {
     "objectID": "W08L16_slides.html#mahalanobis-distance-flex",
@@ -2391,7 +2391,7 @@
     "href": "W08L16_slides.html#rules-become-counts",
     "title": "Types, Anomalies, and Missingness",
     "section": "Rules become counts",
-    "text": "Rules become counts\n\nusers |&gt;\n  summarize(\n    id_missing  = sum(is.na(id)),\n    age_range   = sum(!between(age, 0, 120), na.rm = TRUE),\n    device_set  = sum(!device %in% c(\"watch\", \"band\", \"ring\")),\n    zip_pattern = sum(!str_detect(zip, \"^\\\\d{5}$\"), na.rm = TRUE)\n  ) |&gt;\n  pivot_longer(everything(), names_to = \"rule\", values_to = \"failing\")\n\n#&gt; # A tibble: 4 x 2\n#&gt;   rule        failing\n#&gt;   &lt;chr&gt;         &lt;int&gt;\n#&gt; 1 id_missing        1\n#&gt; 2 age_range         2\n#&gt; 3 device_set        2\n#&gt; 4 zip_pattern       2\n\n\nA table of failing counts is a report you can rerun on every new file."
+    "text": "Rules become counts\n\nusers |&gt;\n  summarize(\n    id_missing = sum(is.na(id)),\n    age_range = sum(!between(age, 0, 120), na.rm = TRUE),\n    device_set = sum(!device %in% c(\"watch\", \"band\", \"ring\")),\n    zip_pattern = sum(!str_detect(zip, \"^\\\\d{5}$\"), na.rm = TRUE)\n  ) |&gt;\n  pivot_longer(everything(), names_to = \"rule\", values_to = \"failing\")\n\n#&gt; # A tibble: 4 x 2\n#&gt;   rule        failing\n#&gt;   &lt;chr&gt;         &lt;int&gt;\n#&gt; 1 id_missing        1\n#&gt; 2 age_range         2\n#&gt; 3 device_set        2\n#&gt; 4 zip_pattern       2\n\n\nA table of failing counts is a report you can rerun on every new file."
   },
   {
     "objectID": "W08L16_slides.html#task-2-prompt-it",
@@ -2405,14 +2405,14 @@
     "href": "W08L16_slides.html#the-answer-1",
     "title": "Types, Anomalies, and Missingness",
     "section": "The answer",
-    "text": "The answer\n\nusers |&gt;\n  summarize(\n    id_missing    = sum(is.na(id)),\n    id_duplicated = sum(duplicated(id[!is.na(id)])),\n    age_range     = sum(!between(age, 0, 120), na.rm = TRUE),\n    device_set    = sum(!device %in% c(\"watch\", \"band\", \"ring\")),\n    zip_pattern   = sum(!str_detect(zip, \"^\\\\d{5}$\"), na.rm = TRUE),\n    end_early     = sum(end &lt; start)\n  )\n\n#&gt; # A tibble: 1 x 6\n#&gt;   id_missing id_duplicated age_range device_set zip_pattern end_early\n#&gt;        &lt;int&gt;         &lt;int&gt;     &lt;int&gt;      &lt;int&gt;       &lt;int&gt;     &lt;int&gt;\n#&gt; 1          1             1         2          2           2         4"
+    "text": "The answer\n\nusers |&gt;\n  summarize(\n    id_missing = sum(is.na(id)),\n    id_duplicated = sum(duplicated(id[!is.na(id)])),\n    age_range = sum(!between(age, 0, 120), na.rm = TRUE),\n    device_set = sum(!device %in% c(\"watch\", \"band\", \"ring\")),\n    zip_pattern = sum(!str_detect(zip, \"^\\\\d{5}$\"), na.rm = TRUE),\n    end_early = sum(end &lt; start)\n  )\n\n#&gt; # A tibble: 1 x 6\n#&gt;   id_missing id_duplicated age_range device_set zip_pattern end_early\n#&gt;        &lt;int&gt;         &lt;int&gt;     &lt;int&gt;      &lt;int&gt;       &lt;int&gt;     &lt;int&gt;\n#&gt; 1          1             1         2          2           2         4"
   },
   {
     "objectID": "W08L16_slides.html#decisions-hidden-in-the-counts",
     "href": "W08L16_slides.html#decisions-hidden-in-the-counts",
     "title": "Types, Anomalies, and Missingness",
     "section": "Decisions hidden in the counts",
-    "text": "Decisions hidden in the counts\n\nNA age: not out of range. It is missing, a different problem\nDuplicated id: count the extra copies, or both?\n\"Watch\": invalid by the rule. Case-fold first, or flag it?\n97201-1234: malformed, or a valid ZIP+4?\n\n. . .\nThe rule table is code and documentation. Write the decision down."
+    "text": "Decisions hidden in the counts\n\nNA age: not out of range. It is missing, a different problem\nDuplicated id: count the extra copies, or both?\n\"Watch\": invalid by the rule. Case-fold first, or flag it?\n97201-1234: malformed, or a valid ZIP+4?\n\n\nThe rule table is code and documentation. Write the decision down."
   },
   {
     "objectID": "W08L16_slides.html#why-is-it-missing",
@@ -2426,14 +2426,14 @@
     "href": "W08L16_slides.html#diagnose-is-missingness-the-same-everywhere",
     "title": "Types, Anomalies, and Missingness",
     "section": "Diagnose: is missingness the same everywhere?",
-    "text": "Diagnose: is missingness the same everywhere?\n\nsteps_sim |&gt;\n  summarize(missing = mean(is.na(steps)), n = n(), .by = device)\n\n#&gt; # A tibble: 2 x 3\n#&gt;   device missing     n\n#&gt;   &lt;chr&gt;    &lt;dbl&gt; &lt;int&gt;\n#&gt; 1 new     0.0798  1203\n#&gt; 2 legacy  0.512    797\n\n\nLegacy devices lose 51% of steps, new devices 8%. That is not random.\n. . .\nYou can describe this pattern. You cannot prove the cause from the file."
+    "text": "Diagnose: is missingness the same everywhere?\n\nsteps_sim |&gt;\n  summarize(missing = mean(is.na(steps)), n = n(), .by = device)\n\n#&gt; # A tibble: 2 x 3\n#&gt;   device missing     n\n#&gt;   &lt;chr&gt;    &lt;dbl&gt; &lt;int&gt;\n#&gt; 1 new     0.0798  1203\n#&gt; 2 legacy  0.512    797\n\n\nLegacy devices lose 51% of steps, new devices 8%. That is not random.\n\nYou can describe this pattern. You cannot prove the cause from the file."
   },
   {
     "objectID": "W08L16_slides.html#drop-the-rows-look-at-who-is-left",
     "href": "W08L16_slides.html#drop-the-rows-look-at-who-is-left",
     "title": "Types, Anomalies, and Missingness",
     "section": "Drop the rows? Look at who is left",
-    "text": "Drop the rows? Look at who is left\n\nsteps_sim |&gt;\n  summarize(all_rows = mean(device == \"legacy\"),\n            complete_rows = mean(device[!is.na(steps)] == \"legacy\"))\n\n#&gt; # A tibble: 1 x 2\n#&gt;   all_rows complete_rows\n#&gt;      &lt;dbl&gt;         &lt;dbl&gt;\n#&gt; 1    0.398         0.260\n\n\nLegacy devices were 40% of users, but only 26% of complete rows.\n. . .\n\nBug: dropping rows with NA removes legacy users first. The model then learns mostly from new-device users."
+    "text": "Drop the rows? Look at who is left\n\nsteps_sim |&gt;\n  summarize(\n    all_rows = mean(device == \"legacy\"),\n    complete_rows = mean(device[!is.na(steps)] == \"legacy\")\n  )\n\n#&gt; # A tibble: 1 x 2\n#&gt;   all_rows complete_rows\n#&gt;      &lt;dbl&gt;         &lt;dbl&gt;\n#&gt; 1    0.398         0.260\n\n\nLegacy devices were 40% of users, but only 26% of complete rows.\n\n\nBug: dropping rows with NA removes legacy users first. The model then learns mostly from new-device users."
   },
   {
     "objectID": "W08L16_slides.html#mnar-leaves-no-trace",
@@ -2461,21 +2461,21 @@
     "href": "W08L16_slides.html#what-it-does-to-the-shape",
     "title": "Types, Anomalies, and Missingness",
     "section": "What it does to the shape",
-    "text": "What it does to the shape\n\nbind_rows(truth = steps_sim |&gt; transmute(steps = steps_true),\n          `mean imputed` = mean_imp |&gt; select(steps), .id = \"version\") |&gt;\n  ggplot(aes(x = steps, fill = version)) +\n  geom_density(alpha = 0.5, color = NA) +\n  scale_fill_manual(values = c(\"#6d8d24\", \"#f68b1f\"), name = NULL)"
+    "text": "What it does to the shape\n\nbind_rows(\n        truth = steps_sim |&gt; transmute(steps = steps_true),\n        `mean imputed` = mean_imp |&gt; select(steps),\n        .id = \"version\"\n) |&gt;\n        ggplot(aes(x = steps, fill = version)) +\n        geom_density(alpha = 0.5, color = NA) +\n        scale_fill_manual(values = c(\"#6d8d24\", \"#f68b1f\"), name = NULL)"
   },
   {
     "objectID": "W08L16_slides.html#multiple-imputation-with-mice",
     "href": "W08L16_slides.html#multiple-imputation-with-mice",
     "title": "Types, Anomalies, and Missingness",
     "section": "Multiple imputation with mice",
-    "text": "Multiple imputation with mice\n\nlibrary(mice)\ndat &lt;- steps_sim |&gt; select(steps, device, age) |&gt; mutate(device = factor(device))\nimp &lt;- mice(dat, m = 5, method = \"pmm\", donors = 20, printFlag = FALSE, seed = 531)\n\n\nm = 5: five completed datasets, to carry the uncertainty\npmm: fill each hole with an observed value from a similar row\nAnalyze each dataset, then pool"
+    "text": "Multiple imputation with mice\n\nlibrary(mice)\ndat &lt;- steps_sim |&gt;\n  select(steps, device, age) |&gt;\n  mutate(device = factor(device))\nimp &lt;- mice(\n  dat,\n  m = 5,\n  method = \"pmm\",\n  donors = 20,\n  printFlag = FALSE,\n  seed = 531\n)\n\n\nm = 5: five completed datasets, to carry the uncertainty\npmm: fill each hole with an observed value from a similar row\nAnalyze each dataset, then pool"
   },
   {
     "objectID": "W08L16_slides.html#judge-it-by-the-distribution",
     "href": "W08L16_slides.html#judge-it-by-the-distribution",
     "title": "Types, Anomalies, and Missingness",
     "section": "Judge it by the distribution",
-    "text": "Judge it by the distribution\n\nstats &lt;- \\(x) c(mean = mean(x), sd = sd(x))\npooled &lt;- sapply(1:5, \\(i) stats(complete(imp, i)$steps))\n\nrbind(truth           = stats(steps_sim$steps_true),\n      `drop rows`     = stats(na.omit(steps_sim$steps)),\n      `mean imputed`  = stats(mean_imp$steps),\n      `mice (pooled)` = rowMeans(pooled)) |&gt; round()\n\n#&gt;               mean   sd\n#&gt; truth         7419 2564\n#&gt; drop rows     7791 2536\n#&gt; mean imputed  7791 2193\n#&gt; mice (pooled) 7404 2604\n\n\n. . .\nReal data has no truth column. There you compare distributions and group means before and after, never single imputed values."
+    "text": "Judge it by the distribution\n\nstats &lt;- \\(x) c(mean = mean(x), sd = sd(x))\npooled &lt;- sapply(1:5, \\(i) stats(complete(imp, i)$steps))\n\nrbind(\n      truth = stats(steps_sim$steps_true),\n      `drop rows` = stats(na.omit(steps_sim$steps)),\n      `mean imputed` = stats(mean_imp$steps),\n      `mice (pooled)` = rowMeans(pooled)\n) |&gt;\n      round()\n\n#&gt;               mean   sd\n#&gt; truth         7419 2564\n#&gt; drop rows     7791 2536\n#&gt; mean imputed  7791 2193\n#&gt; mice (pooled) 7404 2604\n\n\n\nReal data has no truth column. There you compare distributions and group means before and after, never single imputed values."
   },
   {
     "objectID": "W08L16_slides.html#task-3-the-ais-answer",
@@ -2496,7 +2496,7 @@
     "href": "W08L16_slides.html#what-was-wrong",
     "title": "Types, Anomalies, and Missingness",
     "section": "What was wrong",
-    "text": "What was wrong\n\n“Unchanged mean” is guaranteed by the method, so it proves nothing\nThat mean is already biased: legacy devices are under-represented\nThe spread shrinks: intervals will be too narrow\nLegacy users are filled with the new-device average\n\n. . .\nA complete column is not a correct column. Compare distributions and groups."
+    "text": "What was wrong\n\n“Unchanged mean” is guaranteed by the method, so it proves nothing\nThat mean is already biased: legacy devices are under-represented\nThe spread shrinks: intervals will be too narrow\nLegacy users are filled with the new-device average\n\n\nA complete column is not a correct column. Compare distributions and groups."
   },
   {
     "objectID": "W08L16_slides.html#four-things-to-remember",
