@@ -3,7 +3,7 @@
 Slides and handouts for the R, data wrangling, visualization, and data cleaning sessions.
 Labs live in the separate course project repo.
 
-Published site: https://YOUR-USERNAME.github.io/stat531-lectures/
+Published site: https://dtrStats.github.io/stat531-lectures/
 
 ## Layout
 
