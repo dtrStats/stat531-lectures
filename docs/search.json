@@ -2916,7 +2916,7 @@
     "href": "W08L15_slides.html#a-pattern-not-a-literal",
     "title": "Strings, Unicode, and Categories",
     "section": "A pattern, not a literal",
-    "text": "A pattern, not a literal\n\n\n\nPiece\nMeaning\n\n\n\n\n\\\\d \\\\w \\\\s\ndigit, word character, space\n\n\n+ * ?\none or more, zero or more, optional\n\n\n{3} {2,4}\nexactly 3, between 2 and 4\n\n\n^ $\nstart, end of the string\n\n\n( ) \\|\ngroup, or\n\n\n[^...]\nanything except these\n\n\n\nIn R strings the backslash doubles: \"\\\\d+\". Or use a raw string: r\"(\\d+)\"."
+    "text": "A pattern, not a literal\n\n\n\nPiece\nMeaning\n\n\n\n\n\\\\d, \\\\w, \\\\s\ndigit, word character, space\n\n\n+, *, ?\none or more, zero or more, optional\n\n\n{3}, {2,4}\nexactly 3, between 2 and 4\n\n\n^, $\nstart, end of the string\n\n\n( ), \\|\ngroup, or\n\n\n[^...]\nanything except these\n\n\n\nIn R strings the backslash doubles: \"\\\\d+\". Or use a raw string: r\"(\\d+)\"."
   },
   {
     "objectID": "W08L15_slides.html#our-messy-column",
@@ -3049,7 +3049,7 @@
     "href": "W08L15_slides.html#why-a-table-not-an-ifelse-chain",
     "title": "Strings, Unicode, and Categories",
     "section": "Why a table, not an ifelse chain",
-    "text": "Why a table, not an ifelse chain\n\nA reviewer can read it in ten seconds\nIt is data: version it, diff it, extend it\nanti_join() shows what is still unmapped\nSame table works on next month’s file\n\n\nRare real values (chartreuse): flag, do not delete. Rare is not wrong."
+    "text": "Why a table, not an ifelse chain\n\nA reviewer can read it in ten seconds\nIt is data: version it, diff it, extend it\nanti_join() shows what is still unmapped\nSame table works on your next iteration\n\n\nRare real values (chartreuse): flag, do not delete. Rare is not wrong."
   },
   {
     "objectID": "W08L15_slides.html#fct_collapse-flex",

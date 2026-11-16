@@ -223,11 +223,11 @@ Target: 0:13 to 0:31. Regex is the part AI writes fastest and gets wrong most qu
 
 | Piece | Meaning |
 |:--|:--|
-| `\\d` `\\w` `\\s` | digit, word character, space |
-| `+` `*` `?` | one or more, zero or more, optional |
-| `{3}` `{2,4}` | exactly 3, between 2 and 4 |
-| `^` `$` | start, end of the string |
-| `( )` `\|` | group, or |
+| `\\d`, `\\w`, `\\s` | digit, word character, space |
+| `+`, `*`, `?` | one or more, zero or more, optional |
+| `{3}`, `{2,4}` | exactly 3, between 2 and 4 |
+| `^`, `$` | start, end of the string |
+| `( )`, `\|` | group, or |
 | `[^...]` | anything **except** these |
 
 In R strings the backslash doubles: `"\\d+"`. Or use a raw string: `r"(\d+)"`.
@@ -464,7 +464,7 @@ humans |>
 - A reviewer can **read** it in ten seconds
 - It is **data**: version it, diff it, extend it
 - `anti_join()` shows what is **still unmapped**
-- Same table works on next month's file
+- Same table works on your next iteration
 
 . . .
 
