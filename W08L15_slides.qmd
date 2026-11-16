@@ -34,7 +34,7 @@ raw_lines <- c(
   "id,name,score",
   "1,Mia,88",
   "2,Liam,91",
-  "3,Lopez, Liam,79",
+  "3,Cooper, James,79",
   "4,Mason,",
   "5,Olivia",
   "6,,,Sophia,85"
@@ -88,7 +88,7 @@ Press S for speaker view.
 
 1. How do you know a `left_join()` did not duplicate rows?
 2. `mean(x)` is `NA`. What are your options?
-3. Lab 1: which problem surprised you most?
+3. Lab 2: which problem in the data surprised you the most?
 
 . . .
 
@@ -128,9 +128,15 @@ Run this now in your R session (Positron or RStudio). Have your AI assistant ope
 
 ## Where we left off
 
-Lab 1 **found** the grime and counted it.
+</br>
+
+Lab 2 **found** the grime and counted it.
+
+</br>
 
 Cleaning is different: every fix is a **decision** that changes the data a model will learn from.
+
+</br>
 
 AI will happily "clean" a column in one line. It will not tell you what it threw away. That is your job as navigator.
 
@@ -195,7 +201,7 @@ raw_lines[fields != 3]
 **Bug:** three bad lines, three different causes. No rule fixes all of them. **Flag them, then ask the source.**
 :::
 
-## Version your data as you work (FLEX)
+## Version your data as you work
 
 | Size | What to do |
 |:--|:--|

@@ -2846,7 +2846,7 @@
     "href": "W08L15_slides.html#recall-30-seconds-silent",
     "title": "Strings, Unicode, and Categories",
     "section": "Recall (30 seconds, silent)",
-    "text": "Recall (30 seconds, silent)\n\nHow do you know a left_join() did not duplicate rows?\nmean(x) is NA. What are your options?\nLab 1: which problem surprised you most?\n\n\n\nRow count before and after\nna.rm = TRUE, or fix the NAs, and say how many rows it ignored\nHold on to it: today we start fixing\n\n\nDo not collect answers for more than 30 seconds each. This is retrieval practice: the effort of recalling is the point. If the room is quiet on question 3, name two from the lab reports you read (timestamps, weight units)."
+    "text": "Recall (30 seconds, silent)\n\nHow do you know a left_join() did not duplicate rows?\nmean(x) is NA. What are your options?\nLab 2: which problem in the data surprised you the most?\n\n\n\nRow count before and after\nna.rm = TRUE, or fix the NAs, and say how many rows it ignored\nHold on to it: today we start fixing\n\n\nDo not collect answers for more than 30 seconds each. This is retrieval practice: the effort of recalling is the point. If the room is quiet on question 3, name two from the lab reports you read (timestamps, weight units)."
   },
   {
     "objectID": "W08L15_slides.html#todays-route",
@@ -2867,7 +2867,7 @@
     "href": "W08L15_slides.html#where-we-left-off",
     "title": "Strings, Unicode, and Categories",
     "section": "Where we left off",
-    "text": "Where we left off\nLab 1 found the grime and counted it.\nCleaning is different: every fix is a decision that changes the data a model will learn from.\nAI will happily “clean” a column in one line. It will not tell you what it threw away. That is your job as navigator."
+    "text": "Where we left off\n\nLab 2 found the grime and counted it.\n\nCleaning is different: every fix is a decision that changes the data a model will learn from.\n\nAI will happily “clean” a column in one line. It will not tell you what it threw away. That is your job as navigator."
   },
   {
     "objectID": "W08L15_slides.html#five-steps",
@@ -2895,14 +2895,14 @@
     "href": "W08L15_slides.html#a-ragged-csv",
     "title": "Strings, Unicode, and Categories",
     "section": "A ragged CSV",
-    "text": "A ragged CSV\n\nraw_lines\n\n#&gt; [1] \"id,name,score\"    \"1,Mia,88\"         \"2,Liam,91\"       \n#&gt; [4] \"3,Lopez, Liam,79\" \"4,Mason,\"         \"5,Olivia\"        \n#&gt; [7] \"6,,,Sophia,85\"\n\n\nExpected: 3 fields (id,name,score). Count the commas."
+    "text": "A ragged CSV\n\nraw_lines\n\n#&gt; [1] \"id,name,score\"      \"1,Mia,88\"           \"2,Liam,91\"         \n#&gt; [4] \"3,Cooper, James,79\" \"4,Mason,\"           \"5,Olivia\"          \n#&gt; [7] \"6,,,Sophia,85\"\n\n\nExpected: 3 fields (id,name,score). Count the commas."
   },
   {
     "objectID": "W08L15_slides.html#count-fields-per-line",
     "href": "W08L15_slides.html#count-fields-per-line",
     "title": "Strings, Unicode, and Categories",
     "section": "Count fields per line",
-    "text": "Count fields per line\n\nfields &lt;- str_count(raw_lines, \",\") + 1\ntable(fields)\n\n#&gt; fields\n#&gt; 2 3 4 5 \n#&gt; 1 4 1 1\n\nraw_lines[fields != 3]\n\n#&gt; [1] \"3,Lopez, Liam,79\" \"5,Olivia\"         \"6,,,Sophia,85\"\n\n\n\n\nBug: three bad lines, three different causes. No rule fixes all of them. Flag them, then ask the source."
+    "text": "Count fields per line\n\nfields &lt;- str_count(raw_lines, \",\") + 1\ntable(fields)\n\n#&gt; fields\n#&gt; 2 3 4 5 \n#&gt; 1 4 1 1\n\nraw_lines[fields != 3]\n\n#&gt; [1] \"3,Cooper, James,79\" \"5,Olivia\"           \"6,,,Sophia,85\"\n\n\n\n\nBug: three bad lines, three different causes. No rule fixes all of them. Flag them, then ask the source."
   },
   {
     "objectID": "W08L15_slides.html#version-your-data-as-you-work-flex",
@@ -3134,5 +3134,12 @@
     "title": "Strings, Unicode, and Categories",
     "section": "Helper package: janitor (not run)",
     "text": "Helper package: janitor (not run)\n\n# install.packages(\"janitor\")  # once\nlibrary(janitor)\nclean_names(df) # snake_case column names\nget_dupes(df, id) # rows sharing the same id\ntabyl(df, favorite) # counts with percentages"
+  },
+  {
+    "objectID": "W08L15_slides.html#version-your-data-as-you-work",
+    "href": "W08L15_slides.html#version-your-data-as-you-work",
+    "title": "Strings, Unicode, and Categories",
+    "section": "Version your data as you work",
+    "text": "Version your data as you work\n\n\n\n\n\n\n\nSize\nWhat to do\n\n\n\n\nFits easily in memory\nNew object per step; script is the history\n\n\nLarge\nEdit in place; log each change in a text column or file\n\n\nMassive\nDo not load it all: sample, chunk, or push work to the database\n\n\n\n\nFLEX: skip if behind (saves about 1.5 min). Tie to arrow from Session 2."
   }
 ]
