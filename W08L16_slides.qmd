@@ -131,7 +131,7 @@ users <- read_csv("data/s6_users.csv")
 steps_sim <- read_csv("data/s6_steps_sim.csv")
 ```
 
-The files are on the course site, in the `data/` folder. Have your AI assistant open too.
+The files are on the [course site](https://dtrstats.github.io/stat531-lectures/), Have your AI assistant open too.
 
 ## Where we left off
 

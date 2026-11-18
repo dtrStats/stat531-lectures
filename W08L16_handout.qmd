@@ -54,7 +54,7 @@ The pattern from Session 5 continues: an AI assistant can make a column **look**
 4. **Refine** it or **Reject** it. Log the decision.
 :::
 
-**Setup.** The examples use three small files, all on the course site in the `data/` folder: `s6_vitals.csv` (heart rate and steps with sentinels), `s6_users.csv` (ten records that break known rules), and `s6_steps_sim.csv` (a **simulation**, where the true steps are known). You need `tidyverse` and `lubridate` (both come with, or alongside, the tidyverse install), and `mice` for the imputation section.
+**Setup.** The examples use three small files, all on the [course site](https://dtrstats.github.io/stat531-lectures/): `s6_vitals.csv` (heart rate and steps with sentinels), `s6_users.csv` (ten records that break known rules), and `s6_steps_sim.csv` (a **simulation**, where the true steps are known). You need `tidyverse` and `lubridate` (both come with, or alongside, the tidyverse install), and `mice` for the imputation section.
 
 ```{r}
 #| eval: false
