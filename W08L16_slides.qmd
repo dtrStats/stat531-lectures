@@ -420,14 +420,19 @@ A **derived feature** can catch what each column alone cannot.
 
 ## Mahalanobis distance (FLEX)
 
+$$D^2 = (\mathbf{x} - \boldsymbol{\mu})^\top \, \boldsymbol{\Sigma}^{-1} \, (\mathbf{x} - \boldsymbol{\mu})$$
+
+$\mathbf{x}$: one row's values · $\boldsymbol{\mu}$: the column means · $\boldsymbol{\Sigma}$: their covariance matrix
+
 ```{r}
-hw |> filter(md > qchisq(.999, 2)) |> select(id, h, w, md)
+hw |> filter(md > qchisq(.99, 2)) |> select(id, h, w, md) |> 
+  arrange(desc(md)) |> head(3)
 ```
 
-One distance for several variables at once. It accounts for how they move together. Cutoff: $\chi^2_2$ at 99.9%, about **13.8**.
+$\boldsymbol{\Sigma}^{-1}$ scales by spread **and** accounts for how the variables move together. Cutoff: $\chi^2_2$ at 99%, about **9.2**.
 
 ::: {.notes}
-FLEX: skip if behind (saves about 1.5 min). Assumes roughly multivariate normal data. It flags the one planted case (height 190, weight 45), which no single-variable z-score does.
+FLEX: skip if behind (saves about 1.5 min). R's mahalanobis() returns D squared, which is why the cutoff comes from chi-squared with 2 degrees of freedom (one per variable). With one variable, D squared is just z squared, so this is the multivariate version of the z-score. Assumes roughly multivariate normal data. It flags the one planted case (height 190, weight 45), which no single-variable z-score does.
 :::
 
 # Validity rules {background-color="#f3f6ea"}

@@ -1626,18 +1626,23 @@ display:block!important;
 </section>
 <section id="mahalanobis-distance-flex" class="slide level2">
 <h2>Mahalanobis distance (FLEX)</h2>
+<p><span class="math display">\[D^2 = (\mathbf{x} - \boldsymbol{\mu})^\top \, \boldsymbol{\Sigma}^{-1} \, (\mathbf{x} - \boldsymbol{\mu})\]</span></p>
+<p><span class="math inline">\(\mathbf{x}\)</span>: one row’s values · <span class="math inline">\(\boldsymbol{\mu}\)</span>: the column means · <span class="math inline">\(\boldsymbol{\Sigma}\)</span>: their covariance matrix</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a aria-label="1"></a>hw <span class="sc">|&gt;</span> <span class="fu">filter</span>(md <span class="sc">&gt;</span> <span class="fu">qchisq</span>(.<span class="dv">999</span>, <span class="dv">2</span>)) <span class="sc">|&gt;</span> <span class="fu">select</span>(id, h, w, md)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a aria-label="1"></a>hw <span class="sc">|&gt;</span> <span class="fu">filter</span>(md <span class="sc">&gt;</span> <span class="fu">qchisq</span>(.<span class="dv">99</span>, <span class="dv">2</span>)) <span class="sc">|&gt;</span> <span class="fu">select</span>(id, h, w, md) <span class="sc">|&gt;</span> </span>
+<span id="cb47-2"><a aria-label="2"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(md)) <span class="sc">|&gt;</span> <span class="fu">head</span>(<span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>#&gt; # A tibble: 1 x 4
+<pre><code>#&gt; # A tibble: 3 x 4
 #&gt;      id     h     w    md
 #&gt;   &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-#&gt; 1   501   190    45  27.7</code></pre>
+#&gt; 1   501   190    45  27.7
+#&gt; 2   252   143    30  12.2
+#&gt; 3    12   194   111  11.8</code></pre>
 </div>
 </div>
-<p>One distance for several variables at once. It accounts for how they move together. Cutoff: <span class="math inline">\(\chi^2_2\)</span> at 99.9%, about <strong>13.8</strong>.</p>
+<p><span class="math inline">\(\boldsymbol{\Sigma}^{-1}\)</span> scales by spread <strong>and</strong> accounts for how the variables move together. Cutoff: <span class="math inline">\(\chi^2_2\)</span> at 99%, about <strong>9.2</strong>.</p>
 <aside class="notes">
-<p>FLEX: skip if behind (saves about 1.5 min). Assumes roughly multivariate normal data. It flags the one planted case (height 190, weight 45), which no single-variable z-score does.</p>
+<p>FLEX: skip if behind (saves about 1.5 min). R’s mahalanobis() returns D squared, which is why the cutoff comes from chi-squared with 2 degrees of freedom (one per variable). With one variable, D squared is just z squared, so this is the multivariate version of the z-score. Assumes roughly multivariate normal data. It flags the one planted case (height 190, weight 45), which no single-variable z-score does.</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
