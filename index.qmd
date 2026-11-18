@@ -55,7 +55,7 @@ if (!is.null(meta)) {
       date = first$date,
       lecture = d$lecture[1],
       html = sprintf(
-        "<tr><td>%s</td><td><strong>%s</strong><br><span class='text-muted'>%s</span></td><td>%s</td><td>%s</td></tr>",
+        "<tr><td>%s</td><td><strong>%strong><br><span class='text-muted'>%s</span></td><td>%s</td><td>%s</td></tr>",
         esc(first$date),
         esc(first$title),
         esc(first$desc),
@@ -77,4 +77,4 @@ if (!is.null(meta)) {
 }
 ```
 
-Course datasets for in-class examples: [movies.csv](data/movies.csv), [studios.csv](data/studios.csv), [movies.parquet](data/movies.parquet)
+Course datasets for in-class examples: [movies.csv](data/movies.csv), [studios.csv](data/studios.csv), [movies.parquet](data/movies.parquet), [s6_steps_sim.csv](data/s6_steps_sim.csv), [s6_users.csv](data/s6_users.csv), [s6_vitals.csv](data/s6_vitals.csv)
